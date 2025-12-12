@@ -1,0 +1,22 @@
+{
+  "name": "skyfalke-website",
+  "version": "1.0.0",
+  "description": "Modern professional website for Skyfalke - Digital Marketing & Technology Solutions",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "node build-production.js",
+    "build:client": "cd client && npm run build",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "start": "cd server && npm start",
+    "start:prod": "cd server && npm run start:prod"
+  },
+  "keywords": ["skyfalke", "digital-marketing", "cloud-solutions", "mern-stack"],
+  "author": "Skyfalke Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

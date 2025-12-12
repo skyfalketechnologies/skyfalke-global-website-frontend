@@ -1,0 +1,19 @@
+# Cache hero images for better performance
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+</IfModule>
+
+# Enable compression for images
+<IfModule mod_deflate.c>
+    <FilesMatch "\.(webp|jpg|jpeg|png)$">
+        SetOutputFilter DEFLATE
+    </FilesMatch>
+</IfModule>
+
+# Set proper MIME types
+<IfModule mod_mime.c>
+    AddType image/webp .webp
+</IfModule>

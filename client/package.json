@@ -1,0 +1,77 @@
+{
+  "name": "skyfalke-client",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@tiptap/extension-blockquote": "^3.11.0",
+    "@tiptap/extension-code-block": "^3.11.0",
+    "@tiptap/extension-color": "^3.11.0",
+    "@tiptap/extension-horizontal-rule": "^3.11.0",
+    "@tiptap/extension-image": "^3.11.0",
+    "@tiptap/extension-link": "^3.11.0",
+    "@tiptap/extension-strike": "^3.11.0",
+    "@tiptap/extension-text-align": "^3.11.0",
+    "@tiptap/extension-text-style": "^3.11.0",
+    "@tiptap/extension-underline": "^3.11.0",
+    "@tiptap/react": "^3.11.0",
+    "@tiptap/starter-kit": "^3.11.0",
+    "aos": "^2.3.4",
+    "axios": "^1.6.2",
+    "framer-motion": "^10.16.16",
+    "quill": "^2.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet-async": "^2.0.4",
+    "react-hook-form": "^7.48.2",
+    "react-icons": "^4.12.0",
+    "react-lazy-load-image-component": "^1.6.0",
+    "react-quill": "^2.0.0",
+    "react-router-dom": "^6.20.1",
+    "react-scripts": "5.0.1",
+    "socket.io-client": "^4.8.1",
+    "swiper": "^11.0.5",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build && npm run optimize:images",
+    "build:analyze": "npm run build && npx webpack-bundle-analyzer build/static/js/*.js",
+    "optimize:images": "node scripts/optimize-images.js",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lighthouse": "lighthouse http://localhost:3000 --output html --output-path ./lighthouse-report.html",
+    "performance:test": "node scripts/performance-test.js"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "autoprefixer": "^10.4.16",
+    "chrome-launcher": "^0.15.2",
+    "lighthouse": "^11.4.0",
+    "postcss": "^8.4.32",
+    "sharp": "^0.32.6",
+    "tailwindcss": "^3.3.6",
+    "webpack-bundle-analyzer": "^4.9.1"
+  },
+  "proxy": "http://localhost:5000"
+}
