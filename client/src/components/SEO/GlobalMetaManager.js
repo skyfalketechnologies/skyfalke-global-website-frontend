@@ -1,10 +1,15 @@
+'use client';
+
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 
 const GlobalMetaManager = () => {
-  const location = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     // Function to update meta tags immediately
     const updateMetaTag = (name, content, property = false) => {
       if (!content) return;
@@ -26,7 +31,7 @@ const GlobalMetaManager = () => {
     };
 
     // Update canonical URL immediately on route change
-    const currentUrl = `${window.location.origin}${location.pathname}`;
+    const currentUrl = `${window.location.origin}${pathname}`;
     let canonicalLink = document.querySelector('link[rel="canonical"]');
     if (!canonicalLink) {
       canonicalLink = document.createElement('link');
@@ -38,7 +43,7 @@ const GlobalMetaManager = () => {
     // Update og:url immediately
     updateMetaTag('og:url', currentUrl, true);
 
-  }, [location.pathname]);
+  }, [pathname]);
 
   return null; // This component doesn't render anything
 };

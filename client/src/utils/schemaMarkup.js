@@ -91,14 +91,26 @@ export const generateBreadcrumbSchema = (breadcrumbs) => {
     return null;
   }
 
+  // Ensure all breadcrumbs have valid names and filter out invalid ones
+  const validBreadcrumbs = breadcrumbs
+    .filter((crumb) => crumb && crumb.url) // Must have a URL
+    .map((crumb) => ({
+      name: (crumb.name && String(crumb.name).trim()) || "Page", // Ensure name is always present and non-empty
+      url: crumb.url
+    }));
+
+  if (validBreadcrumbs.length === 0) {
+    return null;
+  }
+
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbs.map((crumb, index) => ({
+    "itemListElement": validBreadcrumbs.map((crumb, index) => ({
       "@type": "ListItem",
       "position": index + 1,
-      "name": crumb.name || "Page",
-      "item": crumb.url || "#"
+      "name": crumb.name, // Name is guaranteed to be present and non-empty
+      "item": crumb.url
     }))
   };
 };

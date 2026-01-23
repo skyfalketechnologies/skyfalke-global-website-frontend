@@ -1,6 +1,8 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useRouter, useParams } from 'next/navigation';
 import { apiGet, apiPost, apiPut } from '../../utils/api';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -33,8 +35,9 @@ import {
 } from 'react-icons/fa';
 
 const CaseStudyForm = () => {
-  const navigate = useNavigate();
-  const { id } = useParams();
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id;
   const isEditing = !!id;
 
   const [loading, setLoading] = useState(false);
@@ -317,7 +320,7 @@ const CaseStudyForm = () => {
       }
 
       setTimeout(() => {
-        navigate('/system/dashboard/case-studies');
+        router.push('/system/dashboard/case-studies');
       }, 2000);
     } catch (error) {
       console.error('Error saving case study:', error);
@@ -360,7 +363,7 @@ const CaseStudyForm = () => {
           </div>
           
           <button
-            onClick={() => navigate('/system/dashboard/case-studies')}
+            onClick={() => router.push('/system/dashboard/case-studies')}
             className="inline-flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
           >
             <FaTimes />
@@ -1180,7 +1183,7 @@ const CaseStudyForm = () => {
           <div className="flex justify-end gap-4">
             <button
               type="button"
-              onClick={() => navigate('/system/dashboard/case-studies')}
+              onClick={() => router.push('/system/dashboard/case-studies')}
               className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
             >
               Cancel

@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
+import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -46,11 +49,12 @@ import {
 } from 'react-icons/fa';
 import NotificationDropdown from './NotificationDropdown';
 
-const AdminLayout = () => {
+const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout, isAuthenticated, isSuperAdmin } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const location = useLocation();
+  const pathname = usePathname();
+  const router = useRouter();
 
   // Initialize expanded groups based on active routes
   const getInitialExpandedGroups = () => {
@@ -68,25 +72,25 @@ const AdminLayout = () => {
     };
 
     // Auto-expand HR if any HR route is active
-    if (location.pathname.startsWith('/system/dashboard/hr')) {
+    if (pathname.startsWith('/system/dashboard/hr')) {
       groups.hr = true;
     }
 
     // Auto-expand Accounting if any Accounting route is active
-    if (location.pathname.startsWith('/system/dashboard/accounting') || 
-        location.pathname.startsWith('/system/dashboard/invoices')) {
+    if (pathname.startsWith('/system/dashboard/accounting') || 
+        pathname.startsWith('/system/dashboard/invoices')) {
       groups.accounting = true;
     }
 
     // Auto-expand Projects if any Projects route is active
-    if (location.pathname.startsWith('/system/dashboard/projects')) {
+    if (pathname.startsWith('/system/dashboard/projects')) {
       groups.projects = true;
     }
 
     // Auto-expand System if any System route is active
-    if (location.pathname.startsWith('/system/dashboard/staff') ||
-        location.pathname.startsWith('/system/dashboard/sitemap') ||
-        location.pathname.startsWith('/system/dashboard/settings')) {
+    if (pathname.startsWith('/system/dashboard/staff') ||
+        pathname.startsWith('/system/dashboard/sitemap') ||
+        pathname.startsWith('/system/dashboard/settings')) {
       groups.system = true;
     }
 
@@ -101,35 +105,41 @@ const AdminLayout = () => {
       const updated = { ...prev };
       
       // Auto-expand HR if any HR route is active
-      if (location.pathname.startsWith('/system/dashboard/hr')) {
+      if (pathname.startsWith('/system/dashboard/hr')) {
         updated.hr = true;
       }
 
       // Auto-expand Accounting if any Accounting route is active
-      if (location.pathname.startsWith('/system/dashboard/accounting') || 
-          location.pathname.startsWith('/system/dashboard/invoices')) {
+      if (pathname.startsWith('/system/dashboard/accounting') || 
+          pathname.startsWith('/system/dashboard/invoices')) {
         updated.accounting = true;
       }
 
       // Auto-expand Projects if any Projects route is active
-      if (location.pathname.startsWith('/system/dashboard/projects')) {
+      if (pathname.startsWith('/system/dashboard/projects')) {
         updated.projects = true;
       }
 
       // Auto-expand System if any System route is active
-      if (location.pathname.startsWith('/system/dashboard/staff') ||
-          location.pathname.startsWith('/system/dashboard/sitemap') ||
-          location.pathname.startsWith('/system/dashboard/settings')) {
+      if (pathname.startsWith('/system/dashboard/staff') ||
+          pathname.startsWith('/system/dashboard/sitemap') ||
+          pathname.startsWith('/system/dashboard/settings')) {
         updated.system = true;
       }
 
       return updated;
     });
-  }, [location.pathname]);
+  }, [pathname]);
 
   // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push('/system/portal/access');
+    }
+  }, [isAuthenticated, router]);
+
   if (!isAuthenticated()) {
-    return <Navigate to="/system/portal/access" replace />;
+    return null; // Will redirect via useEffect
   }
 
   const navigationGroups = [
@@ -138,8 +148,8 @@ const AdminLayout = () => {
       name: 'Overview & Analytics',
       icon: FaChartBar,
       items: [
-        { name: 'Dashboard', href: '/system/dashboard', icon: FaTachometerAlt, current: location.pathname === '/system/dashboard' },
-        { name: 'Analytics', href: '/system/dashboard/analytics', icon: FaChartBar, current: location.pathname === '/system/dashboard/analytics' },
+        { name: 'Dashboard', href: '/system/dashboard', icon: FaTachometerAlt, current: pathname === '/system/dashboard' },
+        { name: 'Analytics', href: '/system/dashboard/analytics', icon: FaChartBar, current: pathname === '/system/dashboard/analytics' },
       ]
     },
     {
@@ -147,10 +157,10 @@ const AdminLayout = () => {
       name: 'Content Management',
       icon: FaFileAlt,
       items: [
-        // { name: 'Content', href: '/system/dashboard/content', icon: FaFileAlt, current: location.pathname === '/system/dashboard/content' },
-        { name: 'Blogs', href: '/system/dashboard/blogs', icon: FaBlog, current: location.pathname === '/system/dashboard/blogs' },
-        { name: 'Events', href: '/system/dashboard/events', icon: FaCalendar, current: location.pathname === '/system/dashboard/events' },
-        { name: 'Case Studies', href: '/system/dashboard/case-studies', icon: FaBuilding, current: location.pathname === '/system/dashboard/case-studies' },
+        // { name: 'Content', href: '/system/dashboard/content', icon: FaFileAlt, current: pathname === '/system/dashboard/content' },
+        { name: 'Blogs', href: '/system/dashboard/blogs', icon: FaBlog, current: pathname === '/system/dashboard/blogs' },
+        { name: 'Events', href: '/system/dashboard/events', icon: FaCalendar, current: pathname === '/system/dashboard/events' },
+        { name: 'Case Studies', href: '/system/dashboard/case-studies', icon: FaBuilding, current: pathname === '/system/dashboard/case-studies' },
       ]
     },
     {
@@ -158,13 +168,13 @@ const AdminLayout = () => {
       name: 'Communications',
       icon: FaEnvelope,
       items: [
-        { name: 'Leads', href: '/system/dashboard/leads', icon: FaUser, current: location.pathname.startsWith('/system/dashboard/leads') },
-        { name: 'Tenders & Opportunities', href: '/system/dashboard/tenders', icon: FaFileContract, current: location.pathname.startsWith('/system/dashboard/tenders') },
-        { name: 'Contacts', href: '/system/dashboard/contacts', icon: FaEnvelope, current: location.pathname === '/system/dashboard/contacts' },
-        { name: 'WhatsApp', href: '/system/dashboard/whatsapp', icon: FaWhatsapp, current: location.pathname.startsWith('/system/dashboard/whatsapp') },
-        { name: 'Email Campaigns', href: '/system/dashboard/campaigns', icon: FaEnvelope, current: location.pathname.startsWith('/system/dashboard/campaigns') },
-        { name: 'Partnerships', href: '/system/dashboard/partnerships', icon: FaHandshake, current: location.pathname === '/system/dashboard/partnerships' },
-        { name: 'Subscriptions', href: '/system/dashboard/subscriptions', icon: FaRss, current: location.pathname === '/system/dashboard/subscriptions' },
+        { name: 'Leads', href: '/system/dashboard/leads', icon: FaUser, current: pathname.startsWith('/system/dashboard/leads') },
+        { name: 'Tenders & Opportunities', href: '/system/dashboard/tenders', icon: FaFileContract, current: pathname.startsWith('/system/dashboard/tenders') },
+        { name: 'Contacts', href: '/system/dashboard/contacts', icon: FaEnvelope, current: pathname === '/system/dashboard/contacts' },
+        { name: 'WhatsApp', href: '/system/dashboard/whatsapp', icon: FaWhatsapp, current: pathname.startsWith('/system/dashboard/whatsapp') },
+        { name: 'Email Campaigns', href: '/system/dashboard/campaigns', icon: FaEnvelope, current: pathname.startsWith('/system/dashboard/campaigns') },
+        { name: 'Partnerships', href: '/system/dashboard/partnerships', icon: FaHandshake, current: pathname === '/system/dashboard/partnerships' },
+        { name: 'Subscriptions', href: '/system/dashboard/subscriptions', icon: FaRss, current: pathname === '/system/dashboard/subscriptions' },
       ]
     },
     {
@@ -172,7 +182,7 @@ const AdminLayout = () => {
       name: 'Project Management',
       icon: FaProjectDiagram,
       items: [
-        { name: 'Projects', href: '/system/dashboard/projects', icon: FaProjectDiagram, current: location.pathname.startsWith('/system/dashboard/projects') },
+        { name: 'Projects', href: '/system/dashboard/projects', icon: FaProjectDiagram, current: pathname.startsWith('/system/dashboard/projects') },
       ]
     },
     {
@@ -180,12 +190,12 @@ const AdminLayout = () => {
       name: 'Academy',
       icon: FaGraduationCap,
       items: [
-        { name: 'Academy Dashboard', href: '/system/dashboard/academy', icon: FaGraduationCap, current: location.pathname === '/system/dashboard/academy' },
-        { name: 'Courses', href: '/system/dashboard/academy/courses', icon: FaBookOpen, current: location.pathname === '/system/dashboard/academy/courses' },
-        { name: 'Trainers', href: '/system/dashboard/academy/trainers', icon: FaUserTie, current: location.pathname === '/system/dashboard/academy/trainers' },
-        { name: 'Students', href: '/system/dashboard/academy/students', icon: FaUsers, current: location.pathname === '/system/dashboard/academy/students' },
-        { name: 'Enrollments', href: '/system/dashboard/academy/enrollments', icon: FaClipboardList, current: location.pathname === '/system/dashboard/academy/enrollments' },
-        { name: 'Academy Analytics', href: '/system/dashboard/academy/analytics', icon: FaChartBar, current: location.pathname === '/system/dashboard/academy/analytics' },
+        { name: 'Academy Dashboard', href: '/system/dashboard/academy', icon: FaGraduationCap, current: pathname === '/system/dashboard/academy' },
+        { name: 'Courses', href: '/system/dashboard/academy/courses', icon: FaBookOpen, current: pathname === '/system/dashboard/academy/courses' },
+        { name: 'Trainers', href: '/system/dashboard/academy/trainers', icon: FaUserTie, current: pathname === '/system/dashboard/academy/trainers' },
+        { name: 'Students', href: '/system/dashboard/academy/students', icon: FaUsers, current: pathname === '/system/dashboard/academy/students' },
+        { name: 'Enrollments', href: '/system/dashboard/academy/enrollments', icon: FaClipboardList, current: pathname === '/system/dashboard/academy/enrollments' },
+        { name: 'Academy Analytics', href: '/system/dashboard/academy/analytics', icon: FaChartBar, current: pathname === '/system/dashboard/academy/analytics' },
       ]
     },
     {
@@ -193,9 +203,9 @@ const AdminLayout = () => {
       name: 'Careers',
       icon: FaBriefcase,
       items: [
-        { name: 'Careers Dashboard', href: '/system/dashboard/careers', icon: FaBriefcase, current: location.pathname === '/system/dashboard/careers' },
-        { name: 'Jobs', href: '/system/dashboard/jobs', icon: FaUserTie, current: location.pathname === '/system/dashboard/jobs' },
-        { name: 'Applications', href: '/system/dashboard/applications', icon: FaClipboardList, current: location.pathname === '/system/dashboard/applications' },
+        { name: 'Careers Dashboard', href: '/system/dashboard/careers', icon: FaBriefcase, current: pathname === '/system/dashboard/careers' },
+        { name: 'Jobs', href: '/system/dashboard/jobs', icon: FaUserTie, current: pathname === '/system/dashboard/jobs' },
+        { name: 'Applications', href: '/system/dashboard/applications', icon: FaClipboardList, current: pathname === '/system/dashboard/applications' },
       ]
     },
     {
@@ -203,10 +213,10 @@ const AdminLayout = () => {
       name: 'E-Commerce',
       icon: FaShoppingCart,
       items: [
-        { name: 'Shop Dashboard', href: '/system/dashboard/shop', icon: FaShoppingCart, current: location.pathname === '/system/dashboard/shop' },
-        { name: 'Products', href: '/system/dashboard/shop/products', icon: FaBox, current: location.pathname === '/system/dashboard/shop/products' },
-        { name: 'Orders', href: '/system/dashboard/orders', icon: FaClipboardList, current: location.pathname === '/system/dashboard/orders' },
-        { name: 'Quotations', href: '/system/dashboard/quotations', icon: FaFileInvoice, current: location.pathname.startsWith('/system/dashboard/quotations') },
+        { name: 'Shop Dashboard', href: '/system/dashboard/shop', icon: FaShoppingCart, current: pathname === '/system/dashboard/shop' },
+        { name: 'Products', href: '/system/dashboard/shop/products', icon: FaBox, current: pathname === '/system/dashboard/shop/products' },
+        { name: 'Orders', href: '/system/dashboard/orders', icon: FaClipboardList, current: pathname === '/system/dashboard/orders' },
+        { name: 'Quotations', href: '/system/dashboard/quotations', icon: FaFileInvoice, current: pathname.startsWith('/system/dashboard/quotations') },
       ]
     },
     {
@@ -214,10 +224,10 @@ const AdminLayout = () => {
       name: 'HR Management',
       icon: FaUserTie,
       items: [
-        { name: 'HR Dashboard', href: '/system/dashboard/hr', icon: FaUserTie, current: location.pathname === '/system/dashboard/hr' },
-        { name: 'Employees', href: '/system/dashboard/hr/employees', icon: FaUsers, current: location.pathname.startsWith('/system/dashboard/hr/employees') },
-        { name: 'Payroll', href: '/system/dashboard/hr/payrolls', icon: FaDollarSign, current: location.pathname.startsWith('/system/dashboard/hr/payrolls') },
-        { name: 'Attendance', href: '/system/dashboard/hr/attendance', icon: FaClock, current: location.pathname.startsWith('/system/dashboard/hr/attendance') },
+        { name: 'HR Dashboard', href: '/system/dashboard/hr', icon: FaUserTie, current: pathname === '/system/dashboard/hr' },
+        { name: 'Employees', href: '/system/dashboard/hr/employees', icon: FaUsers, current: pathname.startsWith('/system/dashboard/hr/employees') },
+        { name: 'Payroll', href: '/system/dashboard/hr/payrolls', icon: FaDollarSign, current: pathname.startsWith('/system/dashboard/hr/payrolls') },
+        { name: 'Attendance', href: '/system/dashboard/hr/attendance', icon: FaClock, current: pathname.startsWith('/system/dashboard/hr/attendance') },
       ]
     },
     {
@@ -225,12 +235,12 @@ const AdminLayout = () => {
       name: 'Accounting & Finance',
       icon: FaWallet,
       items: [
-        { name: 'Accounting Dashboard', href: '/system/dashboard/accounting', icon: FaChartBar, current: location.pathname === '/system/dashboard/accounting' },
-        { name: 'Expenses', href: '/system/dashboard/accounting/expenses', icon: FaFileInvoice, current: location.pathname.startsWith('/system/dashboard/accounting/expenses') },
-        { name: 'Accounts', href: '/system/dashboard/accounting/accounts', icon: FaWallet, current: location.pathname.startsWith('/system/dashboard/accounting/accounts') },
-        { name: 'Transactions', href: '/system/dashboard/accounting/transactions', icon: FaChartLine, current: location.pathname.startsWith('/system/dashboard/accounting/transactions') },
-        { name: 'Financial Reports', href: '/system/dashboard/accounting/reports', icon: FaFileAlt, current: location.pathname.startsWith('/system/dashboard/accounting/reports') },
-        { name: 'Invoices', href: '/system/dashboard/invoices', icon: FaFileInvoice, current: location.pathname.startsWith('/system/dashboard/invoices') },
+        { name: 'Accounting Dashboard', href: '/system/dashboard/accounting', icon: FaChartBar, current: pathname === '/system/dashboard/accounting' },
+        { name: 'Expenses', href: '/system/dashboard/accounting/expenses', icon: FaFileInvoice, current: pathname.startsWith('/system/dashboard/accounting/expenses') },
+        { name: 'Accounts', href: '/system/dashboard/accounting/accounts', icon: FaWallet, current: pathname.startsWith('/system/dashboard/accounting/accounts') },
+        { name: 'Transactions', href: '/system/dashboard/accounting/transactions', icon: FaChartLine, current: pathname.startsWith('/system/dashboard/accounting/transactions') },
+        { name: 'Financial Reports', href: '/system/dashboard/accounting/reports', icon: FaFileAlt, current: pathname.startsWith('/system/dashboard/accounting/reports') },
+        { name: 'Invoices', href: '/system/dashboard/invoices', icon: FaFileInvoice, current: pathname.startsWith('/system/dashboard/invoices') },
       ]
     },
     {
@@ -238,9 +248,9 @@ const AdminLayout = () => {
       name: 'System',
       icon: FaCog,
       items: [
-        { name: 'Staff Management', href: '/system/dashboard/staff', icon: FaUsers, current: location.pathname.startsWith('/system/dashboard/staff') },
-        { name: 'Sitemap Manager', href: '/system/dashboard/sitemap', icon: FaSitemap, current: location.pathname === '/system/dashboard/sitemap' },
-        { name: 'Settings', href: '/system/dashboard/settings', icon: FaCog, current: location.pathname === '/system/dashboard/settings' },
+        { name: 'Staff Management', href: '/system/dashboard/staff', icon: FaUsers, current: pathname.startsWith('/system/dashboard/staff') },
+        { name: 'Sitemap Manager', href: '/system/dashboard/sitemap', icon: FaSitemap, current: pathname === '/system/dashboard/sitemap' },
+        { name: 'Settings', href: '/system/dashboard/settings', icon: FaCog, current: pathname === '/system/dashboard/settings' },
       ]
     },
   ];
@@ -370,7 +380,7 @@ const AdminLayout = () => {
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
           <div className="py-6">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              <Outlet />
+              {children}
             </div>
           </div>
         </main>
@@ -469,11 +479,12 @@ const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, o
                   >
                     <div className="pl-4 mt-1 space-y-1">
                       {group.items.map((item) => {
+                        if (!item.href) return null; // Skip items without href
                         const Icon = item.icon;
                         return (
                           <Link
                             key={item.name}
-                            to={item.href}
+                            href={item.href}
                             className={`${
                               item.current
                                 ? 'bg-primary-100 dark:bg-primary-900 border-r-2 border-primary-600 text-primary-700 dark:text-primary-300'
@@ -513,15 +524,13 @@ const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, o
         </div>
         
         <div className="mt-3 space-y-1">
-          <Link
-            to="/system/dashboard/profile"
+          <Link href="/system/dashboard/profile"
             className="flex items-center px-2 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200"
           >
             <FaUser className="mr-3 h-4 w-4" />
             Profile
           </Link>
-          <Link
-            to="/system/dashboard/settings"
+          <Link href="/system/dashboard/settings"
             className="flex items-center px-2 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200"
           >
             <FaCog className="mr-3 h-4 w-4" />

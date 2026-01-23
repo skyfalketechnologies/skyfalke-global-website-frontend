@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { 
   FaBell, 
   FaTimes, 
@@ -257,8 +257,7 @@ const NotificationDropdown = () => {
 
                             {/* Action URL */}
                             {notification.actionUrl && (
-                              <Link
-                                to={transformNotificationUrl(notification.actionUrl)}
+                              <Link href={transformNotificationUrl(notification.actionUrl)}
                                 onClick={() => handleNotificationClick(notification)}
                                 className="inline-block mt-2 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                               >
@@ -277,8 +276,7 @@ const NotificationDropdown = () => {
             {/* Footer */}
             {notifications.length > 10 && (
               <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-                <Link
-                  to="/system/dashboard/notifications"
+                <Link href="/system/dashboard/notifications"
                   className="block text-center text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   View all notifications

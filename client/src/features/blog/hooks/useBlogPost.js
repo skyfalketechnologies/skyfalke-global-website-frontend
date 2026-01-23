@@ -1,5 +1,7 @@
+'use client';
+
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { apiGet, apiPost } from '../../../utils/api';
 
 /**
@@ -7,7 +9,8 @@ import { apiGet, apiPost } from '../../../utils/api';
  * Handles SSR data, loading states, and view tracking
  */
 export const useBlogPost = () => {
-  const { slug } = useParams();
+  const params = useParams();
+  const slug = params?.slug;
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

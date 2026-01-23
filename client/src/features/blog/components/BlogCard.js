@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { FaUser, FaClock, FaCalendar } from 'react-icons/fa';
 import { formatBlogDate, getReadingTime } from '../utils/formatters';
 
@@ -17,7 +19,7 @@ const BlogCard = ({ post, featured = false }) => {
   return (
     <article className={cardClasses} itemScope itemType="https://schema.org/BlogPosting">
       {post.featuredImage?.url && (
-        <Link to={`/blog/${post.slug}`} className="block relative overflow-hidden">
+        <Link href={`/blog/${post.slug}`} className="block relative overflow-hidden">
           <img
             src={post.featuredImage.url}
             alt={post.title}
@@ -39,7 +41,7 @@ const BlogCard = ({ post, featured = false }) => {
 
         <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
           <Link 
-            to={`/blog/${post.slug}`}
+            href={`/blog/${post.slug}`}
             className="hover:text-yellow transition-colors"
             itemProp="headline"
           >

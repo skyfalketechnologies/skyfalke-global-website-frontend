@@ -5,7 +5,6 @@ import 'aos/dist/aos.css';
 import { CartProvider } from './contexts/CartContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import AnalyticsProvider from './components/Analytics/AnalyticsProvider';
-import PWAService from './components/PWAService';
 import CookieBanner from './components/CookieBanner';
 import useScrollToTop from './hooks/useScrollToTop';
 import ScrollToTop from './components/ScrollToTop';
@@ -14,6 +13,7 @@ import FontLoader from './components/FontLoader';
 import PerformanceMonitor from './components/PerformanceMonitor';
 import CriticalCSS from './components/CriticalCSS';
 import LoadingSpinner from './components/LoadingSpinner';
+import ChristmasDecorations from './components/Christmas/ChristmasDecorations';
 
 // Layout Components
 import Header from './components/Layout/Header';
@@ -208,6 +208,7 @@ function App() {
               <FontLoader />
               <PerformanceMonitor />
               <ScrollToTop />
+              <ChristmasDecorations />
               <Suspense fallback={<LoadingSpinner />}>
                 <Routes>
           {/* Public Routes */}
@@ -830,7 +831,6 @@ function App() {
           } />
 
           {/* Admin Login Routes */}
-          <Route path="/admin/login" element={<Login />} />
           <Route path="/admin/secure" element={<SecureLogin />} />
           
           {/* Hidden Admin Access - Non-obvious URL */}
@@ -936,7 +936,6 @@ function App() {
           <Route path="/admin/*" element={<AccessDenied />} />
                 </Routes>
               </Suspense>
-              <PWAService />
               <CookieBanner />
               <GlobalMetaManager />
             </div>

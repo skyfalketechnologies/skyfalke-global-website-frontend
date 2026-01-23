@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { apiPost } from '../../utils/api';
 import { 
@@ -167,7 +169,7 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
             {/* Company Info - Takes 2 columns on large screens */}
             <div className="lg:col-span-2">
-              <Link to="/" className="inline-flex items-center space-x-3 mb-6 group">
+              <Link href="/" className="inline-flex items-center space-x-3 mb-6 group">
                 <img
                   src="/images/logos/logo.svg"
                   alt="Skyfalke Logo"
@@ -206,32 +208,37 @@ const Footer = () => {
                   <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-[#e0ae00]"></div>
                 </h3>
                 <ul className="space-y-4">
-                  {section.links.map((link) => (
-                    <li key={link.name}>
-                      <Link
-                        to={link.href}
-                        target={link.external ? '_blank' : '_self'}
-                        rel={link.external ? 'noopener noreferrer' : ''}
-                        className="flex items-center justify-between text-gray-300 hover:text-white transition-all duration-300 group"
-                      >
-                        <div className="flex items-center space-x-3">
-                          {section.useBullets ? (
-                            <div className="w-1.5 h-1.5 bg-primary-400 rounded-full flex-shrink-0 group-hover:bg-primary-300 transition-colors duration-300" />
-                          ) : link.icon && (
-                            <link.icon className="text-primary-400 group-hover:text-primary-300 transition-colors duration-300" size={16} />
+                  {section.links.map((link) => {
+                    // Skip links without href
+                    if (!link.href) return null;
+                    
+                    return (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          target={link.external ? '_blank' : '_self'}
+                          rel={link.external ? 'noopener noreferrer' : ''}
+                          className="flex items-center justify-between text-gray-300 hover:text-white transition-all duration-300 group"
+                        >
+                          <div className="flex items-center space-x-3">
+                            {section.useBullets ? (
+                              <div className="w-1.5 h-1.5 bg-primary-400 rounded-full flex-shrink-0 group-hover:bg-primary-300 transition-colors duration-300" />
+                            ) : link.icon && (
+                              <link.icon className="text-primary-400 group-hover:text-primary-300 transition-colors duration-300" size={16} />
+                            )}
+                            <span className="text-sm font-medium group-hover:translate-x-1 transition-transform duration-300">
+                              {link.name}
+                            </span>
+                          </div>
+                          {link.badge && (
+                            <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-semibold">
+                              {link.badge}
+                            </span>
                           )}
-                          <span className="text-sm font-medium group-hover:translate-x-1 transition-transform duration-300">
-                            {link.name}
-                          </span>
-                        </div>
-                        {link.badge && (
-                          <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-semibold">
-                            {link.badge}
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  ))}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}
@@ -358,13 +365,13 @@ const Footer = () => {
               {/* Legal Links */}
               <div className="flex items-center space-x-6 text-sm text-gray-400">
                 <Link 
-                  to="/privacy" 
+                  href="/privacy" 
                   className="hover:text-white transition-colors duration-300 flex items-center space-x-1"
                 >
                   <span>Privacy</span>
                 </Link>
                 <Link 
-                  to="/terms" 
+                  href="/terms" 
                   className="hover:text-white transition-colors duration-300 flex items-center space-x-1"
                 >
                   <span>Terms</span>

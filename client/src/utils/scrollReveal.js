@@ -4,10 +4,30 @@
  */
 
 /**
+ * Check if device is mobile
+ * @returns {boolean} - True if device is mobile
+ */
+const isMobileDevice = () => {
+  return window.innerWidth < 1024 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+};
+
+/**
  * Initialize scroll reveal for elements with data-reveal attribute
  * @param {Object} options - Configuration options
  */
 export const initScrollReveal = (options = {}) => {
+  // Skip animations on mobile devices
+  if (isMobileDevice()) {
+    // On mobile, immediately reveal all elements without animation
+    const revealElements = document.querySelectorAll('[data-reveal]');
+    revealElements.forEach((element) => {
+      element.classList.add('reveal', 'revealed');
+      element.style.opacity = '1';
+      element.style.transform = 'translateY(0)';
+    });
+    return null;
+  }
+
   const {
     threshold = 0.1,
     rootMargin = '0px 0px -100px 0px',
@@ -52,6 +72,13 @@ export const initScrollReveal = (options = {}) => {
 export const revealElement = (element, animationType = 'fade-in') => {
   if (!element) return;
   
+  // Skip animations on mobile devices
+  if (isMobileDevice()) {
+    element.style.opacity = '1';
+    element.style.transform = 'translateY(0)';
+    return;
+  }
+  
   element.classList.add(animationType);
   
   const observer = new IntersectionObserver((entries) => {
@@ -74,6 +101,11 @@ export const revealElement = (element, animationType = 'fade-in') => {
  */
 export const initParallax = (element, speed = 0.5) => {
   if (!element) return;
+
+  // Skip parallax on mobile devices
+  if (isMobileDevice()) {
+    return () => {}; // Return empty cleanup function
+  }
 
   const handleScroll = () => {
     const scrolled = window.pageYOffset;
@@ -113,6 +145,18 @@ export const smoothScrollTo = (target, offset = 0) => {
  * Initialize all scroll animations on page load
  */
 export const initScrollAnimations = () => {
+  // Skip scroll animations on mobile devices
+  if (isMobileDevice()) {
+    // On mobile, just reveal elements immediately without animations
+    const revealElements = document.querySelectorAll('[data-reveal]');
+    revealElements.forEach((element) => {
+      element.classList.add('reveal', 'revealed');
+      element.style.opacity = '1';
+      element.style.transform = 'translateY(0)';
+    });
+    return;
+  }
+
   // Initialize scroll reveal
   initScrollReveal({
     threshold: 0.1,

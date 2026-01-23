@@ -54,6 +54,9 @@ const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
   };
 
   const generateBreadcrumbSchema = () => {
+    const postTitle = post.title && post.title.trim() ? post.title : "Blog Post";
+    const postSlug = post.slug || 'post';
+    
     return {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -73,8 +76,8 @@ const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
         {
           "@type": "ListItem",
           "position": 3,
-          "name": post.title || "Blog Post",
-          "item": `${siteUrl}/blog/${post.slug || 'post'}`
+          "name": postTitle,
+          "item": `${siteUrl}/blog/${postSlug}`
         }
       ]
     };
@@ -109,7 +112,7 @@ const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
           {
             "@type": "ListItem",
             "position": 3,
-            "name": post.title || "Blog Post",
+            "name": (post.title && post.title.trim()) || "Blog Post",
             "item": `${siteUrl}/blog/${post.slug || 'post'}`
           }
         ]

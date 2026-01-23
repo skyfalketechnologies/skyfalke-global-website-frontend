@@ -1,9 +1,12 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useRouter, useParams } from 'next/navigation';
 
 const TrainerForm = () => {
-  const navigate = useNavigate();
-  const { id } = useParams();
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id;
   const isEdit = Boolean(id);
 
   const [formData, setFormData] = useState({
@@ -130,7 +133,7 @@ const TrainerForm = () => {
       });
 
       if (response.ok) {
-        navigate('/system/dashboard/academy/trainers');
+        router.push('/system/dashboard/academy/trainers');
       } else {
         const error = await response.json();
         alert(error.message || 'Failed to save trainer');
@@ -669,7 +672,7 @@ const TrainerForm = () => {
         <div className="flex justify-end space-x-4 mt-8 pt-6 border-t">
           <button
             type="button"
-            onClick={() => navigate('/system/dashboard/academy/trainers')}
+            onClick={() => router.push('/system/dashboard/academy/trainers')}
             className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
             Cancel

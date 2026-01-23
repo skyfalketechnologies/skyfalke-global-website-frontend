@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 const AcademyCourses = ({ courses, loading }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -181,8 +181,7 @@ const AcademyCourses = ({ courses, loading }) => {
                     )}
                   </div>
                   
-                  <Link
-                    to={`/academy/courses/${course.slug}`}
+                  <Link href={`/academy/courses/${course.slug}`}
                     className="px-6 py-2 bg-[#e0ae00] hover:bg-[#d4a000] text-[#303661] font-semibold rounded-lg transition-all duration-300 transform hover:scale-105"
                   >
                     View Details
@@ -195,8 +194,7 @@ const AcademyCourses = ({ courses, loading }) => {
 
         {/* View All Courses Button */}
         <div className="text-center">
-          <Link
-            to="/academy/courses"
+          <Link href="/academy/courses"
             className="inline-flex items-center px-8 py-4 bg-[#303661] hover:bg-[#2a2f4e] text-white font-bold text-lg rounded-lg transition-all duration-300 transform hover:scale-105"
           >
             <span>View All Courses</span>

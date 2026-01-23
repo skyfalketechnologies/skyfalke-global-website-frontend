@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 
 const useMetaTags = (metaData) => {
-  const location = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!metaData) return;
@@ -28,7 +28,7 @@ const useMetaTags = (metaData) => {
     } = metaData;
 
     // Get the current URL
-    const currentUrl = url || `${window.location.origin}${location.pathname}`;
+    const currentUrl = url || `${window.location.origin}${pathname}`;
     
     // Get the full image URL
     const fullImageUrl = image && image.startsWith('http') ? image : `${window.location.origin}${image || '/images/logos/logo.svg'}`;
@@ -117,7 +117,7 @@ const useMetaTags = (metaData) => {
       });
     }
 
-  }, [metaData, location.pathname]);
+  }, [metaData, pathname]);
 };
 
 export default useMetaTags;

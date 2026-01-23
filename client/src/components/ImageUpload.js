@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useRef } from 'react';
 import { FaUpload, FaTimes, FaSpinner, FaImage, FaCheck } from 'react-icons/fa';
 

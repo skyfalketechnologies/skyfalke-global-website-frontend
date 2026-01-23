@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 const AcademyCTA = () => {
   return (
@@ -19,8 +19,7 @@ const AcademyCTA = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-            <Link
-              to="/academy/courses"
+            <Link href="/academy/courses"
               className="inline-flex items-center px-8 py-4 bg-[#303661] hover:bg-[#2a2f4e] text-white font-bold text-lg rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg"
             >
               <span>Browse All Courses</span>
@@ -29,8 +28,7 @@ const AcademyCTA = () => {
               </svg>
             </Link>
             
-            <Link
-              to="/academy/join"
+            <Link href="/academy/join"
               className="inline-flex items-center px-8 py-4 border-2 border-[#303661] text-[#303661] hover:bg-[#303661] hover:text-white font-bold text-lg rounded-lg transition-all duration-300 transform hover:scale-105"
             >
               <span>Enroll Now</span>

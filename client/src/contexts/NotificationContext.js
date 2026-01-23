@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
@@ -47,13 +49,21 @@ export const NotificationProvider = ({ children }) => {
 
     initializingRef.current = true;
 
-    // Check if server is running first
+    // Optional health check - don't block on network errors
+    // Socket connection will proceed regardless of health check result
     try {
-      const response = await api.get('/api/health');
+      await api.get('/api/health', { timeout: 5000 });
     } catch (error) {
-      logger.error('Server health check failed:', error.message);
-      initializingRef.current = false;
-      return;
+      // Only log meaningful errors in development
+      if (process.env.NODE_ENV === 'development') {
+        const errorMessage = error?.message || error?.response?.data?.message || String(error);
+        // Skip logging generic network errors
+        if (errorMessage && errorMessage !== 'Network Error' && errorMessage !== '[object Object]') {
+          logger.error('Server health check failed:', errorMessage);
+        }
+      }
+      // Continue with socket initialization even if health check fails
+      // Network errors don't necessarily mean socket won't work
     }
 
     // Close existing socket if any
@@ -62,7 +72,8 @@ export const NotificationProvider = ({ children }) => {
     }
 
     // Initializing new WebSocket connection...
-    const newSocket = io(process.env.REACT_APP_API_BASE_URL || 'https://apis.mwangikinyanjuiadvocates.com', {
+    const WEBSOCKET_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.REACT_APP_API_BASE_URL || 'https://apis.mwangikinyanjuiadvocates.com';
+    const newSocket = io(WEBSOCKET_URL, {
       auth: {
         token: token
       },
@@ -86,17 +97,25 @@ export const NotificationProvider = ({ children }) => {
     });
 
     newSocket.on('connect_error', (error) => {
-      logger.error('WebSocket connection error:', error);
+      // Only log if in development and if error has meaningful information
+      if (process.env.NODE_ENV === 'development') {
+        const errorMessage = error?.message || error?.description || String(error);
+        if (errorMessage && errorMessage !== '[object Object]' && errorMessage !== '{}') {
+          logger.error('WebSocket connection error:', errorMessage);
+        }
+      }
       setConnected(false);
       initializingRef.current = false;
       
-      // If connection fails, try again after a delay
-      setTimeout(() => {
-        if (isAuthenticated() && user?.role === 'admin' && !socket?.connected) {
-          initializingRef.current = false;
-          initializeSocket();
-        }
-      }, 3000);
+      // If connection fails, try again after a delay (only in development or if explicitly needed)
+      if (process.env.NODE_ENV === 'development') {
+        setTimeout(() => {
+          if (isAuthenticated() && user?.role === 'admin' && !socket?.connected) {
+            initializingRef.current = false;
+            initializeSocket();
+          }
+        }, 3000);
+      }
     });
 
     newSocket.on('reconnect', (attemptNumber) => {
@@ -104,11 +123,20 @@ export const NotificationProvider = ({ children }) => {
     });
 
     newSocket.on('reconnect_error', (error) => {
-      logger.error('WebSocket reconnection error:', error);
+      // Only log if in development
+      if (process.env.NODE_ENV === 'development') {
+        const errorMessage = error?.message || error?.description || String(error);
+        if (errorMessage && errorMessage !== '[object Object]' && errorMessage !== '{}') {
+          logger.error('WebSocket reconnection error:', errorMessage);
+        }
+      }
     });
 
     newSocket.on('reconnect_failed', () => {
-      logger.error('WebSocket reconnection failed');
+      // Only log if in development
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('WebSocket reconnection failed');
+      }
       initializingRef.current = false;
     });
 
@@ -248,24 +276,32 @@ export const NotificationProvider = ({ children }) => {
 
     initializingRef.current = true;
 
-    // Health check before connecting
+    // Health check before connecting (optional - don't block on network errors)
     const checkServerHealth = async () => {
       try {
-        const response = await api.get('/api/health');
+        const response = await api.get('/api/health', { timeout: 5000 });
         return response;
       } catch (error) {
+        // If it's a network error, return null instead of throwing
+        // This allows the socket to connect anyway
+        if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
+          return null;
+        }
         throw error;
       }
     };
 
-    const WEBSOCKET_URL = process.env.REACT_APP_API_BASE_URL || 'https://apis.mwangikinyanjuiadvocates.com';
+    const WEBSOCKET_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.REACT_APP_API_BASE_URL || 'https://apis.mwangikinyanjuiadvocates.com';
 
     checkServerHealth()
-      .then(() => {
+      .then((healthResponse) => {
+        // Close existing socket if any
         if (socket) {
           socket.close();
         }
         
+        // Proceed with socket connection regardless of health check result
+        // (health check might fail due to network issues but socket might still work)
         const newSocket = io(WEBSOCKET_URL, {
           auth: {
             token: getToken()
@@ -296,7 +332,13 @@ export const NotificationProvider = ({ children }) => {
         });
 
         newSocket.on('connect_error', (error) => {
-          logger.error('WebSocket connection error:', error);
+          // Only log if in development and if error has meaningful information
+          if (process.env.NODE_ENV === 'development') {
+            const errorMessage = error?.message || error?.description || String(error);
+            if (errorMessage && errorMessage !== '[object Object]' && errorMessage !== '{}') {
+              logger.error('WebSocket connection error:', errorMessage);
+            }
+          }
           initializingRef.current = false;
         });
 
@@ -305,11 +347,20 @@ export const NotificationProvider = ({ children }) => {
         });
 
         newSocket.on('reconnect_error', (error) => {
-          logger.error('WebSocket reconnection error:', error);
+          // Only log if in development
+          if (process.env.NODE_ENV === 'development') {
+            const errorMessage = error?.message || error?.description || String(error);
+            if (errorMessage && errorMessage !== '[object Object]' && errorMessage !== '{}') {
+              logger.error('WebSocket reconnection error:', errorMessage);
+            }
+          }
         });
 
         newSocket.on('reconnect_failed', () => {
-          logger.error('WebSocket reconnection failed');
+          // Only log if in development
+          if (process.env.NODE_ENV === 'development') {
+            logger.error('WebSocket reconnection failed');
+          }
           initializingRef.current = false;
         });
 
@@ -329,7 +380,15 @@ export const NotificationProvider = ({ children }) => {
         });
       })
       .catch((error) => {
-        logger.error('Server health check failed:', error);
+        // Only log if in development and error has meaningful information
+        if (process.env.NODE_ENV === 'development') {
+          const errorMessage = error?.message || error?.response?.data?.message || String(error);
+          // Only log if it's a meaningful error message (not just "Network Error" or empty)
+          if (errorMessage && errorMessage !== 'Network Error' && errorMessage !== '[object Object]') {
+            logger.error('Server health check failed:', errorMessage);
+          }
+        }
+        // Reset initialization flag even on error to allow retry
         initializingRef.current = false;
       });
   }, [user, socket, getToken]);

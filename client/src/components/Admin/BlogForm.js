@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { FaSave, FaGlobe, FaTwitter, FaFacebook, FaUpload, FaImage, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -15,7 +15,7 @@ import { apiPost, apiPut, apiGet } from '../../utils/api';
 import SEOAnalyzer from './SEOAnalyzer';
 
 const BlogForm = ({ blogId, onClose, onSave }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [blog, setBlog] = useState(null);
   const [loadingBlog, setLoadingBlog] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -559,14 +559,14 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
         if (onSave) {
           onSave();
         } else {
-          navigate('/system/dashboard/blogs');
+          router.push('/system/dashboard/blogs');
         }
       } else if (response.status === 200 || response.status === 201) {
         // HTTP success status
         if (onSave) {
           onSave();
         } else {
-          navigate('/system/dashboard/blogs');
+          router.push('/system/dashboard/blogs');
         }
       } else {
         alert(`Failed to save blog: ${response.data?.message || 'Unknown error'}`);
@@ -614,7 +614,7 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
         {/* Header */}
         <div className="mb-6">
           <button
-            onClick={() => onClose ? onClose() : navigate('/system/dashboard/blogs')}
+            onClick={() => onClose ? onClose() : router.push('/system/dashboard/blogs')}
             className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
           >
             <FaArrowLeft className="mr-2" />
@@ -1378,7 +1378,7 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
             <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700 px-6 pb-6">
               <button
                 type="button"
-                onClick={() => onClose ? onClose() : navigate('/system/dashboard/blogs')}
+                onClick={() => onClose ? onClose() : router.push('/system/dashboard/blogs')}
                 className="px-6 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
               >
                 Cancel

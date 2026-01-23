@@ -68,6 +68,12 @@ const retryWithBackoff = async (fn, retries = RETRY_CONFIG.maxRetries) => {
       RETRY_CONFIG.maxDelay
     );
     
+    // Don't retry network errors - API server is likely not running
+    const isNetworkError = error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response;
+    if (isNetworkError) {
+      throw error; // Don't retry network errors
+    }
+    
     console.warn(`API call failed, retrying in ${delay}ms... (${retries} retries left)`);
     await sleep(delay);
     return retryWithBackoff(fn, retries - 1);
@@ -90,7 +96,12 @@ const adminApiCall = async (apiFunction, endpoint, data = null, config = {}) => 
       error: null
     };
   } catch (error) {
-    console.error(`Admin API Error (${endpoint}):`, error);
+    // Don't log network errors as errors - they're already logged by the interceptor
+    // Network errors are expected when API server is not running
+    const isNetworkError = error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response;
+    if (!isNetworkError) {
+      console.error(`Admin API Error (${endpoint}):`, error);
+    }
     
     // Return fallback data based on endpoint
     let fallbackData = null;

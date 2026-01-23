@@ -2,6 +2,9 @@
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
+    "./app/**/*.{js,jsx,ts,tsx}",
+    "./pages/**/*.{js,jsx,ts,tsx}",
+    "./components/**/*.{js,jsx,ts,tsx}",
   ],
   darkMode: 'class',
   theme: {
@@ -56,6 +59,14 @@ module.exports = {
           700: '#715c1c',
           800: '#624f19',
           900: '#534216',
+        },
+        // Christmas Theme Colors
+        christmas: {
+          red: '#dc2626',
+          green: '#16a34a',
+          gold: '#fbbf24',
+          snow: '#ffffff',
+          bg: '#0f172a',
         }
       },
       animation: {

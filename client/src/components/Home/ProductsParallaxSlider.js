@@ -1,6 +1,8 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { 
   FaArrowRight, 
   FaArrowLeft,
@@ -118,9 +120,9 @@ const ProductsParallaxSlider = () => {
   };
 
   return (
-    <section className="relative py-8 sm:py-12 md:py-16 lg:py-20 xl:py-24 bg-primary-900 overflow-hidden hidden sm:block">
+    <section className="relative section-padding bg-primary-900 overflow-hidden hidden sm:block">
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container-custom relative z-10">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -198,7 +200,7 @@ const ProductsParallaxSlider = () => {
                           transition={{ duration: 0.5, delay: 0.6 }}
                         >
                           <Link
-                            to={products[currentSlide].link}
+                            href={products[currentSlide].link}
                             target={products[currentSlide].external ? "_blank" : "_self"}
                             rel={products[currentSlide].external ? "noopener noreferrer" : ""}
                             className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[#E0AE00] text-slate-900 font-semibold rounded-xl hover:bg-[#f4c430] transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"

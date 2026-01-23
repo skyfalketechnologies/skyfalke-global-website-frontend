@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { FaHome, FaChevronRight } from 'react-icons/fa';
 
 /**
@@ -7,11 +9,15 @@ import { FaHome, FaChevronRight } from 'react-icons/fa';
  * Includes schema.org BreadcrumbList markup
  */
 const Breadcrumbs = ({ items = [] }) => {
+  // Ensure all items have valid names and hrefs
   const breadcrumbItems = [
     { name: 'Home', href: '/' },
     { name: 'Blog', href: '/blog' },
-    ...items
-  ];
+    ...items.map(item => ({
+      name: (item.name && item.name.trim()) || 'Page',
+      href: item.href || '#'
+    }))
+  ].filter(item => item.href && item.href !== '#'); // Only filter out items with no valid href
 
   const schemaBreadcrumbs = {
     '@context': 'https://schema.org',
@@ -19,7 +25,7 @@ const Breadcrumbs = ({ items = [] }) => {
     itemListElement: breadcrumbItems.map((item, index) => ({
       '@type': 'ListItem',
       position: index + 1,
-      name: item.name,
+      name: item.name, // Name is guaranteed to be present and non-empty
       item: `https://skyfalke.com${item.href}`
     }))
   };
@@ -48,7 +54,7 @@ const Breadcrumbs = ({ items = [] }) => {
                 </span>
               ) : (
                 <Link
-                  to={item.href}
+                  href={item.href}
                   className="hover:text-yellow transition-colors"
                   itemProp="item"
                 >

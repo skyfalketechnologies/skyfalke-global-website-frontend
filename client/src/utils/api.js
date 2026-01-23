@@ -8,19 +8,30 @@ const REQUEST_DELAY = 100; // 100ms delay between requests
 
 // Get API base URL from environment variable
 const getApiBaseUrl = () => {
-  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  // In Next.js, use NEXT_PUBLIC_ prefix for client-side env vars
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.REACT_APP_API_BASE_URL;
   
-  if (!apiBaseUrl) {
-    logger.warn('REACT_APP_API_BASE_URL not found in environment variables. Using fallback.');
-    // Fallback URLs based on environment
-    if (process.env.NODE_ENV === 'production') {
-      return 'https://apis.mwangikinyanjuiadvocates.com';
+  // If environment variable is set, use it
+  if (apiBaseUrl) {
+    if (process.env.NODE_ENV !== 'production') {
+      logger.log('Using API Base URL:', apiBaseUrl);
     }
-    return 'http://localhost:5000';
+    return apiBaseUrl;
   }
   
-  logger.log('Using API Base URL:', apiBaseUrl);
-  return apiBaseUrl;
+  // Fallback URLs based on environment
+  // In production build, always use production URL
+  if (process.env.NODE_ENV === 'production') {
+    const productionUrl = 'https://apis.mwangikinyanjuiadvocates.com';
+    if (typeof window !== 'undefined') {
+      // Only log in browser console if needed for debugging
+      console.warn('Using production API URL fallback:', productionUrl);
+    }
+    return productionUrl;
+  }
+  
+  // Development fallback
+  return 'http://localhost:5000';
 };
 
 // Create axios instance with default configuration
@@ -36,24 +47,17 @@ const api = axios.create({
   },
 });
 
-// Suppress axios adapter logging in production
-if (process.env.NODE_ENV === 'production') {
-  // Override axios adapter to prevent internal logging
-  const originalAdapter = api.defaults.adapter || axios.defaults.adapter;
-  if (originalAdapter) {
-    api.defaults.adapter = function(config) {
-      // Suppress any internal axios logging
-      return originalAdapter(config);
-    };
-  }
-}
+// Note: Axios adapter override removed - console logging is already suppressed in index.js
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only access localStorage on client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -79,25 +83,62 @@ api.interceptors.response.use(
     }
     
     // Handle Network Errors
-    if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
-      logger.error('Network Error:', {
-        code: error.code,
-        message: error.message,
-        apiUrl: error.config?.baseURL || getApiBaseUrl()
-      });
+    if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response) {
+      // Extract all available error information
+      const errorCode = error.code || 'ERR_NETWORK';
+      const errorMessage = error.message || 'Network request failed - API server may be unavailable';
+      const apiUrl = error.config?.baseURL || getApiBaseUrl();
+      const endpoint = error.config?.url || 'Unknown';
+      const method = error.config?.method?.toUpperCase() || 'GET';
+      const fullUrl = error.config ? `${error.config.baseURL || ''}${error.config.url || ''}` : 'Unknown';
+      
+      const errorDetails = {
+        type: 'Network Error',
+        code: errorCode,
+        message: errorMessage,
+        apiUrl: apiUrl,
+        endpoint: endpoint,
+        method: method,
+        fullUrl: fullUrl,
+        timestamp: new Date().toISOString(),
+        suggestion: 'Please ensure the API server is running and accessible',
+        // Include additional error properties if available
+        ...(error.name && { errorName: error.name }),
+        ...(error.stack && { stack: error.stack.split('\n').slice(0, 3).join('\n') })
+      };
+      
+      // Only log if in development to avoid console spam
+      // Use console.warn instead of console.error for network errors as they're often expected
+      // (e.g., when API server is not running during development)
+      if (process.env.NODE_ENV === 'development') {
+        // Log with explicit structure but use warn level (less alarming)
+        console.warn('Network Error (API may be unavailable):', {
+          endpoint: errorDetails.endpoint,
+          method: errorDetails.method,
+          suggestion: errorDetails.suggestion
+        });
+        // Skip logger.error for network errors since we already logged to console.warn
+        // This prevents duplicate/empty error logs
+      }
+      
+      // Don't throw for network errors in production - let components handle gracefully
+      // This prevents the app from breaking when API is temporarily unavailable
     }
     
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      // Check if we're in an admin context, otherwise redirect to admin login
-      const currentPath = window.location.pathname;
-      if (currentPath.startsWith('/system') || currentPath.startsWith('/admin')) {
-        window.location.href = '/admin/login';
-      } else {
-        // For non-admin routes, redirect to home or appropriate login
-        window.location.href = '/';
+      // Only access localStorage and window on client side
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        // Check if we're in an admin context, otherwise redirect to portal access
+        const currentPath = window.location.pathname;
+        if (currentPath.startsWith('/system') || currentPath.startsWith('/admin')) {
+          window.location.href = '/system/portal/access';
+        } else {
+          // For non-admin routes, redirect to home or appropriate login
+          window.location.href = '/';
+        }
       }
     }
     
@@ -123,6 +164,11 @@ api.interceptors.response.use(
 
 // Throttled request function
 const throttledRequest = async (url, method = 'get', data = null, config = {}) => {
+  // Ensure we're not trying to make API calls during SSR
+  if (typeof window === 'undefined') {
+    throw new Error('API calls cannot be made during server-side rendering');
+  }
+  
   const requestKey = `${method}:${url}`;
   const now = Date.now();
   
@@ -165,6 +211,9 @@ const throttledRequest = async (url, method = 'get', data = null, config = {}) =
   } catch (error) {
     // Remove from queue on error to allow retry
     requestQueue.delete(requestKey);
+    
+    // For network errors, the interceptor has already logged them appropriately
+    // Just re-throw to let components handle gracefully
     throw error;
   }
 };

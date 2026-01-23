@@ -47,9 +47,26 @@ export const useBlogList = (initialFilters = {}) => {
         total: response.data.total || 0
       });
     } catch (err) {
-      console.error('[useBlogList] Error fetching blogs:', err);
-      setError('Failed to load blogs');
-      setBlogs([]);
+      // Check if it's a network error (API server may not be available)
+      const isNetworkError = err.code === 'ERR_NETWORK' || err.message?.includes('Network Error') || !err.response;
+      
+      if (isNetworkError) {
+        // They're already logged by the API interceptor, so we don't need to log again
+        // Only log in development mode for debugging
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[useBlogList] Network error (API may be unavailable):', err.message);
+        }
+        // Set empty state gracefully - don't show error message for network errors
+        setError(null);
+        setBlogs([]);
+      } else {
+        // Only log and set error for non-network errors
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[useBlogList] Error fetching blogs:', err);
+        }
+        setError('Failed to load blogs');
+        setBlogs([]);
+      }
     } finally {
       setLoading(false);
     }

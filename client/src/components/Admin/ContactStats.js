@@ -8,7 +8,8 @@ import {
   FaCheckCircle,
   FaClock,
   FaExclamationTriangle,
-  FaTimes
+  FaTimes,
+  FaCalendarAlt
 } from 'react-icons/fa';
 
 const ContactStats = ({ stats }) => {
@@ -66,6 +67,13 @@ const ContactStats = ({ stats }) => {
       textColor: 'text-blue-600'
     },
     {
+      title: 'Consultations',
+      value: stats.consultation || 0,
+      icon: FaCalendarAlt,
+      color: 'bg-indigo-100',
+      textColor: 'text-indigo-600'
+    },
+    {
       title: 'Hire Us',
       value: stats.hireUs || 0,
       icon: FaUsers,
@@ -114,7 +122,7 @@ const ContactStats = ({ stats }) => {
       </div>
 
       {/* Type Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {typeStats.map((stat, index) => (
           <motion.div
             key={stat.title}

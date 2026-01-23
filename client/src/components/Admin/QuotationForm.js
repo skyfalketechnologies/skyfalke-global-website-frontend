@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
   FaPlus, 
@@ -13,8 +15,9 @@ import {
 // import { useNotifications } from '../../contexts/NotificationContext';
 
 const QuotationForm = () => {
-  const navigate = useNavigate();
-  const { id } = useParams();
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id;
   const isEdit = Boolean(id);
   
   // Notification function - defined at the top level
@@ -83,7 +86,7 @@ const QuotationForm = () => {
         });
       } else {
         showNotification('Failed to fetch quotation', 'error');
-        navigate('/system/dashboard/quotations');
+        router.push('/system/dashboard/quotations');
       }
     } catch (error) {
       console.error('Error fetching quotation:', error);
@@ -187,8 +190,50 @@ const QuotationForm = () => {
     try {
       setSaving(true);
       
+      // Filter out items with empty descriptions and validate
+      const validItems = quotation.items.filter(item => 
+        item.description && item.description.trim() !== ''
+      );
+
+      // Ensure at least one valid item exists
+      if (validItems.length === 0) {
+        showNotification('Please add at least one item with a description', 'error');
+        setSaving(false);
+        return;
+      }
+
+      // Validate client information
+      if (!quotation.client.name || !quotation.client.name.trim()) {
+        showNotification('Client name is required', 'error');
+        setSaving(false);
+        return;
+      }
+
+      if (!quotation.client.email || !quotation.client.email.trim()) {
+        showNotification('Client email is required', 'error');
+        setSaving(false);
+        return;
+      }
+
+      // Recalculate totals with valid items only
+      const subtotal = validItems.reduce((sum, item) => {
+        const itemTotal = (item.quantity || 0) * (item.unitPrice || 0);
+        return sum + itemTotal;
+      }, 0);
+      const taxAmount = (subtotal - (quotation.discount || 0)) * ((quotation.taxRate || 0) / 100);
+      const total = subtotal - (quotation.discount || 0) + taxAmount;
+
       const quotationData = {
         ...quotation,
+        items: validItems.map(item => ({
+          description: item.description.trim(),
+          quantity: item.quantity || 0,
+          unitPrice: item.unitPrice || 0,
+          total: (item.quantity || 0) * (item.unitPrice || 0)
+        })),
+        subtotal,
+        taxAmount,
+        total,
         status
       };
 
@@ -210,9 +255,10 @@ const QuotationForm = () => {
           isEdit ? 'Quotation updated successfully' : 'Quotation created successfully',
           'success'
         );
-        navigate('/system/dashboard/quotations');
+        router.push('/system/dashboard/quotations');
       } else {
-        showNotification('Failed to save quotation', 'error');
+        const errorData = await response.json().catch(() => ({}));
+        showNotification(errorData.message || 'Failed to save quotation', 'error');
       }
     } catch (error) {
       console.error('Error saving quotation:', error);
@@ -239,7 +285,7 @@ const QuotationForm = () => {
 
       if (response.ok) {
         showNotification('Quotation sent successfully', 'success');
-        navigate('/system/dashboard/quotations');
+        router.push('/system/dashboard/quotations');
       } else {
         showNotification('Failed to send quotation', 'error');
       }
@@ -301,7 +347,7 @@ const QuotationForm = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
-            onClick={() => navigate('/system/dashboard/quotations')}
+            onClick={() => router.push('/system/dashboard/quotations')}
             className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
           >
             <FaArrowLeft className="h-5 w-5" />

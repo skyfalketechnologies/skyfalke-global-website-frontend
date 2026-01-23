@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
   FaPlus, 
@@ -72,17 +74,27 @@ const QuotationList = () => {
         setTotalPages(response.data.pagination?.pages || 1);
       }
     } catch (error) {
-      console.error('Error fetching quotations:', error);
-      // Handle 503 and other server errors gracefully
-      if (error.response?.status === 503) {
-        showNotification('Service temporarily unavailable. Please try again later.', 'error');
-      } else if (error.response?.status >= 500) {
-        showNotification('Server error. Please try again later.', 'error');
+      // Network errors are expected when API server is not running
+      // They're already logged by the API interceptor, so we don't need to log again
+      const isNetworkError = error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response;
+      
+      if (isNetworkError) {
+        // Set empty arrays on network error to prevent UI from breaking
+        setQuotations([]);
+        setTotalPages(1);
       } else {
-        showNotification('Error fetching quotations', 'error');
+        // Only log and show notifications for non-network errors
+        console.error('Error fetching quotations:', error);
+        if (error.response?.status === 503) {
+          showNotification('Service temporarily unavailable. Please try again later.', 'error');
+        } else if (error.response?.status >= 500) {
+          showNotification('Server error. Please try again later.', 'error');
+        } else {
+          showNotification('Error fetching quotations', 'error');
+        }
+        setQuotations([]);
+        setTotalPages(1);
       }
-      setQuotations([]);
-      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -219,8 +231,7 @@ const QuotationList = () => {
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
-          <Link
-            to="/system/dashboard/quotations/new"
+          <Link href="/system/dashboard/quotations/new"
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200"
           >
             <FaPlus className="mr-2 h-4 w-4" />
@@ -290,8 +301,7 @@ const QuotationList = () => {
               Get started by creating a new quotation.
             </p>
             <div className="mt-6">
-              <Link
-                to="/system/dashboard/quotations/new"
+              <Link href="/system/dashboard/quotations/new"
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 <FaPlus className="mr-2 h-4 w-4" />
@@ -368,15 +378,13 @@ const QuotationList = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center space-x-2">
-                          <Link
-                            to={`/system/dashboard/quotations/${quotation._id}`}
+                          <Link href={`/system/dashboard/quotations/${quotation._id}`}
                             className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
                             title="View"
                           >
                             <FaEye className="h-4 w-4" />
                           </Link>
-                          <Link
-                            to={`/system/dashboard/quotations/${quotation._id}/edit`}
+                          <Link href={`/system/dashboard/quotations/${quotation._id}/edit`}
                             className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                             title="Edit"
                           >

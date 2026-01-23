@@ -1,18 +1,16 @@
-import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiPost } from '../../utils/api';
 import { 
   FaArrowRight,
+  FaChevronDown,
   FaHandshake,
-  FaChevronLeft,
-  FaChevronRight,
   FaTimes,
   FaPhone,
   FaEnvelope,
-  FaMapMarkerAlt,
   FaUser,
   FaBuilding,
   FaDollarSign,
@@ -21,20 +19,14 @@ import {
   FaTimesCircle
 } from 'react-icons/fa';
 
-// Import Swiper styles
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-
 const HeroSlider = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     company: '',
-    subject: 'Hire Us Request',
+    subject: 'Free Digital Systems Audit Request',
     message: '',
     service: '',
     budget: 'not_specified',
@@ -43,38 +35,8 @@ const HeroSlider = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', null
   const [errorMessage, setErrorMessage] = useState('');
-  const swiperRef = useRef(null);
 
-  const slides = [
-    {
-      id: 1,
-      title: "360° Digital Marketing",
-      description: "We will help you build your brand with strategic digital marketing solutions that deliver measurable results and high Return on Investment(ROI).",
-      buttonText: "Explore Marketing Solutions",
-      buttonLink: "/services#digital-marketing",
-
-      backgroundImage: "https://ik.imagekit.io/g3nahgeeu/hero/digital-marketing-min.JPG",
-    },
-    {
-      id: 2,
-      title: "Scalable Cloud Solutions",
-      description: "Harness the power of cloud technology with our secure, scalable, and cost-effective cloud infrastructure solutions designed for modern businesses.",
-      buttonText: "Visit Cloud Platform",
-      buttonLink: "https://skyfalke.co.ke",
-      external: true,
-
-      backgroundImage: "https://ik.imagekit.io/g3nahgeeu/hero/cloud-min.jpg",
-    },
-    {
-      id: 3,
-      title: "Business Tools & Solutions",
-      description: "With our dedication to help you succeed online, we constantly discover and build innovative business tools to help you streamline your business operations and discover new opportunities.",
-      buttonText: "Discover Our Business Tools",
-      buttonLink: "/services#business-tools",
-
-      backgroundImage: "https://ik.imagekit.io/g3nahgeeu/hero/bussiness-tools.webp",
-    }
-  ];
+  const backgroundImage = "https://ik.imagekit.io/g3nahgeeu/hero/digital-marketing-min.JPG";
 
   const services = [
     "Digital Marketing",
@@ -107,28 +69,6 @@ const HeroSlider = () => {
     { label: "Not specified", value: "not_specified" }
   ];
 
-  const handleSlideChange = (swiper) => {
-    setActiveIndex(swiper.realIndex);
-  };
-
-  const goToSlide = (index) => {
-    if (swiperRef.current && swiperRef.current.swiper) {
-      swiperRef.current.swiper.slideTo(index);
-    }
-  };
-
-  const nextSlide = () => {
-    if (swiperRef.current && swiperRef.current.swiper) {
-      swiperRef.current.swiper.slideNext();
-    }
-  };
-
-  const prevSlide = () => {
-    if (swiperRef.current && swiperRef.current.swiper) {
-      swiperRef.current.swiper.slidePrev();
-    }
-  };
-
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -140,7 +80,7 @@ const HeroSlider = () => {
       email: '',
       phone: '',
       company: '',
-      subject: 'Hire Us Request',
+      subject: 'Free Digital Systems Audit Request',
       message: '',
       service: '',
       budget: 'not_specified',
@@ -231,148 +171,91 @@ Additional Message: ${formData.message || 'No additional message provided.'}`;
 
   return (
     <>
-      <section className="relative h-screen overflow-hidden">
-        <Swiper
-          ref={swiperRef}
-          modules={[Navigation, Pagination]}
-          speed={300}
-          onSlideChange={handleSlideChange}
-          className="h-full w-full"
-        >
-          {slides.map((slide, index) => (
-            <SwiperSlide key={slide.id}>
-              {/* Background Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{ 
-                  backgroundImage: `url(${slide.backgroundImage})`,
-                }}
-              />
-              
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
-              
+      <section className="relative min-h-screen h-screen overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ 
+            backgroundImage: `url(${backgroundImage})`,
+          }}
+        />
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
 
-
-              {/* Content */}
-              <div className="relative z-10 h-full flex items-center">
-                <div className="container-custom">
-                  <div className="flex items-center justify-start">
-            {/* Text Content */}
-                    <div className="text-white max-w-4xl text-left" data-swiper-parallax="-300">
-                      
-
-                {/* Title */}
+        {/* Content */}
+        <div className="relative z-10 h-full flex items-center sm:items-end pb-0 sm:pb-20 md:pb-24 lg:pb-32 xl:pb-40">
+          <div className="container-custom w-full">
+            <div className="flex items-center sm:items-end justify-start w-full">
+              {/* Text Content */}
+              <div className="text-white max-w-4xl w-full text-left">
+                {/* Headline */}
                 <motion.h1
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4, duration: 0.6 }}
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight"
-                        data-swiper-parallax="-100"
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight sm:leading-tight"
                 >
-                        {slide.title}
+                  Digital Growth & Automation Systems for Modern Organizations
                 </motion.h1>
 
-                {/* Description */}
+                {/* Sub-headline */}
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, duration: 0.5 }}
-                        className="text-lg md:text-xl text-gray-200 mb-6 md:mb-8 leading-relaxed max-w-2xl"
-                        data-swiper-parallax="-50"
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                  className="text-base sm:text-lg md:text-xl text-gray-200 mb-6 sm:mb-8 md:mb-10 leading-relaxed max-w-2xl"
                 >
-                        {slide.description}
+                  We help businesses simplify operations, automate workflows, and make better decisions by combining technology, AI, cloud, data, and digital marketing.
                 </motion.p>
-
-                      {/* Features */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6, duration: 0.5 }}
-                                        className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8 max-w-3xl"
-                        data-swiper-parallax="-25"
-                      >
-                  </motion.div>
 
                 {/* CTA Buttons */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.7, duration: 0.5 }}
-                  className="flex flex-col sm:flex-row gap-3 md:gap-4"
-                        data-swiper-parallax="0"
+                  transition={{ delay: 0.7, duration: 0.5 }}
+                  className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto"
                 >
-                  <Link
-                          to={slide.buttonLink}
-                          target={slide.external ? '_blank' : '_self'}
-                          rel={slide.external ? 'noopener noreferrer' : ''}
-                          className="inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group text-sm md:text-base"
-                        >
-                          <span>{slide.buttonText}</span>
-                    <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                  </Link>
-                  
-                        <button 
-                          onClick={openModal}
-                          className="inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 border-2 border-white/80 text-white font-semibold hover:bg-white hover:text-primary-600 transition-all duration-300 backdrop-blur-sm group text-sm md:text-base"
-                        >
-                    <FaHandshake className="mr-2 group-hover:scale-110 transition-transform duration-300" />
-                    <span>Hire Us</span>
+                  <button 
+                    onClick={openModal}
+                    className="inline-flex items-center justify-center px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group text-sm sm:text-base rounded-sm sm:rounded"
+                  >
+                    <span className="text-center">Book a Free Digital Systems Audit</span>
+                    <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />
                   </button>
+                  
+                  <Link
+                    href="/services"
+                    className="inline-flex items-center justify-center px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 border-2 border-white/80 text-white font-semibold hover:bg-white hover:text-primary-600 transition-all duration-300 backdrop-blur-sm group text-sm sm:text-base rounded-sm sm:rounded"
+                  >
+                    <span>See How It Works</span>
+                    <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />
+                  </Link>
                 </motion.div>
-                    </div>
-
-
-                  </div>
-          </div>
-        </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        {/* Custom Navigation - Left Side - Hidden on mobile */}
-        <div className="absolute left-4 md:left-8 bottom-1/2 transform -translate-y-1/2 z-20 hidden md:block">
-          <button
-            onClick={prevSlide}
-            className="w-10 h-10 md:w-12 md:h-12 bg-[#303661]/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 hover:scale-110"
-          >
-            <FaChevronLeft className="text-sm md:text-base" />
-          </button>
-        </div>
-
-        {/* Custom Navigation - Right Side - Hidden on mobile */}
-        <div className="absolute right-4 md:right-8 bottom-1/2 transform -translate-y-1/2 z-20 hidden md:block">
-          <button
-            onClick={nextSlide}
-            className="w-10 h-10 md:w-12 md:h-12 bg-[#303661]/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 hover:scale-110"
-          >
-            <FaChevronRight className="text-sm md:text-base" />
-          </button>
-        </div>
-
-        {/* Slide Indicators - Bottom Center */}
-        <div className="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 z-20">
-          <div className="flex items-center space-x-1 md:space-x-2 bg-black/20 backdrop-blur-md px-3 md:px-4 py-1 md:py-2">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`w-2 h-2 md:w-3 md:h-3 transition-all duration-300 ${
-                  index === activeIndex 
-                    ? 'bg-primary-400 scale-125' 
-                    : 'bg-white/50 hover:bg-primary-300 hover:scale-110'
-                }`}
-              />
-            ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 z-10">
-          <div 
-            className="h-full bg-gradient-to-r from-primary-500 to-secondary-500 transition-all duration-300 ease-linear"
-            style={{ width: `${((activeIndex + 1) / slides.length) * 100}%` }}
-          />
+        {/* Animated Down Arrow */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.6 }}
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="text-white cursor-pointer"
+            >
+              <FaChevronDown className="text-2xl sm:text-3xl opacity-80 hover:opacity-100 transition-opacity" />
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
@@ -417,8 +300,8 @@ Additional Message: ${formData.message || 'No additional message provided.'}`;
                     <FaHandshake className="text-2xl" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">Work With Us</h2>
-                    <p className="text-primary-100">Fill out the form below.</p>
+                    <h2 className="text-2xl font-bold">Book a Free Digital Systems Audit</h2>
+                    <p className="text-primary-100">Fill out the form below to get started.</p>
                   </div>
                 </div>
               </div>

@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
   FaArrowRight,
@@ -16,12 +18,28 @@ const BlogSection = () => {
 
   // Fetch featured blogs from API
   const fetchBlogs = async () => {
+    // Only fetch on client side
+    if (typeof window === 'undefined') return;
+    
     try {
       setLoading(true);
-      const response = await apiGet('/api/blogs?limit=3');
-      setBlogs(response.data.blogs);
+      const response = await apiGet('/api/blogs?limit=3&featured=true');
+      setBlogs(response.data?.blogs || []);
     } catch (error) {
-      console.error('Error fetching blogs:', error);
+      // Silently handle network errors - API might not be available
+      // Only log in development mode
+      if (process.env.NODE_ENV === 'development') {
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to fetch blogs';
+      const errorDetails = {
+        message: errorMessage,
+        status: error?.response?.status,
+        url: error?.config?.url,
+          code: error?.code,
+          note: error?.code === 'ERR_NETWORK' ? 'API server may be unavailable' : 'Request failed'
+      };
+        console.warn('Blog fetch error (non-critical):', errorDetails);
+      }
+      // Set empty array to show no blogs gracefully
       setBlogs([]);
     } finally {
       setLoading(false);
@@ -55,6 +73,11 @@ const BlogSection = () => {
         </div>
       </section>
     );
+  }
+
+  // Don't render section if no blogs available (API might be down)
+  if (!blogs || blogs.length === 0) {
+    return null;
   }
 
   return (
@@ -160,7 +183,7 @@ const BlogSection = () => {
                   <div className="mb-4">
                     <SocialSharing
                       title={blog.title}
-                      url={`${window.location.origin}/blog/${blog.slug}`}
+                      url={typeof window !== 'undefined' ? `${window.location.origin}/blog/${blog.slug}` : `/blog/${blog.slug}`}
                       description={blog.excerpt}
                       image={blog.featuredImage?.url || ''}
                       platforms={['facebook', 'whatsapp', 'twitter', 'linkedin']}
@@ -171,7 +194,7 @@ const BlogSection = () => {
 
                   {/* Read More Link */}
                   <Link
-                    to={`/blog/${blog.slug}`}
+                    href={`/blog/${blog.slug}`}
                     className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-300 group/link"
                   >
                     <span>Read Article</span>

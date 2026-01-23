@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { 
   FaArrowRight,
@@ -70,7 +72,7 @@ const CTASection = () => {
   return (
     <section 
       ref={containerRef}
-      className="relative min-h-screen bg-slate-900 overflow-hidden flex items-center py-16 md:py-0"
+      className="relative min-h-screen bg-slate-900 overflow-hidden flex items-center section-padding md:py-0"
     >
       {/* Parallax Background */}
       <div className="absolute inset-0">
@@ -89,7 +91,7 @@ const CTASection = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-900/85 to-slate-800/90" />
       </div>
 
-      <div className="container-custom relative z-10 px-4 sm:px-6 lg:px-8">
+      <div className="container-custom relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-20 items-center">
           {/* Left Content */}
           <motion.div
@@ -146,14 +148,14 @@ const CTASection = () => {
               className="flex flex-col sm:flex-row gap-3 sm:gap-4"
             >
               <Link
-                to="https://skyfalke.co.ke/backup-disaster-recovery"
+                href="https://skyfalke.co.ke/backup-disaster-recovery"
                 className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[#e0ae00] text-slate-900 font-semibold rounded-lg hover:bg-[#f4c430] transition-all duration-300 transform hover:scale-105 group shadow-lg text-sm sm:text-base"
               >
                 <span>Start Free Trial</span>
                 <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
               <Link
-                to="https://skyfalke.co.ke"
+                href="https://skyfalke.co.ke"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-slate-600 text-white font-semibold rounded-lg hover:bg-slate-800/50 transition-all duration-300 backdrop-blur-sm text-sm sm:text-base"

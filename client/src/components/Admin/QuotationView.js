@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
   FaEdit, 
@@ -16,8 +18,9 @@ import {
 // import { useNotifications } from '../../contexts/NotificationContext';
 
 const QuotationView = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const params = useParams();
+  const id = params?.id;
+  const router = useRouter();
   // Notification function - defined at the top level
   const showNotification = React.useCallback((message, type) => {
     console.log(`${type.toUpperCase()}: ${message}`);
@@ -62,7 +65,7 @@ const QuotationView = () => {
         setQuotation(data);
       } else {
         showNotification('Failed to fetch quotation', 'error');
-        navigate('/system/dashboard/quotations');
+        router.push('/system/dashboard/quotations');
       }
     } catch (error) {
       console.error('Error fetching quotation:', error);
@@ -135,7 +138,7 @@ const QuotationView = () => {
       if (response.ok) {
         const data = await response.json();
         showNotification('Quotation converted to invoice successfully', 'success');
-        navigate(`/system/dashboard/invoices/${data.invoice._id}`);
+        router.push(`/system/dashboard/invoices/${data.invoice._id}`);
       } else {
         showNotification('Failed to convert quotation to invoice', 'error');
       }
@@ -208,7 +211,7 @@ const QuotationView = () => {
         </p>
         <div className="mt-6">
           <button
-            onClick={() => navigate('/system/dashboard/quotations')}
+            onClick={() => router.push('/system/dashboard/quotations')}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
             Back to Quotations
@@ -226,7 +229,7 @@ const QuotationView = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
-            onClick={() => navigate('/system/dashboard/quotations')}
+            onClick={() => router.push('/system/dashboard/quotations')}
             className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
           >
             <FaArrowLeft className="h-5 w-5" />
@@ -253,7 +256,7 @@ const QuotationView = () => {
         <div className="flex flex-wrap items-center justify-between">
           <div className="flex flex-wrap items-center space-x-3">
             <button
-              onClick={() => navigate(`/system/dashboard/quotations/${id}/edit`)}
+              onClick={() => router.push(`/system/dashboard/quotations/${id}/edit`)}
               className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
               <FaEdit className="mr-2 h-4 w-4" />

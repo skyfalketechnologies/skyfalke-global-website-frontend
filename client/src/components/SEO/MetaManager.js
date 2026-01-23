@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 
 const MetaManager = ({ 
   title, 
@@ -21,11 +21,11 @@ const MetaManager = ({
   canonical,
   noIndex = false
 }) => {
-  const location = useLocation();
+  const pathname = usePathname();
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Get the current URL
-  const currentUrl = url || `${window.location.origin}${location.pathname}`;
+  const currentUrl = url || `${window.location.origin}${pathname}`;
   
   // Get the full image URL
   const fullImageUrl = image && image.startsWith('http') ? image : `${window.location.origin}${image || '/images/logos/logo.svg'}`;

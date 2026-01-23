@@ -1,8 +1,10 @@
+'use client';
+
 import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { FaShoppingCart, FaTimes, FaMinus, FaPlus, FaTrash } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 const Cart = ({ isOpen, onClose }) => {
   const { items, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
@@ -65,8 +67,7 @@ const Cart = ({ isOpen, onClose }) => {
               <FaShoppingCart className="text-6xl text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-600 mb-2">Your cart is empty</h3>
               <p className="text-gray-500 mb-6">Add some products to get started!</p>
-              <Link
-                to="/shop"
+              <Link href="/shop"
                 onClick={onClose}
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
@@ -154,8 +155,7 @@ const Cart = ({ isOpen, onClose }) => {
             </div>
             
             <div className="space-y-3">
-              <Link
-                to="/checkout"
+              <Link href="/checkout"
                 onClick={onClose}
                 className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center font-medium block"
               >

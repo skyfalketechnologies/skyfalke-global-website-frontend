@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 
 const CartContext = createContext();
@@ -64,6 +66,8 @@ export const CartProvider = ({ children }) => {
 
   // Load cart from localStorage on mount
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const savedCart = localStorage.getItem('skyfalke_cart');
     if (savedCart) {
       try {
@@ -77,6 +81,7 @@ export const CartProvider = ({ children }) => {
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem('skyfalke_cart', JSON.stringify(state.items));
   }, [state.items]);
 

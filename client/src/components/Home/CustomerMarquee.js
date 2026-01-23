@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 const CustomerMarquee = () => {
@@ -40,12 +42,8 @@ const CustomerMarquee = () => {
     }
   ];
 
-  // Duplicate the array to create seamless loop
-  const duplicatedCustomers = [...customers, ...customers];
-
-  // Calculate the scroll distance for seamless loop
-  const itemWidth = 160 + 48; // 160px (w-40) + 48px (space-x-12)
-  const scrollDistance = customers.length * itemWidth;
+  // Duplicate the array multiple times to create seamless infinite loop
+  const duplicatedCustomers = [...customers, ...customers, ...customers];
 
   return (
     <section className="py-16 bg-white overflow-hidden">
@@ -63,18 +61,12 @@ const CustomerMarquee = () => {
         {/* Marquee Container */}
         <div className="relative">
           {/* Gradient Overlays for smooth fade effect */}
-          <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-white to-transparent z-10"></div>
-          <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-white to-transparent z-10"></div>
+          <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
 
           {/* Scrolling Marquee */}
           <div className="flex overflow-hidden">
-            <div
-              className="flex items-center space-x-12 md:space-x-16 animate-marquee"
-              style={{ 
-                minWidth: 'fit-content',
-                animation: 'marquee 30s linear infinite'
-              }}
-            >
+            <div className="flex items-center space-x-12 md:space-x-16 marquee-slide">
               {duplicatedCustomers.map((customer, index) => (
                 <div
                   key={`${customer.id}-${index}`}

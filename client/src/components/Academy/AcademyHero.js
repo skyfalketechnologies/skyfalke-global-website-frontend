@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 const AcademyHero = () => {
   return (
@@ -33,8 +33,7 @@ const AcademyHero = () => {
 
           {/* CTA Button */}
           <div className="flex justify-center">
-            <Link
-              to="/academy/courses"
+            <Link href="/academy/courses"
               className="inline-flex items-center px-8 py-4 bg-[#e0ae00] hover:bg-[#d4a000] text-[#303661] font-bold text-lg rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg"
             >
               <span>Explore Courses</span>

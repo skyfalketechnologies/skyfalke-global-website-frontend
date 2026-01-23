@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaBars, 
@@ -26,7 +29,7 @@ const Header = () => {
   const [showHireUsModal, setShowHireUsModal] = useState(false);
   const { isMobile, shouldAnimate } = useMobileDetection();
 
-  const location = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,7 +56,7 @@ const Header = () => {
   useEffect(() => {
     setIsMenuOpen(false);
     setActiveDropdown(null);
-  }, [location]);
+  }, [pathname]);
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -167,8 +170,8 @@ const Header = () => {
   ];
 
   const isActivePage = (href) => {
-    if (href === '/' && location.pathname === '/') return true;
-    if (href !== '/' && location.pathname.startsWith(href)) return true;
+    if (href === '/' && pathname === '/') return true;
+    if (href !== '/' && pathname?.startsWith(href)) return true;
     return false;
   };
 
@@ -188,7 +191,7 @@ const Header = () => {
       <nav className="container-custom">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link href="/" className="flex items-center">
             <motion.div
               {...getAnimationProps({}, shouldAnimate)}
               className="flex items-center"
@@ -215,7 +218,7 @@ const Header = () => {
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
                     <Link
-                      to={item.href}
+                      href={item.href}
                       className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-bold transition-colors duration-200 ${
                         isActivePage(item.href)
                           ? 'text-[#e0ae00]'
@@ -261,38 +264,48 @@ const Header = () => {
                                         <>
                                           <div className="space-y-0.5">
                                             {data.subItems.map((subItem, index) => (
-                                              <Link
-                                                key={subItem.name}
-                                                to={subItem.href}
-                                                target={subItem.external ? '_blank' : '_self'}
-                                                rel={subItem.external ? 'noopener noreferrer' : ''}
-                                                className="block py-1 px-2 rounded text-xs text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200"
-                                              >
-                                                {subItem.name}
-                                              </Link>
+                                              subItem.href ? (
+                                                <Link
+                                                  key={subItem.name}
+                                                  href={subItem.href}
+                                                  target={subItem.external ? '_blank' : '_self'}
+                                                  rel={subItem.external ? 'noopener noreferrer' : ''}
+                                                  className="block py-1 px-2 rounded text-xs text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200"
+                                                >
+                                                  {subItem.name}
+                                                </Link>
+                                              ) : (
+                                                <span key={subItem.name} className="block py-1 px-2 rounded text-xs text-gray-400">
+                                                  {subItem.name}
+                                                </span>
+                                              )
                                             ))}
                                           </div>
                                           
+                                          {data.href && (
+                                            <div className="mt-2">
+                                              <Link
+                                                href={data.href}
+                                                className="inline-flex items-center text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors duration-200"
+                                              >
+                                                View all
+                                                <FaArrowRight className="w-2 h-2 ml-1" />
+                                              </Link>
+                                            </div>
+                                          )}
+                                        </>
+                                      ) : (
+                                        data.href && (
                                           <div className="mt-2">
                                             <Link
-                                              to={data.href}
+                                              href={data.href}
                                               className="inline-flex items-center text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors duration-200"
                                             >
-                                              View all
+                                              Learn more
                                               <FaArrowRight className="w-2 h-2 ml-1" />
                                             </Link>
                                           </div>
-                                        </>
-                                      ) : (
-                                        <div className="mt-2">
-                                          <Link
-                                            to={data.href}
-                                            className="inline-flex items-center text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors duration-200"
-                                          >
-                                            Learn more
-                                            <FaArrowRight className="w-2 h-2 ml-1" />
-                                          </Link>
-                                        </div>
+                                        )
                                       )}
                                     </div>
                                   </div>
@@ -304,9 +317,9 @@ const Header = () => {
                       )}
                     </AnimatePresence>
                   </div>
-                ) : (
+                ) : item.href ? (
                   <Link
-                    to={item.href}
+                    href={item.href}
                     className={`px-3 py-2 rounded-md text-sm font-bold transition-colors duration-200 ${
                       isActivePage(item.href)
                         ? 'text-[#e0ae00]'
@@ -317,6 +330,10 @@ const Header = () => {
                   >
                     {item.name}
                   </Link>
+                ) : (
+                  <span className="px-3 py-2 rounded-md text-sm font-bold text-gray-400">
+                    {item.name}
+                  </span>
                 )}
               </div>
             ))}
@@ -394,30 +411,37 @@ const Header = () => {
                 <div className="flex-1 px-6 py-4 space-y-2 overflow-y-auto">
                 {navigation.map((item) => (
                   <div key={item.name}>
-                    <Link
-                      to={item.href}
-                      className={`block px-4 py-4 rounded-xl text-base font-bold transition-all duration-200 ${
-                        isActivePage(item.href)
-                          ? 'text-[#e0ae00] bg-[#e0ae00]/10 border border-[#e0ae00]/20'
-                          : 'text-slate-700 hover:text-[#e0ae00] hover:bg-slate-50'
-                      }`}
-                      onClick={() => !item.hasDropdown && setIsMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
+                    {item.href ? (
+                      <Link
+                        href={item.href}
+                        className={`block px-4 py-4 rounded-xl text-base font-bold transition-all duration-200 ${
+                          isActivePage(item.href)
+                            ? 'text-[#e0ae00] bg-[#e0ae00]/10 border border-[#e0ae00]/20'
+                            : 'text-slate-700 hover:text-[#e0ae00] hover:bg-slate-50'
+                        }`}
+                        onClick={() => !item.hasDropdown && setIsMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    ) : (
+                      <span className="block px-4 py-4 rounded-xl text-base font-bold text-gray-400">
+                        {item.name}
+                      </span>
+                    )}
                     {item.hasDropdown && (
                       <div className="ml-4 mt-2 space-y-3">
                         {Object.entries(solutionsData).map(([category, data]) => {
                           const IconComponent = data.icon;
                           return (
                             <div key={category} className="bg-gray-50 rounded-lg p-3">
-                              <Link
-                                to={data.href}
-                                target={data.external ? '_blank' : '_self'}
-                                rel={data.external ? 'noopener noreferrer' : ''}
-                                className="flex items-center space-x-2 mb-2"
-                                onClick={() => setIsMenuOpen(false)}
-                              >
+                              {data.href ? (
+                                <Link
+                                  href={data.href}
+                                  target={data.external ? '_blank' : '_self'}
+                                  rel={data.external ? 'noopener noreferrer' : ''}
+                                  className="flex items-center space-x-2 mb-2"
+                                  onClick={() => setIsMenuOpen(false)}
+                                >
                                 <div className="w-6 h-6 bg-[#e0ae00] rounded-lg flex items-center justify-center">
                                   <IconComponent className="w-3 h-3 text-white" />
                                 </div>
@@ -425,19 +449,35 @@ const Header = () => {
                                   <span className="text-xs font-semibold text-gray-900 block">{category}</span>
                                 </div>
                               </Link>
+                              ) : (
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <div className="w-6 h-6 bg-gray-300 rounded-lg flex items-center justify-center">
+                                    <IconComponent className="w-3 h-3 text-gray-500" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <span className="text-xs font-semibold text-gray-500 block">{category}</span>
+                                  </div>
+                                </div>
+                              )}
                               {data.subItems.length > 0 && (
                                 <div className="space-y-0.5">
                                   {data.subItems.map((subItem) => (
-                                    <Link
-                                      key={subItem.name}
-                                      to={subItem.href}
-                                      target={subItem.external ? '_blank' : '_self'}
-                                      rel={subItem.external ? 'noopener noreferrer' : ''}
-                                      className="block py-1 px-2 text-xs text-gray-700 hover:text-[#e0ae00] hover:bg-white rounded transition-all duration-200"
-                                      onClick={() => setIsMenuOpen(false)}
-                                    >
-                                      {subItem.name}
-                                    </Link>
+                                    subItem.href ? (
+                                      <Link
+                                        key={subItem.name}
+                                        href={subItem.href}
+                                        target={subItem.external ? '_blank' : '_self'}
+                                        rel={subItem.external ? 'noopener noreferrer' : ''}
+                                        className="block py-1 px-2 text-xs text-gray-700 hover:text-[#e0ae00] hover:bg-white rounded transition-all duration-200"
+                                        onClick={() => setIsMenuOpen(false)}
+                                      >
+                                        {subItem.name}
+                                      </Link>
+                                    ) : (
+                                      <span key={subItem.name} className="block py-1 px-2 text-xs text-gray-400">
+                                        {subItem.name}
+                                      </span>
+                                    )
                                   ))}
                                 </div>
                               )}
