@@ -1,41 +1,40 @@
-/**
- * Next.js Standalone Server for cPanel
- * This is the correct way to start Next.js with standalone output
- * 
- * Usage: node .next/standalone/server.js
- * Or set this as startup file in cPanel: .next/standalone/server.js
- */
-
-// This file is a placeholder/wrapper
-// The actual server is in .next/standalone/server.js after build
-// 
-// If you need a custom wrapper, use this:
-
-const path = require('path');
-const { spawn } = require('child_process');
-
-// Get the standalone server path
-const standalonePath = path.join(__dirname, '.next', 'standalone', 'server.js');
-
-// Check if standalone server exists
-const fs = require('fs');
-if (!fs.existsSync(standalonePath)) {
-  console.error('❌ Standalone server not found. Please run: npm run build');
-  console.error(`   Expected path: ${standalonePath}`);
-  process.exit(1);
-}
-
-// Set environment variables
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-process.env.PORT = process.env.PORT || '3000';
-process.env.HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
-
-// Start the standalone server
-console.log('🚀 Starting Next.js standalone server...');
-console.log(`   Port: ${process.env.PORT}`);
-console.log(`   Hostname: ${process.env.HOSTNAME}`);
-console.log(`   Server: ${standalonePath}`);
-
-// Use the standalone server directly
-require(standalonePath);
-
+const { createServer } = require('http')
+const { parse } = require('url')
+const next = require('next')
+ 
+const dev = process.env.NODE_ENV !== 'production'
+const hostname = 'localhost'
+const port = 3000
+// when using middleware `hostname` and `port` must be provided below
+const app = next({ dev, hostname, port })
+const handle = app.getRequestHandler()
+ 
+app.prepare().then(() => {
+  createServer(async (req, res) => {
+    try {
+      // Be sure to pass `true` as the second argument to `url.parse`.
+      // This tells it to parse the query portion of the URL.
+      const parsedUrl = parse(req.url, true)
+      const { pathname, query } = parsedUrl
+ 
+      if (pathname === '/a') {
+        await app.render(req, res, '/a', query)
+      } else if (pathname === '/b') {
+        await app.render(req, res, '/b', query)
+      } else {
+        await handle(req, res, parsedUrl)
+      }
+    } catch (err) {
+      console.error('Error occurred handling', req.url, err)
+      res.statusCode = 500
+      res.end('internal server error')
+    }
+  })
+    .once('error', (err) => {
+      console.error(err)
+      process.exit(1)
+    })
+    .listen(port, () => {
+      console.log(`> Ready on http://${hostname}:${port}`)
+    })
+})
