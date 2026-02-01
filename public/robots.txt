@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://skyfalke.com/sitemap.xml
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+Disallow: /admin/login
+Disallow: /system/
+
+# Allow important API endpoints for SEO
+Allow: /api/sitemap.xml
+Allow: /api/robots.txt
+
+# Crawl delay (optional)
+Crawl-delay: 1
