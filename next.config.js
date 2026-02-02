@@ -49,14 +49,24 @@ const nextConfig = {
         ...config.resolve.fallback,
       };
       
-      // Optimize TipTap bundle
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: 'deterministic',
-      };
+      // Transpile TipTap packages to fix bundling issues
+      config.module.rules.push({
+        test: /\.(js|jsx|ts|tsx)$/,
+        include: /node_modules\/@tiptap/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['next/babel'],
+            plugins: [],
+          },
+        },
+      });
     }
     return config;
   },
+  
+  // Transpile TipTap packages
+  transpilePackages: ['@tiptap/react', '@tiptap/core', '@tiptap/starter-kit'],
   // Turbopack configuration (Next.js 16+ uses Turbopack by default)
   // Fonts are handled automatically by Turbopack, no webpack config needed
   turbopack: {},
