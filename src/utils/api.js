@@ -20,10 +20,10 @@ const getApiBaseUrl = () => {
   }
   
   // Fallback URLs based on environment
-  // In production build, always use production URL
-  if (process.env.NODE_ENV === 'production') {
+  // In production build or Vercel production, always use production URL
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
     const productionUrl = 'https://apis.mwangikinyanjuiadvocates.com';
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
       // Only log in browser console if needed for debugging
       console.warn('Using production API URL fallback:', productionUrl);
     }

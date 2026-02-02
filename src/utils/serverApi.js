@@ -3,7 +3,22 @@
  * Use this for metadata generation and server components
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const getApiBaseUrl = () => {
+  // Check for explicit environment variable first
+  if (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.REACT_APP_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL || process.env.REACT_APP_API_BASE_URL;
+  }
+  
+  // In production, use production API URL
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+    return 'https://apis.mwangikinyanjuiadvocates.com';
+  }
+  
+  // Development fallback
+  return 'http://localhost:5000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Server-side fetch function for API calls
