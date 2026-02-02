@@ -8,7 +8,7 @@ import Underline from '@tiptap/extension-underline';
 import Strike from '@tiptap/extension-strike';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FaBold,
   FaItalic,
@@ -33,6 +33,13 @@ const RichTextEditor = ({
   style = {},
   ...props 
 }) => {
+  // Ensure we're on the client side
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -71,11 +78,38 @@ const RichTextEditor = ({
   // Update editor content when value prop changes externally
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value || '');
+      try {
+        editor.commands.setContent(value || '');
+      } catch (error) {
+        console.error('Error setting editor content:', error);
+      }
     }
   }, [value, editor]);
 
-  if (!editor) {
+  // Ensure editor is fully initialized before rendering
+  const [isEditorReady, setIsEditorReady] = useState(false);
+
+  useEffect(() => {
+    if (editor && isMounted) {
+      // Small delay to ensure editor is fully initialized
+      const timer = setTimeout(() => {
+        try {
+          // Test if editor is accessible
+          if (editor.view && editor.view.dom) {
+            setIsEditorReady(true);
+          }
+        } catch (error) {
+          console.error('Editor not ready:', error);
+          setIsEditorReady(false);
+        }
+      }, 0);
+      return () => clearTimeout(timer);
+    } else {
+      setIsEditorReady(false);
+    }
+  }, [editor, isMounted]);
+
+  if (!isMounted || !editor || !isEditorReady) {
     return (
       <div 
         className="border border-gray-300 dark:border-gray-600 rounded-md p-4 min-h-[200px] bg-gray-50 dark:bg-gray-800 animate-pulse"
@@ -266,7 +300,14 @@ const RichTextEditor = ({
     <div className="border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden" style={style}>
       <MenuBar />
       <div className="prose-editor">
-        <EditorContent editor={editor} />
+        {editor && isEditorReady && isMounted ? (
+          <EditorContent editor={editor} />
+        ) : (
+          <div className="p-4 min-h-[200px] bg-gray-50 dark:bg-gray-800">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+          </div>
+        )}
       </div>
       <style jsx global>{`
         .prose-editor .ProseMirror {
