@@ -5,8 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { FaSave, FaTimes, FaUpload, FaEye } from 'react-icons/fa';
 import { apiPost, apiGet, apiPatch } from '../../utils/api';
 import { Helmet } from 'react-helmet-async';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import RichTextEditor from '../../components/RichTextEditor';
 
 const ProductForm = () => {
   const params = useParams();
@@ -32,23 +31,6 @@ const ProductForm = () => {
 
   const categories = ['Hoodies', 'Caps', 'Mugs', 'Stickers', 'T-Shirts', 'Accessories', 'Digital Products'];
 
-  // Rich text editor configuration
-  const quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      ['link', 'blockquote'],
-      [{ 'align': [] }],
-      ['clean']
-    ],
-  };
-
-  const quillFormats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'indent', 'link', 'blockquote', 'align'
-  ];
 
   useEffect(() => {
     if (isEditing) {
@@ -297,12 +279,9 @@ const ProductForm = () => {
                 Description *
               </label>
               <div className="border border-gray-300 rounded-md">
-                <ReactQuill
-                  theme="snow"
+                <RichTextEditor
                   value={formData.description}
                   onChange={(value) => handleRichTextChange('description', value)}
-                  modules={quillModules}
-                  formats={quillFormats}
                   placeholder="Provide a detailed product description..."
                   style={{ minHeight: '200px' }}
                 />

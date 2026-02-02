@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import RichTextEditor from '../../components/RichTextEditor';
 import { 
   FaSave, 
   FaTimes, 
@@ -87,23 +86,6 @@ const CampaignForm = () => {
     { value: 'closed', label: 'Closed' }
   ];
 
-  const quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'align': [] }],
-      ['link', 'image'],
-      ['clean']
-    ],
-  };
-
-  const quillFormats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'color', 'background', 'align',
-    'link', 'image'
-  ];
 
   useEffect(() => {
     if (isEditing) {
@@ -492,13 +474,9 @@ const CampaignForm = () => {
                     Content <span className="text-red-500">*</span>
                   </label>
                   <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-                    <ReactQuill
-                      theme="snow"
+                    <RichTextEditor
                       value={formData.content}
                       onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
-                      modules={quillModules}
-                      formats={quillFormats}
-                      className="bg-white dark:bg-gray-700"
                       placeholder="Start writing your email content here..."
                     />
                   </div>

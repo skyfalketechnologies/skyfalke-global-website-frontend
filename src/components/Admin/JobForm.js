@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
 import { apiGet, apiPost, apiPut } from '../../utils/api';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import RichTextEditor from '../RichTextEditor';
 import { 
   FaSave, 
   FaTimes, 
@@ -16,10 +15,10 @@ import {
   FaTrash
 } from 'react-icons/fa';
 
-const JobForm = () => {
+const JobForm = ({ id: propId }) => {
   const router = useRouter();
   const params = useParams();
-  const id = params?.id;
+  const id = propId || params?.id;
   const isEditing = !!id;
   
   const [loading, setLoading] = useState(false);
@@ -57,50 +56,54 @@ const JobForm = () => {
   const currencies = ['USD', 'EUR', 'GBP', 'KES'];
   const periods = ['hourly', 'monthly', 'yearly'];
 
-  // Rich text editor configuration
-  const quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      ['link', 'blockquote'],
-      [{ 'align': [] }],
-      ['clean']
-    ],
-  };
-
-  const quillFormats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'indent', 'link', 'blockquote', 'align'
-  ];
-
-  useEffect(() => {
-    if (isEditing) {
-      fetchJob();
-    }
-  }, [id]);
-
-  const fetchJob = async () => {
+  const fetchJob = useCallback(async () => {
+    if (!id) return;
+    
     try {
       setLoading(true);
+      setError('');
       const response = await apiGet(`/api/jobs/${id}`);
       if (response.data) {
         setFormData({
-          ...response.data,
+          title: response.data.title || '',
+          category: response.data.category || '',
+          location: response.data.location || '',
+          type: response.data.type || '',
+          experience: response.data.experience || '',
+          description: response.data.description || '',
           requirements: response.data.requirements || [''],
           benefits: response.data.benefits || [''],
           responsibilities: response.data.responsibilities || [''],
-          skills: response.data.skills || ['']
+          skills: response.data.skills || [''],
+          salary: {
+            min: response.data.salary?.min ?? '',
+            max: response.data.salary?.max ?? '',
+            currency: response.data.salary?.currency || 'USD',
+            period: response.data.salary?.period || 'yearly'
+          },
+          isRemote: response.data.isRemote || false,
+          isActive: response.data.isActive !== undefined ? response.data.isActive : true,
+          deadline: response.data.deadline || '',
+          department: response.data.department || '',
+          contactInfo: {
+            email: response.data.contactInfo?.email || '',
+            phone: response.data.contactInfo?.phone || ''
+          }
         });
       }
     } catch (error) {
       console.error('Error fetching job:', error);
-      setError('Failed to load job details');
+      setError('Failed to load job details. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id && isEditing) {
+      fetchJob();
+    }
+  }, [id, isEditing, fetchJob]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -283,7 +286,7 @@ const JobForm = () => {
                 <input
                   type="text"
                   name="title"
-                  value={formData.title}
+                  value={formData.title || ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="e.g., Senior Full Stack Developer"
@@ -297,7 +300,7 @@ const JobForm = () => {
                 </label>
                 <select
                   name="category"
-                  value={formData.category}
+                  value={formData.category || ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   required
@@ -316,7 +319,7 @@ const JobForm = () => {
                 <input
                   type="text"
                   name="location"
-                  value={formData.location}
+                  value={formData.location || ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="e.g., Nairobi, Kenya"
@@ -330,7 +333,7 @@ const JobForm = () => {
                 </label>
                 <select
                   name="type"
-                  value={formData.type}
+                  value={formData.type || ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   required
@@ -349,7 +352,7 @@ const JobForm = () => {
                 <input
                   type="text"
                   name="experience"
-                  value={formData.experience}
+                  value={formData.experience || ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="e.g., 3-5 years"
@@ -364,7 +367,7 @@ const JobForm = () => {
                 <input
                   type="text"
                   name="department"
-                  value={formData.department}
+                  value={formData.department || ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="e.g., Engineering"
@@ -377,12 +380,9 @@ const JobForm = () => {
                 Job Description *
               </label>
               <div className="border border-gray-300 dark:border-gray-600 rounded-md">
-                <ReactQuill
-                  theme="snow"
-                  value={formData.description}
+                <RichTextEditor
+                  value={formData.description || ''}
                   onChange={(value) => handleRichTextChange('description', value)}
-                  modules={quillModules}
-                  formats={quillFormats}
                   placeholder="Provide a detailed description of the role..."
                   style={{ minHeight: '200px' }}
                 />
@@ -428,7 +428,7 @@ const JobForm = () => {
                 <input
                   type="number"
                   name="salary.min"
-                  value={formData.salary.min}
+                  value={formData.salary.min ?? ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="e.g., 50000"
@@ -442,7 +442,7 @@ const JobForm = () => {
                 <input
                   type="number"
                   name="salary.max"
-                  value={formData.salary.max}
+                  value={formData.salary.max ?? ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="e.g., 80000"
@@ -455,7 +455,7 @@ const JobForm = () => {
                 </label>
                 <select
                   name="salary.currency"
-                  value={formData.salary.currency}
+                  value={formData.salary.currency || 'USD'}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
@@ -471,7 +471,7 @@ const JobForm = () => {
                 </label>
                 <select
                   name="salary.period"
-                  value={formData.salary.period}
+                  value={formData.salary.period || 'yearly'}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
@@ -635,7 +635,7 @@ const JobForm = () => {
                 <input
                   type="email"
                   name="contactInfo.email"
-                  value={formData.contactInfo.email}
+                  value={formData.contactInfo?.email || ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="careers@skyfalke.com"
@@ -650,7 +650,7 @@ const JobForm = () => {
                 <input
                   type="tel"
                   name="contactInfo.phone"
-                  value={formData.contactInfo.phone}
+                  value={formData.contactInfo?.phone || ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="+254 700 123 456"
@@ -670,7 +670,7 @@ const JobForm = () => {
               <input
                 type="date"
                 name="deadline"
-                value={formData.deadline}
+                value={formData.deadline || ''}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />

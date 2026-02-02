@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
@@ -54,9 +54,8 @@ const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout, isAuthenticated, isSuperAdmin } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const pathname = location.pathname;
+  const pathname = usePathname();
+  const router = useRouter();
 
   // Initialize expanded groups based on active routes
   const getInitialExpandedGroups = () => {
@@ -136,9 +135,9 @@ const AdminLayout = ({ children }) => {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate('/system/portal/access');
+      router.push('/system/portal/access');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, router]);
 
   if (!isAuthenticated()) {
     return null; // Will redirect via useEffect
@@ -498,7 +497,7 @@ const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, o
                         return (
                           <Link
                             key={item.name}
-                            to={item.href}
+                            href={item.href}
                             className={`${
                               item.current
                                 ? 'bg-primary-100 dark:bg-primary-900 border-r-2 border-primary-600 text-primary-700 dark:text-primary-300'
@@ -538,13 +537,13 @@ const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, o
         </div>
         
         <div className="mt-3 space-y-1">
-          <Link to="/system/dashboard/profile"
+          <Link href="/system/dashboard/profile"
             className="flex items-center px-2 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200"
           >
             <FaUser className="mr-3 h-4 w-4" />
             Profile
           </Link>
-          <Link to="/system/dashboard/settings"
+          <Link href="/system/dashboard/settings"
             className="flex items-center px-2 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200"
           >
             <FaCog className="mr-3 h-4 w-4" />

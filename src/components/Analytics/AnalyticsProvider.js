@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 import { 
   initializeAnalyticsWithConsent, 
   trackPageView,
@@ -10,7 +10,7 @@ import {
 } from '../../utils/analytics';
 
 const AnalyticsProvider = ({ children }) => {
-  const location = useLocation();
+  const pathname = usePathname();
 
   // Initialize analytics on component mount
   useEffect(() => {
@@ -48,7 +48,7 @@ const AnalyticsProvider = ({ children }) => {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [location.pathname]);
+  }, [pathname]);
 
   return <>{children}</>;
 };

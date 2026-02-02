@@ -36,6 +36,16 @@ const nextConfig = {
   },
   // Output configuration
   output: 'standalone',
+  // Webpack configuration for react-quill compatibility
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Ensure react-dom has findDOMNode on default export for react-quill
+      config.resolve.alias = {
+        ...config.resolve.alias,
+      };
+    }
+    return config;
+  },
   // Turbopack configuration (Next.js 16+ uses Turbopack by default)
   // Fonts are handled automatically by Turbopack, no webpack config needed
   turbopack: {},
