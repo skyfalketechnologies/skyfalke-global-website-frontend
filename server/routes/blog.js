@@ -29,8 +29,13 @@ router.get('/', async (req, res) => {
     const category = req.query.category;
     const search = req.query.search;
     const tag = req.query.tag;
+    const featured = req.query.featured;
 
     let query = { status: 'published' };
+    
+    if (featured === 'true') {
+      query.isFeatured = true;
+    }
     
     if (category) {
       query.category = category;

@@ -274,5 +274,6 @@ module.exports = {
   sendNotificationToAllAdmins,
   sendNotificationToProjectMembers,
   sendUnreadCount,
-  broadcastSystemMessage
+  broadcastSystemMessage,
+  getIO: () => io // Export getter function to safely access io instance
 };

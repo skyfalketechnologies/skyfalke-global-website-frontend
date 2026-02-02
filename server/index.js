@@ -356,6 +356,40 @@ if (buildExists) {
   }));
 }
 
+// API sitemap route (redirects to root-level sitemap)
+app.get('/api/sitemap.xml', async (req, res) => {
+  // Redirect to root-level sitemap or serve directly
+  try {
+    // Try to use the sitemap service first (reads from file if available)
+    const sitemapService = require('./services/sitemapService');
+    const sitemapPath = require('path').join(__dirname, 'public/sitemap.xml');
+    const fs = require('fs');
+    
+    if (fs.existsSync(sitemapPath)) {
+      const sitemap = await fs.promises.readFile(sitemapPath, 'utf8');
+      res.header('Content-Type', 'application/xml; charset=utf-8');
+      res.header('Cache-Control', 'public, max-age=3600');
+      return res.send(sitemap);
+    }
+    
+    // If file doesn't exist, try to generate (but handle DB errors gracefully)
+    try {
+      const { xml } = await sitemapService.generateSitemapXML();
+      res.header('Content-Type', 'application/xml; charset=utf-8');
+      res.header('Cache-Control', 'public, max-age=3600');
+      return res.send(xml);
+    } catch (dbError) {
+      // If database is not connected, serve static sitemap only
+      console.warn('⚠️  Database not available for sitemap generation, serving static routes only');
+      return res.redirect('/sitemap.xml');
+    }
+  } catch (error) {
+    console.error('Error serving /api/sitemap.xml:', error);
+    // Fallback: redirect to root sitemap
+    return res.redirect('/sitemap.xml');
+  }
+});
+
 // Root-level sitemap route for better SEO discovery - MUST be before catch-all route
 app.get('/sitemap.xml', async (req, res) => {
   try {
@@ -425,16 +459,41 @@ app.get('/sitemap.xml', async (req, res) => {
       { url: '/services/business-tools/performance-optimization', priority: '0.6', changefreq: 'monthly' }
     ];
 
-    // Fetch dynamic content
-    const [blogs, jobs, products, caseStudies, courses, events, trainers] = await Promise.all([
-      require('./models/Blog').find({ status: 'published' }).select('slug updatedAt').sort({ updatedAt: -1 }),
-      require('./models/Job').find({ status: 'active' }).select('slug updatedAt').sort({ updatedAt: -1 }),
-      require('./models/Product').find({ isActive: true }).select('slug updatedAt').sort({ updatedAt: -1 }),
-      require('./models/CaseStudy').find({ status: 'published' }).select('slug updatedAt').sort({ updatedAt: -1 }),
-      require('./models/Course').find({ isActive: true }).select('slug updatedAt').sort({ updatedAt: -1 }),
-      require('./models/Event').find({ status: 'published' }).select('slug updatedAt').sort({ updatedAt: -1 }),
-      require('./models/Trainer').find({ isActive: true }).select('_id updatedAt').sort({ updatedAt: -1 })
-    ]);
+    // Fetch dynamic content (with error handling for database connection issues)
+    let blogs = [], jobs = [], products = [], caseStudies = [], courses = [], events = [], trainers = [];
+    
+    // Check if MongoDB is connected before querying
+    const mongoose = require('mongoose');
+    const isDbConnected = mongoose.connection.readyState === 1;
+    
+    if (isDbConnected) {
+      try {
+        [blogs, jobs, products, caseStudies, courses, events, trainers] = await Promise.all([
+          require('./models/Blog').find({
+            $and: [
+              {
+                $or: [
+                  { status: 'published' },
+                  { isPublished: true }
+                ]
+              },
+              { slug: { $exists: true, $ne: null, $ne: '' } }
+            ]
+          }).select('slug updatedAt publishedAt status isPublished').sort({ updatedAt: -1 }).lean(),
+          require('./models/Job').find({ status: 'active' }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
+          require('./models/Product').find({ isActive: true, slug: { $exists: true, $ne: null, $ne: '' } }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
+          require('./models/CaseStudy').find({ status: 'published', slug: { $exists: true, $ne: null, $ne: '' } }).select('slug updatedAt publishedAt').sort({ updatedAt: -1 }).lean(),
+          require('./models/Course').find({ isActive: true, slug: { $exists: true, $ne: null, $ne: '' } }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
+          require('./models/Event').find({ status: 'published', slug: { $exists: true, $ne: null, $ne: '' } }).select('slug updatedAt publishedAt').sort({ updatedAt: -1 }).lean(),
+          require('./models/Trainer').find({ isActive: true }).select('_id updatedAt').sort({ updatedAt: -1 }).lean()
+        ]);
+      } catch (dbError) {
+        console.warn('⚠️  Database query failed for sitemap, serving static routes only:', dbError.message);
+        // Continue with empty arrays - will only serve static routes
+      }
+    } else {
+      console.warn('⚠️  Database not connected, serving static routes only in sitemap');
+    }
 
     // Build XML sitemap
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -456,12 +515,16 @@ app.get('/sitemap.xml', async (req, res) => {
   </url>`;
     });
 
-    // Add blog posts
-    blogs.forEach(blog => {
+    // Add blog posts (filter out any without slugs as a safety measure)
+    blogs.filter(blog => blog.slug && blog.slug.trim() !== '').forEach(blog => {
+      // Use publishedAt if available, otherwise updatedAt, otherwise currentDate
+      const lastMod = blog.publishedAt 
+        ? new Date(blog.publishedAt).toISOString() 
+        : (blog.updatedAt ? new Date(blog.updatedAt).toISOString() : currentDate);
       sitemap += `
   <url>
     <loc>${baseUrl}/blog/${blog.slug}</loc>
-    <lastmod>${blog.updatedAt.toISOString()}</lastmod>
+    <lastmod>${lastMod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`;
@@ -469,54 +532,65 @@ app.get('/sitemap.xml', async (req, res) => {
 
     // Add job listings
     jobs.forEach(job => {
+      const updatedAt = job.updatedAt ? new Date(job.updatedAt).toISOString() : currentDate;
       sitemap += `
   <url>
     <loc>${baseUrl}/careers/${job.slug}</loc>
-    <lastmod>${job.updatedAt.toISOString()}</lastmod>
+    <lastmod>${updatedAt}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>`;
     });
 
-    // Add products
-    products.forEach(product => {
+    // Add products (filter out any without slugs as a safety measure)
+    products.filter(p => p.slug && p.slug.trim() !== '').forEach(product => {
+      const updatedAt = product.updatedAt ? new Date(product.updatedAt).toISOString() : currentDate;
       sitemap += `
   <url>
     <loc>${baseUrl}/shop/product/${product.slug}</loc>
-    <lastmod>${product.updatedAt.toISOString()}</lastmod>
+    <lastmod>${updatedAt}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`;
     });
 
-    // Add case studies
-    caseStudies.forEach(caseStudy => {
+    // Add case studies (filter out any without slugs as a safety measure)
+    caseStudies.filter(cs => cs.slug && cs.slug.trim() !== '').forEach(caseStudy => {
+      // Use publishedAt if available, otherwise updatedAt, otherwise currentDate
+      const lastMod = caseStudy.publishedAt 
+        ? new Date(caseStudy.publishedAt).toISOString() 
+        : (caseStudy.updatedAt ? new Date(caseStudy.updatedAt).toISOString() : currentDate);
       sitemap += `
   <url>
     <loc>${baseUrl}/case-studies/${caseStudy.slug}</loc>
-    <lastmod>${caseStudy.updatedAt.toISOString()}</lastmod>
+    <lastmod>${lastMod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`;
     });
 
-    // Add courses
-    courses.forEach(course => {
+    // Add courses (filter out any without slugs as a safety measure)
+    courses.filter(c => c.slug && c.slug.trim() !== '').forEach(course => {
+      const updatedAt = course.updatedAt ? new Date(course.updatedAt).toISOString() : currentDate;
       sitemap += `
   <url>
     <loc>${baseUrl}/academy/courses/${course.slug}</loc>
-    <lastmod>${course.updatedAt.toISOString()}</lastmod>
+    <lastmod>${updatedAt}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`;
     });
 
-    // Add events
-    events.forEach(event => {
+    // Add events (filter out any without slugs as a safety measure)
+    events.filter(e => e.slug && e.slug.trim() !== '').forEach(event => {
+      // Use publishedAt if available, otherwise updatedAt, otherwise currentDate
+      const lastMod = event.publishedAt 
+        ? new Date(event.publishedAt).toISOString() 
+        : (event.updatedAt ? new Date(event.updatedAt).toISOString() : currentDate);
       sitemap += `
   <url>
     <loc>${baseUrl}/events/${event.slug}</loc>
-    <lastmod>${event.updatedAt.toISOString()}</lastmod>
+    <lastmod>${lastMod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>`;
@@ -524,10 +598,11 @@ app.get('/sitemap.xml', async (req, res) => {
 
     // Add trainers
     trainers.forEach(trainer => {
+      const updatedAt = trainer.updatedAt ? new Date(trainer.updatedAt).toISOString() : currentDate;
       sitemap += `
   <url>
     <loc>${baseUrl}/academy/trainers/${trainer._id}</loc>
-    <lastmod>${trainer.updatedAt.toISOString()}</lastmod>
+    <lastmod>${updatedAt}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>`;
@@ -655,9 +730,12 @@ app.get('/api/test-ssr-html', async (req, res) => {
 
 // WebSocket test endpoint
 app.get('/api/ws-test', (req, res) => {
+  const socketModule = require('./socket');
+  const io = socketModule.getIO ? socketModule.getIO() : null;
   res.json({ 
     message: 'WebSocket server is available',
-    socketInitialized: !!require('./socket').io
+    socketInitialized: !!io,
+    connectedClients: io ? io.sockets.sockets.size : 0
   });
 });
 

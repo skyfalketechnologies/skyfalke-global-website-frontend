@@ -38,7 +38,7 @@ const contactSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['contact', 'hire_us', 'quote_request', 'partnership'],
+    enum: ['contact', 'hire_us', 'quote_request', 'partnership', 'consultation'],
     default: 'contact'
   },
   service: {
@@ -187,6 +187,7 @@ contactSchema.statics.getStats = async function() {
         closed: { $sum: { $cond: [{ $eq: ['$status', 'closed'] }, 1, 0] } },
         spam: { $sum: { $cond: [{ $eq: ['$status', 'spam'] }, 1, 0] } },
         contact: { $sum: { $cond: [{ $eq: ['$type', 'contact'] }, 1, 0] } },
+        consultation: { $sum: { $cond: [{ $eq: ['$type', 'consultation'] }, 1, 0] } },
         hireUs: { $sum: { $cond: [{ $eq: ['$type', 'hire_us'] }, 1, 0] } },
         quoteRequest: { $sum: { $cond: [{ $eq: ['$type', 'quote_request'] }, 1, 0] } },
         partnership: { $sum: { $cond: [{ $eq: ['$type', 'partnership'] }, 1, 0] } }
@@ -202,6 +203,7 @@ contactSchema.statics.getStats = async function() {
     closed: 0,
     spam: 0,
     contact: 0,
+    consultation: 0,
     hireUs: 0,
     quoteRequest: 0,
     partnership: 0

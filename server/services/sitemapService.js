@@ -86,8 +86,19 @@ class SitemapService {
       console.log('📋 Fetching dynamic content for sitemap...');
 
       // Fetch dynamic content
+      // For blogs: include both status: 'published' OR isPublished: true, and ensure slug exists
       const [blogs, jobs, products, caseStudies, courses, events, trainers] = await Promise.all([
-        Blog.find({ status: 'published' }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
+        Blog.find({
+          $and: [
+            {
+              $or: [
+                { status: 'published' },
+                { isPublished: true }
+              ]
+            },
+            { slug: { $exists: true, $ne: null, $ne: '' } }
+          ]
+        }).select('slug updatedAt publishedAt status isPublished').sort({ updatedAt: -1 }).lean(),
         Job.find({ 
           $and: [
             {
@@ -105,14 +116,35 @@ class SitemapService {
             }
           ]
         }).select('_id slug updatedAt deadline').sort({ updatedAt: -1 }).lean(),
-        Product.find({ isActive: true }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
-        CaseStudy.find({ status: 'published' }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
-        Course.find({ isActive: true }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
-        Event.find({ status: 'published' }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
+        Product.find({ isActive: true, slug: { $exists: true, $ne: null, $ne: '' } }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
+        CaseStudy.find({ status: 'published', slug: { $exists: true, $ne: null, $ne: '' } }).select('slug updatedAt publishedAt').sort({ updatedAt: -1 }).lean(),
+        Course.find({ isActive: true, slug: { $exists: true, $ne: null, $ne: '' } }).select('slug updatedAt').sort({ updatedAt: -1 }).lean(),
+        Event.find({ status: 'published', slug: { $exists: true, $ne: null, $ne: '' } }).select('slug updatedAt publishedAt').sort({ updatedAt: -1 }).lean(),
         Trainer.find({ isActive: true }).select('_id updatedAt').sort({ updatedAt: -1 }).lean()
       ]);
 
       console.log(`✅ Found ${blogs.length} blogs, ${jobs.length} jobs, ${products.length} products, ${caseStudies.length} case studies, ${courses.length} courses, ${events.length} events, ${trainers.length} trainers`);
+      
+      // Debug: Log blog details
+      if (blogs.length > 0) {
+        console.log(`📋 Sample blogs for sitemap:`, blogs.slice(0, 5).map(b => ({ 
+          slug: b.slug, 
+          status: b.status, 
+          isPublished: b.isPublished,
+          hasUpdatedAt: !!b.updatedAt 
+        })));
+      } else {
+        console.log('⚠️  No blogs found - checking query...');
+        // Try to see what blogs exist
+        const allBlogs = await Blog.find({}).countDocuments();
+        const publishedByStatus = await Blog.find({ status: 'published' }).countDocuments();
+        const publishedByFlag = await Blog.find({ isPublished: true }).countDocuments();
+        const withSlugs = await Blog.find({ slug: { $exists: true, $ne: null, $ne: '' } }).countDocuments();
+        console.log(`   Total blogs in DB: ${allBlogs}`);
+        console.log(`   Blogs with status='published': ${publishedByStatus}`);
+        console.log(`   Blogs with isPublished=true: ${publishedByFlag}`);
+        console.log(`   Blogs with slugs: ${withSlugs}`);
+      }
       
       // Debug: Log job details if found
       if (jobs.length > 0) {
@@ -145,12 +177,17 @@ class SitemapService {
   </url>`;
       });
 
-      // Add blog posts
-      blogs.forEach(blog => {
+      // Add blog posts (filter out any without slugs as a safety measure)
+      blogs.filter(blog => blog.slug && blog.slug.trim() !== '').forEach(blog => {
+        // Use publishedAt if available, otherwise updatedAt, otherwise currentDate
+        const lastMod = blog.publishedAt 
+          ? new Date(blog.publishedAt).toISOString() 
+          : (blog.updatedAt ? new Date(blog.updatedAt).toISOString() : currentDate);
+        
         sitemap += `
   <url>
     <loc>${this.baseUrl}/blog/${blog.slug}</loc>
-    <lastmod>${blog.updatedAt ? new Date(blog.updatedAt).toISOString() : currentDate}</lastmod>
+    <lastmod>${lastMod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`;
@@ -174,8 +211,8 @@ class SitemapService {
         console.log('⚠️  No active jobs found for sitemap');
       }
 
-      // Add products
-      products.forEach(product => {
+      // Add products (filter out any without slugs as a safety measure)
+      products.filter(p => p.slug && p.slug.trim() !== '').forEach(product => {
         sitemap += `
   <url>
     <loc>${this.baseUrl}/shop/product/${product.slug}</loc>
@@ -185,19 +222,23 @@ class SitemapService {
   </url>`;
       });
 
-      // Add case studies
-      caseStudies.forEach(caseStudy => {
+      // Add case studies (filter out any without slugs as a safety measure)
+      caseStudies.filter(cs => cs.slug && cs.slug.trim() !== '').forEach(caseStudy => {
+        // Use publishedAt if available, otherwise updatedAt, otherwise currentDate
+        const lastMod = caseStudy.publishedAt 
+          ? new Date(caseStudy.publishedAt).toISOString() 
+          : (caseStudy.updatedAt ? new Date(caseStudy.updatedAt).toISOString() : currentDate);
         sitemap += `
   <url>
     <loc>${this.baseUrl}/case-studies/${caseStudy.slug}</loc>
-    <lastmod>${caseStudy.updatedAt ? new Date(caseStudy.updatedAt).toISOString() : currentDate}</lastmod>
+    <lastmod>${lastMod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`;
       });
 
-      // Add courses
-      courses.forEach(course => {
+      // Add courses (filter out any without slugs as a safety measure)
+      courses.filter(c => c.slug && c.slug.trim() !== '').forEach(course => {
         sitemap += `
   <url>
     <loc>${this.baseUrl}/academy/courses/${course.slug}</loc>
@@ -207,12 +248,16 @@ class SitemapService {
   </url>`;
       });
 
-      // Add events
-      events.forEach(event => {
+      // Add events (filter out any without slugs as a safety measure)
+      events.filter(e => e.slug && e.slug.trim() !== '').forEach(event => {
+        // Use publishedAt if available, otherwise updatedAt, otherwise currentDate
+        const lastMod = event.publishedAt 
+          ? new Date(event.publishedAt).toISOString() 
+          : (event.updatedAt ? new Date(event.updatedAt).toISOString() : currentDate);
         sitemap += `
   <url>
     <loc>${this.baseUrl}/events/${event.slug}</loc>
-    <lastmod>${event.updatedAt ? new Date(event.updatedAt).toISOString() : currentDate}</lastmod>
+    <lastmod>${lastMod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>`;

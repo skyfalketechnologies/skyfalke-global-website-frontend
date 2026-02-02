@@ -252,12 +252,11 @@ router.patch('/admin/:id', adminAuth, dbCheck, async (req, res) => {
     // Notify creator if tender was updated (and updater is not the creator)
     if (tender.createdBy.toString() !== req.user._id.toString()) {
       try {
-        const notification = await Notification.createNotification({
+        await sendNotificationToAdmin(tender.createdBy.toString(), {
           title: 'Tender Updated',
           message: `Tender "${tender.title}" has been updated by ${req.user.name || 'an admin'}`,
           type: 'info',
           category: 'system',
-          recipient: tender.createdBy,
           priority: 'medium',
           actionUrl: `/system/dashboard/tenders/${tender._id}`,
           data: {
@@ -265,16 +264,6 @@ router.patch('/admin/:id', adminAuth, dbCheck, async (req, res) => {
             tenderTitle: tender.title,
             updatedBy: req.user._id
           }
-        });
-
-        sendNotificationToAdmin(tender.createdBy.toString(), {
-          title: notification.title,
-          message: notification.message,
-          type: notification.type,
-          category: notification.category,
-          priority: notification.priority,
-          actionUrl: notification.actionUrl,
-          data: notification.data
         });
       } catch (notifError) {
         console.error('Error sending notification to creator:', notifError);
@@ -284,28 +273,17 @@ router.patch('/admin/:id', adminAuth, dbCheck, async (req, res) => {
     // Notify assignee if assigned
     if (tender.assignee && tender.assignee.toString() !== req.user._id.toString()) {
       try {
-        const notification = await Notification.createNotification({
+        await sendNotificationToAdmin(tender.assignee.toString(), {
           title: 'Tender Assigned',
           message: `You have been assigned to tender "${tender.title}"`,
           type: 'info',
           category: 'system',
-          recipient: tender.assignee,
           priority: 'high',
           actionUrl: `/system/dashboard/tenders/${tender._id}`,
           data: {
             tenderId: tender._id,
             tenderTitle: tender.title
           }
-        });
-
-        sendNotificationToAdmin(tender.assignee.toString(), {
-          title: notification.title,
-          message: notification.message,
-          type: notification.type,
-          category: notification.category,
-          priority: notification.priority,
-          actionUrl: notification.actionUrl,
-          data: notification.data
         });
       } catch (notifError) {
         console.error('Error sending notification to assignee:', notifError);

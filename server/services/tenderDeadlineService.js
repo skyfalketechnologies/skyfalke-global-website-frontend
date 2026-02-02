@@ -1,5 +1,4 @@
 const Tender = require('../models/Tender');
-const Notification = require('../models/Notification');
 const { sendNotificationToAdmin } = require('../socket');
 
 class TenderDeadlineService {
@@ -40,12 +39,12 @@ class TenderDeadlineService {
               const daysText = days === 1 ? '1 day' : `${days} days`;
               const deadlineDate = new Date(tender.deadline).toLocaleDateString();
               
-              const notification = await Notification.createNotification({
+              // Send notification (sendNotificationToAdmin already creates the notification)
+              await sendNotificationToAdmin(tender.assignee._id.toString(), {
                 title: 'Tender Deadline Approaching',
                 message: `Tender "${tender.title}" deadline is in ${daysText} (${deadlineDate})`,
                 type: 'warning',
                 category: 'system',
-                recipient: tender.assignee._id,
                 priority: days <= 1 ? 'urgent' : days <= 3 ? 'high' : 'medium',
                 actionUrl: `/system/dashboard/tenders/${tender._id}`,
                 data: {
@@ -54,17 +53,6 @@ class TenderDeadlineService {
                   deadline: tender.deadline,
                   daysBefore: days
                 }
-              });
-
-              // Send via socket
-              await sendNotificationToAdmin(tender.assignee._id.toString(), {
-                title: notification.title,
-                message: notification.message,
-                type: notification.type,
-                category: notification.category,
-                priority: notification.priority,
-                actionUrl: notification.actionUrl,
-                data: notification.data
               });
 
               // Record that reminder was sent

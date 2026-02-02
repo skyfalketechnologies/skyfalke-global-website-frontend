@@ -30,11 +30,19 @@ router.get('/expenses', superAdminAuth, async (req, res) => {
     }
 
     const expenses = await Expense.find(query)
-      .populate('account', 'name accountNumber')
-      .populate('approvedBy', 'name email')
+      .populate({
+        path: 'account',
+        select: 'name accountNumber',
+        strictPopulate: false
+      })
+      .populate({
+        path: 'approvedBy',
+        select: 'name email',
+        strictPopulate: false
+      })
       .sort({ date: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .limit(parseInt(limit) || 10)
+      .skip((parseInt(page) - 1) * (parseInt(limit) || 10));
 
     const total = await Expense.countDocuments(query);
 
@@ -50,7 +58,11 @@ router.get('/expenses', superAdminAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Get expenses error:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch expenses' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch expenses',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -203,13 +215,21 @@ router.get('/accounts', superAdminAuth, async (req, res) => {
     }
 
     const accounts = await Account.find(query)
-      .populate('createdBy', 'name email')
+      .populate({
+        path: 'createdBy',
+        select: 'name email',
+        strictPopulate: false
+      })
       .sort({ createdAt: -1 });
 
     res.json({ success: true, data: accounts });
   } catch (error) {
     console.error('Get accounts error:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch accounts' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch accounts',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -323,13 +343,29 @@ router.get('/transactions', superAdminAuth, async (req, res) => {
     }
 
     const transactions = await Transaction.find(query)
-      .populate('account', 'name accountNumber')
-      .populate('toAccount', 'name accountNumber')
-      .populate('createdBy', 'name email')
-      .populate('approvedBy', 'name email')
+      .populate({
+        path: 'account',
+        select: 'name accountNumber',
+        strictPopulate: false
+      })
+      .populate({
+        path: 'toAccount',
+        select: 'name accountNumber',
+        strictPopulate: false
+      })
+      .populate({
+        path: 'createdBy',
+        select: 'name email',
+        strictPopulate: false
+      })
+      .populate({
+        path: 'approvedBy',
+        select: 'name email',
+        strictPopulate: false
+      })
       .sort({ date: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .limit(parseInt(limit) || 10)
+      .skip((parseInt(page) - 1) * (parseInt(limit) || 10));
 
     const total = await Transaction.countDocuments(query);
 
@@ -345,7 +381,11 @@ router.get('/transactions', superAdminAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Get transactions error:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch transactions' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch transactions',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -495,6 +535,7 @@ router.get('/transactions/stats', superAdminAuth, async (req, res) => {
       if (endDate) query.date.$lte = new Date(endDate);
     }
 
+    // Get stats by type
     const stats = await Transaction.aggregate([
       { $match: query },
       {
@@ -506,28 +547,41 @@ router.get('/transactions/stats', superAdminAuth, async (req, res) => {
       }
     ]);
 
+    // Get total transactions count
     const totalTransactions = await Transaction.countDocuments(query);
-    const totalIncome = await Transaction.aggregate([
-      { $match: { ...query, type: 'income' } },
+    
+    // Get total income
+    const incomeQuery = { ...query, type: 'income' };
+    const totalIncomeResult = await Transaction.aggregate([
+      { $match: incomeQuery },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
-    const totalExpenses = await Transaction.aggregate([
-      { $match: { ...query, type: 'expense' } },
+    const totalIncome = totalIncomeResult[0]?.total || 0;
+    
+    // Get total expenses
+    const expenseQuery = { ...query, type: 'expense' };
+    const totalExpensesResult = await Transaction.aggregate([
+      { $match: expenseQuery },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
+    const totalExpenses = totalExpensesResult[0]?.total || 0;
 
     res.json({
       success: true,
       data: {
         total: totalTransactions,
-        totalIncome: totalIncome[0]?.total || 0,
-        totalExpenses: totalExpenses[0]?.total || 0,
+        totalIncome: totalIncome,
+        totalExpenses: totalExpenses,
         byType: stats
       }
     });
   } catch (error) {
     console.error('Transaction stats error:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch stats' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch stats',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 

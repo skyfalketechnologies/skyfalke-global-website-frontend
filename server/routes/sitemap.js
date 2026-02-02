@@ -8,19 +8,40 @@ const path = require('path');
 // Generate sitemap XML (API route)
 router.get('/sitemap.xml', async (req, res) => {
   try {
+    // Check if client wants to bypass cache
+    const noCache = req.query.t || req.headers['cache-control'] === 'no-cache';
+    
     // Try to read from file first (faster)
     const sitemapPath = path.join(__dirname, '../public/sitemap.xml');
     if (fs.existsSync(sitemapPath)) {
+      // Read file fresh (not from any internal cache)
       const sitemap = await fs.promises.readFile(sitemapPath, 'utf8');
       res.header('Content-Type', 'application/xml');
-      res.header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      
+      // Set cache headers based on request
+      if (noCache) {
+        res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.header('Pragma', 'no-cache');
+        res.header('Expires', '0');
+      } else {
+        res.header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      }
+      
+      // Set last-modified header based on file stats
+      try {
+        const stats = await fs.promises.stat(sitemapPath);
+        res.header('Last-Modified', stats.mtime.toUTCString());
+      } catch (statError) {
+        // Ignore stat errors
+      }
+      
       return res.send(sitemap);
     }
 
     // If file doesn't exist, generate on-the-fly
     const { xml } = await sitemapService.generateSitemapXML();
     res.header('Content-Type', 'application/xml');
-    res.header('Cache-Control', 'public, max-age=3600');
+    res.header('Cache-Control', noCache ? 'no-cache, no-store, must-revalidate' : 'public, max-age=3600');
     res.send(xml);
   } catch (error) {
     console.error('Error generating sitemap:', error);
