@@ -36,12 +36,23 @@ const nextConfig = {
   },
   // Output configuration
   output: 'standalone',
-  // Webpack configuration for react-quill compatibility
+  // Webpack configuration for react-quill and TipTap compatibility
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Ensure react-dom has findDOMNode on default export for react-quill
       config.resolve.alias = {
         ...config.resolve.alias,
+      };
+      
+      // Ensure TipTap packages are properly handled
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+      };
+      
+      // Optimize TipTap bundle
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'deterministic',
       };
     }
     return config;

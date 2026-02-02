@@ -8,7 +8,7 @@ import Underline from '@tiptap/extension-underline';
 import Strike from '@tiptap/extension-strike';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   FaBold,
   FaItalic,
@@ -26,6 +26,24 @@ import {
   FaHeading
 } from 'react-icons/fa';
 
+// Wrapper component to safely render EditorContent
+const EditorContentWrapper = ({ editor }) => {
+  if (!editor) {
+    return null;
+  }
+  
+  try {
+    return <EditorContent editor={editor} />;
+  } catch (error) {
+    console.error('Error rendering EditorContent:', error);
+    return (
+      <div className="p-4 min-h-[200px] bg-gray-50 dark:bg-gray-800">
+        <div className="text-red-600">Error loading editor</div>
+      </div>
+    );
+  }
+};
+
 const RichTextEditor = ({ 
   value, 
   onChange, 
@@ -35,12 +53,14 @@ const RichTextEditor = ({
 }) => {
   // Ensure we're on the client side
   const [isMounted, setIsMounted] = useState(false);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   const editor = useEditor({
+    editable: true,
     extensions: [
       StarterKit.configure({
         heading: {
@@ -91,25 +111,15 @@ const RichTextEditor = ({
 
   useEffect(() => {
     if (editor && isMounted) {
-      // Small delay to ensure editor is fully initialized
-      const timer = setTimeout(() => {
-        try {
-          // Test if editor is accessible
-          if (editor.view && editor.view.dom) {
-            setIsEditorReady(true);
-          }
-        } catch (error) {
-          console.error('Editor not ready:', error);
-          setIsEditorReady(false);
-        }
-      }, 0);
-      return () => clearTimeout(timer);
+      // Set ready immediately if editor exists - TipTap will handle initialization
+      setIsEditorReady(true);
     } else {
       setIsEditorReady(false);
     }
   }, [editor, isMounted]);
 
-  if (!isMounted || !editor || !isEditorReady) {
+  // Show loading only if editor doesn't exist or we're not mounted yet
+  if (!isMounted || !editor) {
     return (
       <div 
         className="border border-gray-300 dark:border-gray-600 rounded-md p-4 min-h-[200px] bg-gray-50 dark:bg-gray-800 animate-pulse"
@@ -299,9 +309,9 @@ const RichTextEditor = ({
   return (
     <div className="border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden" style={style}>
       <MenuBar />
-      <div className="prose-editor">
-        {editor && isEditorReady && isMounted ? (
-          <EditorContent editor={editor} />
+      <div className="prose-editor" ref={containerRef}>
+        {isEditorReady ? (
+          <EditorContentWrapper editor={editor} />
         ) : (
           <div className="p-4 min-h-[200px] bg-gray-50 dark:bg-gray-800">
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
