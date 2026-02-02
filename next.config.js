@@ -25,6 +25,11 @@ const nextConfig = {
         source: '/api/:path*',
         destination: `${apiUrl}/api/:path*`,
       },
+      // Rewrite sitemap.xml to sitemap route handler
+      {
+        source: '/sitemap.xml',
+        destination: '/sitemap',
+      },
     ];
   },
   // Environment variables
