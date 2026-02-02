@@ -20,13 +20,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     
-    defaults:
-      run:
-        working-directory: ./client
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Verify directory structure
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Listing root directory:"
+          ls -la
+          echo "Checking client directory:"
+          ls -la client/ || echo "client directory not found"
+          echo "Checking for package.json:"
+          cat client/package.json | grep -A 5 '"scripts"' || echo "package.json not found in client/"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,12 +42,14 @@ jobs:
           cache-dependency-path: client/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./client
-        run: npm ci
+        run: |
+          cd client
+          npm ci
 
       - name: Build project
-        working-directory: ./client
-        run: npm run build
+        run: |
+          cd client
+          npm run build
         env:
           NODE_ENV: production
           NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL || 'https://apis.mwangikinyanjuiadvocates.com' }}
