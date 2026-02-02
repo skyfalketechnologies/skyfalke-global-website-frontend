@@ -47,7 +47,13 @@ jobs:
             cd client
           fi
           pwd
-          ls -la package.json
+          echo "Current directory contents:"
+          ls -la
+          echo "Checking package.json exists:"
+          test -f package.json && echo "✓ package.json found" || echo "✗ package.json NOT found"
+          echo "Package.json scripts section:"
+          cat package.json | grep -A 10 '"scripts"' || echo "No scripts section found"
+          echo "Installing dependencies:"
           npm ci
 
       - name: Build project
@@ -56,6 +62,13 @@ jobs:
             cd client
           fi
           pwd
+          echo "Verifying we're in the right directory:"
+          ls -la | grep -E "(package.json|next.config)"
+          echo "Checking npm can read package.json:"
+          npm pkg get scripts || echo "Failed to read scripts"
+          echo "Available scripts:"
+          npm run --silent 2>&1 || true
+          echo "Running build command:"
           npm run build
         env:
           NODE_ENV: production
