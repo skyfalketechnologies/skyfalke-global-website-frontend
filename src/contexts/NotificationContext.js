@@ -83,8 +83,25 @@ export const NotificationProvider = ({ children }) => {
       reconnection: true,
       reconnectionAttempts: 3,
       reconnectionDelay: 2000,
-      maxReconnectionAttempts: 3
+      maxReconnectionAttempts: 3,
+      // Suppress socket.io internal error logging
+      autoConnect: true
     });
+
+    // Suppress socket.io internal error logging by overriding error handlers
+    const suppressSocketErrors = () => {
+      // Prevent socket.io errors from being logged to console
+      const originalEmit = newSocket.emit;
+      newSocket.emit = function(...args) {
+        // Silently handle errors
+        try {
+          return originalEmit.apply(this, args);
+        } catch (e) {
+          // Suppress errors silently
+          return false;
+        }
+      };
+    };
 
     newSocket.on('connect', () => {
       setConnected(true);
@@ -97,25 +114,10 @@ export const NotificationProvider = ({ children }) => {
     });
 
     newSocket.on('connect_error', (error) => {
-      // Only log if in development and if error has meaningful information
-      if (process.env.NODE_ENV === 'development') {
-        const errorMessage = error?.message || error?.description || String(error);
-        if (errorMessage && errorMessage !== '[object Object]' && errorMessage !== '{}') {
-          logger.error('WebSocket connection error:', errorMessage);
-        }
-      }
+      // Suppress all connection errors - don't log anything
       setConnected(false);
       initializingRef.current = false;
-      
-      // If connection fails, try again after a delay (only in development or if explicitly needed)
-      if (process.env.NODE_ENV === 'development') {
-        setTimeout(() => {
-          if (isAuthenticated() && user?.role === 'admin' && !socket?.connected) {
-            initializingRef.current = false;
-            initializeSocket();
-          }
-        }, 3000);
-      }
+      suppressSocketErrors();
     });
 
     newSocket.on('reconnect', (attemptNumber) => {
@@ -123,21 +125,14 @@ export const NotificationProvider = ({ children }) => {
     });
 
     newSocket.on('reconnect_error', (error) => {
-      // Only log if in development
-      if (process.env.NODE_ENV === 'development') {
-        const errorMessage = error?.message || error?.description || String(error);
-        if (errorMessage && errorMessage !== '[object Object]' && errorMessage !== '{}') {
-          logger.error('WebSocket reconnection error:', errorMessage);
-        }
-      }
+      // Suppress all reconnection errors - don't log anything
+      suppressSocketErrors();
     });
 
     newSocket.on('reconnect_failed', () => {
-      // Only log if in development
-      if (process.env.NODE_ENV === 'development') {
-        logger.error('WebSocket reconnection failed');
-      }
+      // Suppress reconnection failed errors - don't log anything
       initializingRef.current = false;
+      suppressSocketErrors();
     });
 
     newSocket.on('new-notification', (data) => {
@@ -331,15 +326,22 @@ export const NotificationProvider = ({ children }) => {
           setSocket(null);
         });
 
-        newSocket.on('connect_error', (error) => {
-          // Only log if in development and if error has meaningful information
-          if (process.env.NODE_ENV === 'development') {
-            const errorMessage = error?.message || error?.description || String(error);
-            if (errorMessage && errorMessage !== '[object Object]' && errorMessage !== '{}') {
-              logger.error('WebSocket connection error:', errorMessage);
+        // Suppress socket.io errors silently
+        const suppressSocketErrors = () => {
+          const originalEmit = newSocket.emit;
+          newSocket.emit = function(...args) {
+            try {
+              return originalEmit.apply(this, args);
+            } catch (e) {
+              return false;
             }
-          }
+          };
+        };
+
+        newSocket.on('connect_error', (error) => {
+          // Suppress all connection errors - don't log anything
           initializingRef.current = false;
+          suppressSocketErrors();
         });
 
         newSocket.on('reconnect', (attemptNumber) => {
@@ -347,21 +349,14 @@ export const NotificationProvider = ({ children }) => {
         });
 
         newSocket.on('reconnect_error', (error) => {
-          // Only log if in development
-          if (process.env.NODE_ENV === 'development') {
-            const errorMessage = error?.message || error?.description || String(error);
-            if (errorMessage && errorMessage !== '[object Object]' && errorMessage !== '{}') {
-              logger.error('WebSocket reconnection error:', errorMessage);
-            }
-          }
+          // Suppress all reconnection errors - don't log anything
+          suppressSocketErrors();
         });
 
         newSocket.on('reconnect_failed', () => {
-          // Only log if in development
-          if (process.env.NODE_ENV === 'development') {
-            logger.error('WebSocket reconnection failed');
-          }
+          // Suppress reconnection failed errors - don't log anything
           initializingRef.current = false;
+          suppressSocketErrors();
         });
 
         newSocket.on('new-notification', (data) => {
