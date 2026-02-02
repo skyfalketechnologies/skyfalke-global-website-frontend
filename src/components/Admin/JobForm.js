@@ -113,7 +113,7 @@ const JobForm = ({ id: propId }) => {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent],
+          ...(prev[parent] || {}),
           [child]: type === 'checkbox' ? checked : value
         }
       }));
@@ -193,6 +193,12 @@ const JobForm = ({ id: propId }) => {
     try {
       const submitData = {
         ...formData,
+        salary: formData.salary || {
+          min: '',
+          max: '',
+          currency: 'USD',
+          period: 'yearly'
+        },
         requirements: formData.requirements.filter(req => req.trim()),
         benefits: formData.benefits.filter(benefit => benefit.trim()),
         responsibilities: formData.responsibilities.filter(resp => resp.trim()),
@@ -428,7 +434,7 @@ const JobForm = ({ id: propId }) => {
                 <input
                   type="number"
                   name="salary.min"
-                  value={formData.salary.min ?? ''}
+                  value={formData.salary?.min ?? ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="e.g., 50000"
@@ -442,7 +448,7 @@ const JobForm = ({ id: propId }) => {
                 <input
                   type="number"
                   name="salary.max"
-                  value={formData.salary.max ?? ''}
+                  value={formData.salary?.max ?? ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="e.g., 80000"
@@ -455,7 +461,7 @@ const JobForm = ({ id: propId }) => {
                 </label>
                 <select
                   name="salary.currency"
-                  value={formData.salary.currency || 'USD'}
+                  value={formData.salary?.currency || 'USD'}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
@@ -471,7 +477,7 @@ const JobForm = ({ id: propId }) => {
                 </label>
                 <select
                   name="salary.period"
-                  value={formData.salary.period || 'yearly'}
+                  value={formData.salary?.period || 'yearly'}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
