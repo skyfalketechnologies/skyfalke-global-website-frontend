@@ -30,9 +30,33 @@ jobs:
           echo "Listing root directory:"
           ls -la
           echo "Checking for package.json in root:"
-          test -f package.json && echo "package.json found in root" && cat package.json | grep -A 5 '"scripts"' || echo "package.json not found in root"
+          if [ -f package.json ]; then
+            echo "package.json found in root (size: $(wc -c < package.json) bytes)"
+            echo "First 20 lines:"
+            head -20 package.json
+          else
+            echo "package.json not found in root"
+          fi
           echo "Checking client directory:"
-          test -d client && (echo "client directory exists" && ls -la client/ && test -f client/package.json && echo "package.json found in client/" && cat client/package.json | grep -A 5 '"scripts"') || echo "client directory not found"
+          if [ -d client ]; then
+            echo "client directory exists"
+            ls -la client/ | head -20
+            if [ -f client/package.json ]; then
+              echo "package.json found in client/ (size: $(wc -c < client/package.json) bytes)"
+              echo "First 20 lines:"
+              head -20 client/package.json
+            else
+              echo "package.json not found in client/"
+            fi
+            if [ -d client/client ]; then
+              echo "WARNING: nested client/client directory found!"
+              if [ -f client/client/package.json ]; then
+                echo "package.json in client/client/ (size: $(wc -c < client/client/package.json) bytes)"
+              fi
+            fi
+          else
+            echo "client directory not found"
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -51,6 +75,10 @@ jobs:
           ls -la
           echo "Checking package.json exists:"
           test -f package.json && echo "✓ package.json found" || echo "✗ package.json NOT found"
+          echo "Package.json file size:"
+          wc -c package.json
+          echo "Full package.json contents:"
+          cat package.json
           echo "Package.json scripts section:"
           cat package.json | grep -A 10 '"scripts"' || echo "No scripts section found"
           echo "Installing dependencies:"
@@ -64,6 +92,12 @@ jobs:
           pwd
           echo "Verifying we're in the right directory:"
           ls -la | grep -E "(package.json|next.config)"
+          echo "Checking package.json file:"
+          cat package.json
+          echo "File size:"
+          wc -c package.json
+          echo "Checking if package.json is valid JSON:"
+          node -e "const pkg = require('./package.json'); console.log('Scripts:', JSON.stringify(pkg.scripts, null, 2));" || echo "Failed to parse package.json"
           echo "Checking npm can read package.json:"
           npm pkg get scripts || echo "Failed to read scripts"
           echo "Available scripts:"
