@@ -29,10 +29,10 @@ jobs:
           echo "Current directory: $(pwd)"
           echo "Listing root directory:"
           ls -la
+          echo "Checking for package.json in root:"
+          test -f package.json && echo "package.json found in root" && cat package.json | grep -A 5 '"scripts"' || echo "package.json not found in root"
           echo "Checking client directory:"
-          ls -la client/ || echo "client directory not found"
-          echo "Checking for package.json:"
-          cat client/package.json | grep -A 5 '"scripts"' || echo "package.json not found in client/"
+          test -d client && (echo "client directory exists" && ls -la client/ && test -f client/package.json && echo "package.json found in client/" && cat client/package.json | grep -A 5 '"scripts"') || echo "client directory not found"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,12 +43,19 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd client
+          if [ -d "client" ]; then
+            cd client
+          fi
+          pwd
+          ls -la package.json
           npm ci
 
       - name: Build project
         run: |
-          cd client
+          if [ -d "client" ]; then
+            cd client
+          fi
+          pwd
           npm run build
         env:
           NODE_ENV: production
