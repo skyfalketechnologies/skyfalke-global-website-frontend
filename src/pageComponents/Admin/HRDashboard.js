@@ -46,65 +46,68 @@ const HRDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [employeesRes, payrollsRes, attendanceRes, statsRes] = await Promise.all([
+      // Use Promise.allSettled to handle partial failures gracefully
+      const [employeesResult, payrollsResult, attendanceResult, statsResult] = await Promise.allSettled([
         adminApiGet('/api/hr/employees?limit=5'),
         adminApiGet('/api/hr/payrolls?limit=5&status=pending'),
         adminApiGet('/api/hr/attendance/stats'),
         adminApiGet('/api/hr/employees/stats')
       ]);
 
-      if (employeesRes.success && employeesRes.data) {
+      // Handle employees response
+      if (employeesResult.status === 'fulfilled' && employeesResult.value.success && employeesResult.value.data) {
+        const employeesRes = employeesResult.value;
         setRecentEmployees(employeesRes.data.data || []);
         setStats(prev => ({
           ...prev,
           totalEmployees: employeesRes.data.pagination?.total || 0
         }));
+      } else if (employeesResult.status === 'rejected') {
+        console.warn('Failed to fetch employees:', employeesResult.reason);
       }
 
-      if (statsRes.success && statsRes.data) {
+      // Handle stats response
+      if (statsResult.status === 'fulfilled' && statsResult.value.success && statsResult.value.data) {
+        const statsRes = statsResult.value;
         setStats(prev => ({
           ...prev,
           activeEmployees: statsRes.data.active || 0
         }));
+      } else if (statsResult.status === 'rejected') {
+        console.warn('Failed to fetch employee stats:', statsResult.reason);
       }
 
-      if (payrollsRes.success && payrollsRes.data) {
+      // Handle payrolls response
+      if (payrollsResult.status === 'fulfilled' && payrollsResult.value.success && payrollsResult.value.data) {
+        const payrollsRes = payrollsResult.value;
         const totalNet = payrollsRes.data.data?.reduce((sum, p) => sum + (p.netSalary || 0), 0) || 0;
         setStats(prev => ({
           ...prev,
           pendingPayrolls: payrollsRes.data.pagination?.total || 0,
           totalPayroll: totalNet
         }));
+      } else if (payrollsResult.status === 'rejected') {
+        console.warn('Failed to fetch payrolls:', payrollsResult.reason);
       }
 
-      if (attendanceRes.success && attendanceRes.data) {
+      // Handle attendance response
+      if (attendanceResult.status === 'fulfilled' && attendanceResult.value.success && attendanceResult.value.data) {
+        const attendanceRes = attendanceResult.value;
         const byStatus = attendanceRes.data.byStatus || [];
         setAttendanceStats({
           present: byStatus.find(s => s._id === 'present')?.count || 0,
           absent: byStatus.find(s => s._id === 'absent')?.count || 0,
           late: byStatus.find(s => s._id === 'late')?.count || 0
         });
+      } else if (attendanceResult.status === 'rejected') {
+        console.warn('Failed to fetch attendance stats:', attendanceResult.reason);
       }
     } catch (error) {
-      // Network errors are expected when API server is not running
-      // They're already logged by the API interceptor, so we don't need to log again
+      // This catch block handles unexpected errors
       const isNetworkError = error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response;
       if (!isNetworkError) {
-        console.error('Error fetching HR dashboard data:', error);
+        console.error('Unexpected error fetching HR dashboard data:', error);
       }
-      // Set default values on error to prevent UI from breaking
-      setStats({
-        totalEmployees: 0,
-        activeEmployees: 0,
-        totalPayroll: 0,
-        pendingPayrolls: 0
-      });
-      setAttendanceStats({
-        present: 0,
-        absent: 0,
-        late: 0
-      });
-      setRecentEmployees([]);
     } finally {
       setLoading(false);
     }

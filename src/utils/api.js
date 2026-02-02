@@ -153,6 +153,17 @@ api.interceptors.response.use(
       // You could implement retry logic here with exponential backoff
     }
     
+    // Handle 500 Internal Server Error
+    if (error.response?.status >= 500 && error.response?.status < 600) {
+      // Server errors are handled gracefully by components
+      // Log as warning in development, but don't spam console
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Server error (${error.response.status}) on ${error.config?.method?.toUpperCase()} ${error.config?.url}:`, 
+          error.response?.data?.message || 'Internal server error');
+      }
+      // Don't throw - let the calling code handle it gracefully
+    }
+    
     // Handle 404 Not Found
     if (error.response?.status === 404) {
       logger.warn('API endpoint not found:', error.config?.url);

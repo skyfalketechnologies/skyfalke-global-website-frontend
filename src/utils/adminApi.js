@@ -63,17 +63,32 @@ const retryWithBackoff = async (fn, retries = RETRY_CONFIG.maxRetries) => {
       throw error;
     }
     
+    // Don't retry on certain error types
+    const isNetworkError = error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response;
+    const isServerError = error.response?.status >= 500 && error.response?.status < 600;
+    const isClientError = error.response?.status >= 400 && error.response?.status < 500;
+    
+    // Don't retry network errors or client errors (4xx) - they won't succeed on retry
+    if (isNetworkError || isClientError) {
+      throw error;
+    }
+    
+    // Only retry server errors (5xx) - they might be transient
+    if (isServerError) {
+      const delay = Math.min(
+        RETRY_CONFIG.baseDelay * Math.pow(2, RETRY_CONFIG.maxRetries - retries),
+        RETRY_CONFIG.maxDelay
+      );
+      console.warn(`Server error (${error.response?.status}), retrying in ${delay}ms... (${retries} retries left)`);
+      await sleep(delay);
+      return retryWithBackoff(fn, retries - 1);
+    }
+    
+    // For other errors, retry with backoff
     const delay = Math.min(
       RETRY_CONFIG.baseDelay * Math.pow(2, RETRY_CONFIG.maxRetries - retries),
       RETRY_CONFIG.maxDelay
     );
-    
-    // Don't retry network errors - API server is likely not running
-    const isNetworkError = error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response;
-    if (isNetworkError) {
-      throw error; // Don't retry network errors
-    }
-    
     console.warn(`API call failed, retrying in ${delay}ms... (${retries} retries left)`);
     await sleep(delay);
     return retryWithBackoff(fn, retries - 1);
@@ -99,7 +114,17 @@ const adminApiCall = async (apiFunction, endpoint, data = null, config = {}) => 
     // Don't log network errors as errors - they're already logged by the interceptor
     // Network errors are expected when API server is not running
     const isNetworkError = error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response;
-    if (!isNetworkError) {
+    const isServerError = error.response?.status >= 500 && error.response?.status < 600;
+    
+    // Use console.warn for server errors since they're being handled gracefully
+    // Only use console.error for unexpected errors
+    if (isNetworkError) {
+      // Network errors are already handled by the interceptor
+    } else if (isServerError) {
+      // Server errors (500-599) are handled gracefully, log as warning
+      console.warn(`Server error on ${endpoint} (${error.response?.status}):`, error.response?.data?.message || error.message);
+    } else {
+      // Other errors (4xx, etc.) - log as error
       console.error(`Admin API Error (${endpoint}):`, error);
     }
     
@@ -188,13 +213,31 @@ export const fetchApplicationsData = async (params = {}) => {
 };
 
 export const fetchJobsData = async (params = {}) => {
-  const queryParams = new URLSearchParams({
-    page: 1,
-    limit: 10,
-    ...params
-  });
+  // Build query string properly, handling all param types
+  const queryParams = new URLSearchParams();
+  
+  // Set defaults
+  queryParams.set('page', params.page || 1);
+  queryParams.set('limit', params.limit || 10);
+  
+  // Add optional params
+  if (params.search) {
+    queryParams.set('search', params.search);
+  }
+  if (params.category) {
+    queryParams.set('category', params.category);
+  }
+  if (params.isActive !== undefined) {
+    queryParams.set('isActive', params.isActive);
+  }
+  if (params.sortBy) {
+    queryParams.set('sortBy', params.sortBy);
+  }
+  if (params.sortOrder) {
+    queryParams.set('sortOrder', params.sortOrder);
+  }
 
-  return await adminApiGet(`/api/jobs?${queryParams}`);
+  return await adminApiGet(`/api/jobs?${queryParams.toString()}`);
 };
 
 export const fetchJobsStats = async () => {

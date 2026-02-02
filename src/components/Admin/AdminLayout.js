@@ -52,7 +52,7 @@ import NotificationDropdown from './NotificationDropdown';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout, isAuthenticated, isSuperAdmin } = useAuth();
+  const { user, logout, isAuthenticated, isSuperAdmin, loading } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
@@ -132,12 +132,21 @@ const AdminLayout = ({ children }) => {
     });
   }, [pathname]);
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated (only after loading is complete)
   useEffect(() => {
-    if (!isAuthenticated()) {
+    if (!loading && !isAuthenticated()) {
       router.push('/system/portal/access');
     }
-  }, [isAuthenticated, router]);
+  }, [loading, isAuthenticated, router]);
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated()) {
     return null; // Will redirect via useEffect
