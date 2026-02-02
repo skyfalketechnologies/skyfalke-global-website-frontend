@@ -24,84 +24,58 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify directory structure
+      - name: Determine working directory
+        id: set-dir
         run: |
           echo "Current directory: $(pwd)"
-          echo "Listing root directory:"
-          ls -la
-          echo "Checking for package.json in root:"
-          if [ -f package.json ]; then
-            echo "package.json found in root (size: $(wc -c < package.json) bytes)"
-            echo "First 20 lines:"
-            head -20 package.json
+          echo "Checking directory structure:"
+          ls -la | head -10
+          if [ -f "package.json" ] && [ -f "next.config.js" ]; then
+            echo "Already in client directory (has package.json and next.config.js)"
+            echo "dir=." >> $GITHUB_OUTPUT
+          elif [ -d "client" ] && [ -f "client/package.json" ] && [ -f "client/next.config.js" ]; then
+            echo "Need to cd into client directory"
+            echo "dir=client" >> $GITHUB_OUTPUT
           else
-            echo "package.json not found in root"
-          fi
-          echo "Checking client directory:"
-          if [ -d client ]; then
-            echo "client directory exists"
-            ls -la client/ | head -20
-            if [ -f client/package.json ]; then
-              echo "package.json found in client/ (size: $(wc -c < client/package.json) bytes)"
-              echo "First 20 lines:"
-              head -20 client/package.json
-            else
-              echo "package.json not found in client/"
+            echo "ERROR: Cannot find client directory with package.json and next.config.js"
+            echo "Root contents:"
+            ls -la
+            if [ -d "client" ]; then
+              echo "Client directory contents:"
+              ls -la client/ | head -20
             fi
-            if [ -d client/client ]; then
-              echo "WARNING: nested client/client directory found!"
-              if [ -f client/client/package.json ]; then
-                echo "package.json in client/client/ (size: $(wc -c < client/client/package.json) bytes)"
-              fi
-            fi
-          else
-            echo "client directory not found"
+            exit 1
           fi
+          echo "Working directory will be: ${{ steps.set-dir.outputs.dir }}"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: client/package-lock.json
+          cache-dependency-path: ${{ (steps.set-dir.outputs.dir == 'client' && 'client/package-lock.json') || 'package-lock.json' }}
 
       - name: Install dependencies
         run: |
-          if [ -d "client" ]; then
-            cd client
-          fi
+          cd ${{ steps.set-dir.outputs.dir }}
           pwd
           echo "Current directory contents:"
-          ls -la
-          echo "Checking package.json exists:"
-          test -f package.json && echo "✓ package.json found" || echo "✗ package.json NOT found"
-          echo "Package.json file size:"
-          wc -c package.json
-          echo "Full package.json contents:"
-          cat package.json
-          echo "Package.json scripts section:"
-          cat package.json | grep -A 10 '"scripts"' || echo "No scripts section found"
+          ls -la | head -20
+          echo "Checking package.json:"
+          test -f package.json && echo "✓ package.json found ($(wc -c < package.json) bytes)" || echo "✗ package.json NOT found"
+          echo "Checking for scripts in package.json:"
+          grep -q '"build"' package.json && echo "✓ Build script found" || echo "✗ Build script NOT found"
           echo "Installing dependencies:"
           npm ci
 
       - name: Build project
         run: |
-          if [ -d "client" ]; then
-            cd client
-          fi
+          cd ${{ steps.set-dir.outputs.dir }}
           pwd
           echo "Verifying we're in the right directory:"
           ls -la | grep -E "(package.json|next.config)"
-          echo "Checking package.json file:"
-          cat package.json
-          echo "File size:"
-          wc -c package.json
-          echo "Checking if package.json is valid JSON:"
-          node -e "const pkg = require('./package.json'); console.log('Scripts:', JSON.stringify(pkg.scripts, null, 2));" || echo "Failed to parse package.json"
-          echo "Checking npm can read package.json:"
-          npm pkg get scripts || echo "Failed to read scripts"
-          echo "Available scripts:"
-          npm run --silent 2>&1 || true
+          echo "Checking package.json has build script:"
+          grep '"build"' package.json || echo "ERROR: No build script found!"
           echo "Running build command:"
           npm run build
         env:
@@ -115,7 +89,7 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
-          working-directory: ./client
+          working-directory: ${{ steps.set-dir.outputs.dir }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
