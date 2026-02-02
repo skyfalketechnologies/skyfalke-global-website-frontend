@@ -51,7 +51,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
           cache-dependency-path: ${{ (steps.set-dir.outputs.dir == 'client' && 'client/package-lock.json') || 'package-lock.json' }}
 
@@ -65,8 +65,16 @@ jobs:
           test -f package.json && echo "✓ package.json found ($(wc -c < package.json) bytes)" || echo "✗ package.json NOT found"
           echo "Checking for scripts in package.json:"
           grep -q '"build"' package.json && echo "✓ Build script found" || echo "✗ Build script NOT found"
+          echo "Node version:"
+          node --version
           echo "Installing dependencies:"
-          npm ci
+          echo "Attempting npm ci..."
+          if npm ci; then
+            echo "✓ npm ci succeeded"
+          else
+            echo "npm ci failed, trying npm install..."
+            npm install
+          fi
 
       - name: Build project
         run: |
