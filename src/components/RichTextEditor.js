@@ -1,6 +1,6 @@
 'use client';
 
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
@@ -9,6 +9,21 @@ import Strike from '@tiptap/extension-strike';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { useEffect, useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import EditorContent to avoid bundling issues with refs
+const EditorContent = dynamic(
+  () => import('@tiptap/react').then((mod) => mod.EditorContent),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="p-4 min-h-[200px] bg-gray-50 dark:bg-gray-800">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+      </div>
+    )
+  }
+);
 import {
   FaBold,
   FaItalic,

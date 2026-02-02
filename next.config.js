@@ -53,12 +53,25 @@ const nextConfig = {
     '@tiptap/extension-text-style',
   ],
   
-  // Webpack configuration for react-quill compatibility (minimal changes)
-  webpack: (config, { isServer }) => {
+  // Webpack configuration for react-quill and TipTap compatibility
+  webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
       // Ensure react-dom has findDOMNode on default export for react-quill
       config.resolve.alias = {
         ...config.resolve.alias,
+      };
+      
+      // Fix for TipTap ref issues - ensure proper module resolution
+      config.resolve.extensionAlias = {
+        '.js': ['.js', '.ts', '.tsx'],
+        '.jsx': ['.jsx', '.tsx'],
+      };
+      
+      // Optimize TipTap bundle handling
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'deterministic',
+        usedExports: true,
       };
     }
     return config;
