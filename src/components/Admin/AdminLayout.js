@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -53,8 +54,9 @@ const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout, isAuthenticated, isSuperAdmin } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const pathname = usePathname();
-  const router = useRouter();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const pathname = location.pathname;
 
   // Initialize expanded groups based on active routes
   const getInitialExpandedGroups = () => {
@@ -134,9 +136,9 @@ const AdminLayout = ({ children }) => {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated()) {
-      router.push('/system/portal/access');
+      navigate('/system/portal/access');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, navigate]);
 
   if (!isAuthenticated()) {
     return null; // Will redirect via useEffect
@@ -267,7 +269,18 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-100 dark:bg-gray-900">
+    <>
+      <Helmet>
+        <title>Admin Dashboard | Skyfalke</title>
+        {/* Set favicon for admin pages */}
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
+        <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/favicon-96x96.png" sizes="96x96" type="image/png" />
+        <link rel="apple-touch-icon" href="/favicon-192x192.png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/favicon-512x512.png" sizes="512x512" />
+      </Helmet>
+      <div className="h-screen flex overflow-hidden bg-gray-100 dark:bg-gray-900">
       {/* Mobile sidebar overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -386,6 +399,7 @@ const AdminLayout = ({ children }) => {
         </main>
       </div>
     </div>
+    </>
   );
 };
 
@@ -484,7 +498,7 @@ const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, o
                         return (
                           <Link
                             key={item.name}
-                            href={item.href}
+                            to={item.href}
                             className={`${
                               item.current
                                 ? 'bg-primary-100 dark:bg-primary-900 border-r-2 border-primary-600 text-primary-700 dark:text-primary-300'
@@ -524,13 +538,13 @@ const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, o
         </div>
         
         <div className="mt-3 space-y-1">
-          <Link href="/system/dashboard/profile"
+          <Link to="/system/dashboard/profile"
             className="flex items-center px-2 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200"
           >
             <FaUser className="mr-3 h-4 w-4" />
             Profile
           </Link>
-          <Link href="/system/dashboard/settings"
+          <Link to="/system/dashboard/settings"
             className="flex items-center px-2 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200"
           >
             <FaCog className="mr-3 h-4 w-4" />
