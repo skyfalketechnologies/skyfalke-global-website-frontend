@@ -35,38 +35,34 @@ const nextConfig = {
         : 'http://localhost:5000'),
   },
   // Output configuration
+  // Note: Vercel handles output automatically, but standalone is fine for both
   output: 'standalone',
-  // Webpack configuration for react-quill and TipTap compatibility
+  
+  // Transpile TipTap packages - this is the recommended way for Next.js 13+
+  // This ensures TipTap is properly transpiled during build, fixing _ref errors
+  transpilePackages: [
+    '@tiptap/react',
+    '@tiptap/core',
+    '@tiptap/pm',
+    '@tiptap/starter-kit',
+    '@tiptap/extension-link',
+    '@tiptap/extension-text-align',
+    '@tiptap/extension-underline',
+    '@tiptap/extension-strike',
+    '@tiptap/extension-color',
+    '@tiptap/extension-text-style',
+  ],
+  
+  // Webpack configuration for react-quill compatibility (minimal changes)
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Ensure react-dom has findDOMNode on default export for react-quill
       config.resolve.alias = {
         ...config.resolve.alias,
       };
-      
-      // Ensure TipTap packages are properly handled
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-      };
-      
-      // Transpile TipTap packages to fix bundling issues
-      config.module.rules.push({
-        test: /\.(js|jsx|ts|tsx)$/,
-        include: /node_modules\/@tiptap/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['next/babel'],
-            plugins: [],
-          },
-        },
-      });
     }
     return config;
   },
-  
-  // Transpile TipTap packages
-  transpilePackages: ['@tiptap/react', '@tiptap/core', '@tiptap/starter-kit'],
   // Turbopack configuration (Next.js 16+ uses Turbopack by default)
   // Fonts are handled automatically by Turbopack, no webpack config needed
   turbopack: {},
