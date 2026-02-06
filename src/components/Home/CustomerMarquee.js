@@ -19,7 +19,8 @@ const CustomerMarquee = () => {
     {
       id: 3,
       name: "CFAO Motors",
-      logo: "https://ik.imagekit.io/g3nahgeeu/customers/cfao.png?updatedAt=1756382770791",
+      // Use a neutral local logo or placeholder instead of the blocked ImageKit URL
+      logo: "/images/customers/cfao.png",
       alt: "CFAO Motors"
     },
     {

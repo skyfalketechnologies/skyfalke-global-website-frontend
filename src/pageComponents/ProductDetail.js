@@ -45,6 +45,16 @@ const truncateText = (text, maxLength = 160) => {
   return `${text.slice(0, maxLength - 1)}…`;
 };
 
+// Blocklist for images that must never be used as OG/Twitter images
+const BLOCKED_IMAGE_PREFIXES = [
+  'https://ik.imagekit.io/g3nahgeeu/customers/cfao.png',
+];
+
+const isBlockedImage = (url) => {
+  if (!url) return false;
+  return BLOCKED_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix));
+};
+
 const ProductDetail = ({ slug: propSlug }) => {
   const params = useParams();
   const slug = propSlug || params?.slug;
@@ -217,8 +227,14 @@ const ProductDetail = ({ slug: propSlug }) => {
     );
   }
 
-  const primaryImage = product.images.find((img) => img.isPrimary) || product.images[0];
-  const currentImage = product.images[selectedImageIndex] || primaryImage;
+  const primaryImage =
+    product.images.find((img) => img.isPrimary) || product.images[0];
+  let currentImage = product.images[selectedImageIndex] || primaryImage;
+
+  // Ensure we never use blocked images as OG/Twitter image
+  if (currentImage?.url && isBlockedImage(currentImage.url)) {
+    currentImage = { ...currentImage, url: '/images/hero/business_tools.webp' };
+  }
   const isInCartItem = isInCart(product._id);
   const cartQuantity = getItemQuantity(product._id);
 

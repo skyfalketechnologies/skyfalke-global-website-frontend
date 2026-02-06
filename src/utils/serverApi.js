@@ -83,11 +83,20 @@ export async function getBlogBySlug(slug) {
  */
 export async function getProductBySlug(slug) {
   try {
-    const response = await serverFetch(`/api/products/slug/${slug}`);
+    // Use the same endpoint shape as the client-side ProductDetail page
+    // Client calls: /api/shop/products/:slug and expects { success, data: { product, relatedProducts } }
+    const response = await serverFetch(`/api/shop/products/${slug}`);
+
     // Handle null response (404 or network error)
     if (!response) {
       return null;
     }
+
+    // Normalise to just the product object for metadata generation
+    if (response.success && response.data) {
+      return response.data.product || response.data;
+    }
+
     return response.data || response;
   } catch (error) {
     // Silently handle errors - return null to allow metadata generation with fallbacks

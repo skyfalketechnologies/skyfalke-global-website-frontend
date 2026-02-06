@@ -41,6 +41,16 @@ const truncateText = (text, maxLength = 160) => {
   return `${text.slice(0, maxLength - 1)}…`;
 };
 
+// Blocklist for images that must never be used as OG/Twitter images
+const BLOCKED_IMAGE_PREFIXES = [
+  'https://ik.imagekit.io/g3nahgeeu/customers/cfao.png',
+];
+
+const isBlockedImage = (url) => {
+  if (!url) return false;
+  return BLOCKED_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix));
+};
+
 const CaseStudyDetail = () => {
   const params = useParams();
   const slug = params?.slug;
@@ -145,10 +155,14 @@ const CaseStudyDetail = () => {
     ? caseStudy.tags.join(', ')
     : undefined;
 
-  const primaryImageUrl =
+  let primaryImageUrl =
     caseStudy.images?.find((img) => img.isPrimary)?.url ||
     caseStudy.images?.[0]?.url ||
     '/images/hero/business_tools.webp';
+
+  if (isBlockedImage(primaryImageUrl)) {
+    primaryImageUrl = '/images/hero/business_tools.webp';
+  }
 
   return (
     <>
