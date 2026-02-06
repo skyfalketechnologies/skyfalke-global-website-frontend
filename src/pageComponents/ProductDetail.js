@@ -33,6 +33,18 @@ import {
   FaShippingFast
 } from 'react-icons/fa';
 
+// Helper utilities for safer SEO metadata
+const stripHtmlTags = (html) => {
+  if (!html || typeof html !== 'string') return '';
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+const truncateText = (text, maxLength = 160) => {
+  if (!text || typeof text !== 'string') return '';
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1)}…`;
+};
+
 const ProductDetail = ({ slug: propSlug }) => {
   const params = useParams();
   const slug = propSlug || params?.slug;
@@ -205,25 +217,65 @@ const ProductDetail = ({ slug: propSlug }) => {
     );
   }
 
-  const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
+  const primaryImage = product.images.find((img) => img.isPrimary) || product.images[0];
   const currentImage = product.images[selectedImageIndex] || primaryImage;
   const isInCartItem = isInCart(product._id);
   const cartQuantity = getItemQuantity(product._id);
 
+  // --- SEO metadata preparation ---
+  const baseUrl = process.env.REACT_APP_SITE_URL || 'https://skyfalke.com';
+  const canonicalUrl = `${baseUrl}/shop/product/${slug}`;
+
+  const metaTitle =
+    product.seo?.metaTitle ||
+    `${product.name} - Skyfalke Shop`;
+
+  const rawDescription =
+    product.seo?.metaDescription ||
+    product.shortDescription ||
+    stripHtmlTags(product.description);
+
+  const metaDescription = truncateText(rawDescription, 160);
+
+  const metaKeywords = Array.isArray(product.tags)
+    ? product.tags.join(', ')
+    : `${product.name}, ${product.category}, Skyfalke, merchandise`;
+
   return (
     <>
       <Helmet>
-        <title>{product.name} - Skyfalke Shop</title>
-        <meta name="description" content={product.shortDescription} />
-        <meta name="keywords" content={`${product.name}, ${product.category}, Skyfalke, merchandise`} />
-        <meta property="og:title" content={product.name} />
-        <meta property="og:description" content={product.shortDescription} />
-        <meta property="og:image" content={currentImage?.url} />
+        <title>{metaTitle}</title>
+        {metaDescription && (
+          <meta name="description" content={metaDescription} />
+        )}
+        {metaKeywords && (
+          <meta name="keywords" content={metaKeywords} />
+        )}
+
+        {/* Canonical URL */}
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph */}
+        <meta property="og:title" content={metaTitle} />
+        {metaDescription && (
+          <meta property="og:description" content={metaDescription} />
+        )}
+        {currentImage?.url && (
+          <meta property="og:image" content={currentImage.url} />
+        )}
         <meta property="og:type" content="product" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="Skyfalke" />
+
+        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={product.name} />
-        <meta name="twitter:description" content={product.shortDescription} />
-        <meta name="twitter:image" content={currentImage?.url} />
+        <meta name="twitter:title" content={metaTitle} />
+        {metaDescription && (
+          <meta name="twitter:description" content={metaDescription} />
+        )}
+        {currentImage?.url && (
+          <meta name="twitter:image" content={currentImage.url} />
+        )}
       </Helmet>
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

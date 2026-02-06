@@ -29,6 +29,18 @@ import {
   FaTags
 } from 'react-icons/fa';
 
+// Helper utilities for safer SEO metadata
+const stripHtmlTags = (html) => {
+  if (!html || typeof html !== 'string') return '';
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+const truncateText = (text, maxLength = 160) => {
+  if (!text || typeof text !== 'string') return '';
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1)}…`;
+};
+
 const CaseStudyDetail = () => {
   const params = useParams();
   const slug = params?.slug;
@@ -115,15 +127,64 @@ const CaseStudyDetail = () => {
     );
   }
 
+  // --- SEO metadata preparation ---
+  const baseUrl = process.env.REACT_APP_SITE_URL || 'https://skyfalke.com';
+  const canonicalUrl = `${baseUrl}/case-studies/${slug}`;
+
+  const metaTitle =
+    caseStudy.seo?.metaTitle ||
+    `${caseStudy.title} - Case Study | Skyfalke`;
+
+  const rawDescription =
+    caseStudy.seo?.metaDescription ||
+    caseStudy.summary ||
+    stripHtmlTags(caseStudy.description);
+
+  const metaDescription = truncateText(rawDescription, 160);
+  const metaKeywords = Array.isArray(caseStudy.tags)
+    ? caseStudy.tags.join(', ')
+    : undefined;
+
+  const primaryImageUrl =
+    caseStudy.images?.find((img) => img.isPrimary)?.url ||
+    caseStudy.images?.[0]?.url ||
+    '/images/hero/business_tools.webp';
+
   return (
     <>
       <Helmet>
-        <title>{caseStudy.title} - Case Study | Skyfalke</title>
-        <meta name="description" content={caseStudy.summary} />
-        <meta name="keywords" content={caseStudy.tags?.join(', ')} />
-        {caseStudy.seo?.metaTitle && <meta property="og:title" content={caseStudy.seo.metaTitle} />}
-        {caseStudy.seo?.metaDescription && <meta property="og:description" content={caseStudy.seo.metaDescription} />}
-        {caseStudy.images[0]?.url && <meta property="og:image" content={caseStudy.images[0].url} />}
+        <title>{metaTitle}</title>
+        {metaDescription && (
+          <meta name="description" content={metaDescription} />
+        )}
+        {metaKeywords && (
+          <meta name="keywords" content={metaKeywords} />
+        )}
+
+        {/* Canonical URL */}
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph */}
+        <meta property="og:title" content={metaTitle} />
+        {metaDescription && (
+          <meta property="og:description" content={metaDescription} />
+        )}
+        {primaryImageUrl && (
+          <meta property="og:image" content={primaryImageUrl} />
+        )}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="Skyfalke" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metaTitle} />
+        {metaDescription && (
+          <meta name="twitter:description" content={metaDescription} />
+        )}
+        {primaryImageUrl && (
+          <meta name="twitter:image" content={primaryImageUrl} />
+        )}
       </Helmet>
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -192,6 +253,22 @@ const CaseStudyDetail = () => {
 
         {/* Main Content */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          {/* Breadcrumb */}
+          <div className="max-w-5xl mx-auto mb-6 sm:mb-8">
+            <nav className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              <Link
+                href="/case-studies"
+                className="font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              >
+                Case Studies
+              </Link>
+              <span className="text-gray-400">/</span>
+              <span className="text-gray-700 dark:text-gray-200 font-medium truncate">
+                {caseStudy.title}
+              </span>
+            </nav>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6 lg:space-y-8">
@@ -328,18 +405,23 @@ const CaseStudyDetail = () => {
                     {caseStudy.metrics.map((metric, index) => (
                       <div
                         key={index}
-                        className="text-center p-4 sm:p-6 bg-gradient-to-br from-secondary-50 to-secondary-100 dark:from-secondary-900/20 dark:to-secondary-800/20 rounded-xl border border-secondary-200/50 dark:border-secondary-700/50 hover:shadow-lg transition-shadow duration-300"
+                        className="p-4 sm:p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200"
                       >
-                        <div className="text-2xl sm:text-3xl font-bold text-secondary-600 dark:text-secondary-400 mb-2">
+                        <div className="flex items-baseline justify-between mb-2">
+                          <div className="text-xs font-semibold tracking-wide uppercase text-gray-500 dark:text-gray-400">
+                            {metric.label}
+                          </div>
+                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+                            Result
+                          </span>
+                        </div>
+                        <div className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-1">
                           {metric.value}{metric.unit}
                         </div>
-                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          {metric.label}
-                        </div>
                         {metric.description && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                          <p className="mt-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                             {metric.description}
-                          </div>
+                          </p>
                         )}
                       </div>
                     ))}
@@ -434,20 +516,20 @@ const CaseStudyDetail = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.7 }}
-                  className="bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8"
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-4 sm:p-6 md:p-8"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                     {/* Quote Icons */}
-                    <div className="flex justify-between sm:flex-col sm:justify-start">
-                      <FaQuoteLeft className="text-lg sm:text-xl md:text-2xl text-primary-200 flex-shrink-0" />
+                    <div className="flex justify-between sm:flex-col sm:justify-start sm:items-start">
+                      <FaQuoteLeft className="text-lg sm:text-xl md:text-2xl text-primary-500 flex-shrink-0" />
                       <FaQuoteRight className="text-lg sm:text-xl md:text-2xl text-primary-200 flex-shrink-0 sm:hidden" />
                     </div>
                     
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <blockquote className="text-sm sm:text-base md:text-lg italic mb-4 sm:mb-6 leading-relaxed">
+                      <p className="text-sm sm:text-base md:text-lg italic mb-4 sm:mb-6 leading-relaxed text-gray-700 dark:text-gray-200">
                         "{caseStudy.testimonial.content}"
-                      </blockquote>
+                      </p>
                       
                       {/* Author Info */}
                       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -460,12 +542,12 @@ const CaseStudyDetail = () => {
                         )}
                         <div className="text-center sm:text-left min-w-0">
                           {caseStudy.testimonial.author && (
-                            <div className="font-semibold text-sm sm:text-base md:text-base truncate">
+                            <div className="font-semibold text-sm sm:text-base md:text-base text-gray-900 dark:text-white truncate">
                               {caseStudy.testimonial.author}
                             </div>
                           )}
                           {(caseStudy.testimonial.position || caseStudy.testimonial.company) && (
-                            <div className="text-primary-200 text-xs sm:text-sm md:text-sm truncate">
+                            <div className="text-xs sm:text-sm md:text-sm text-gray-500 dark:text-gray-400 truncate">
                               {caseStudy.testimonial.position}
                               {caseStudy.testimonial.position && caseStudy.testimonial.company && ' at '}
                               {caseStudy.testimonial.company}
@@ -476,7 +558,7 @@ const CaseStudyDetail = () => {
                     </div>
                     
                     {/* Right Quote Icon - Hidden on mobile */}
-                    <FaQuoteRight className="hidden sm:block text-xl md:text-2xl text-primary-200 mt-1 flex-shrink-0" />
+                    <FaQuoteRight className="hidden sm:block text-xl md:text-2xl text-primary-500 mt-1 flex-shrink-0" />
                   </div>
                 </motion.div>
               )}
@@ -618,51 +700,6 @@ const CaseStudyDetail = () => {
                 </div>
               </motion.div>
 
-              {/* Related Case Studies */}
-              {relatedCaseStudies.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
-                >
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center gap-2">
-                    <div className="w-6 h-6 bg-accent-100 dark:bg-accent-900/20 flex items-center justify-center rounded-lg">
-                      <FaArrowRight className="text-accent-600 dark:text-accent-400 text-sm" />
-                    </div>
-                    Related Case Studies
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    {relatedCaseStudies.map((related) => (
-                      <Link
-                        key={related._id}
-                        to={`/case-studies/${related.slug}`}
-                        className="block group p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                      >
-                        <div className="flex gap-3">
-                          <img
-                            src={related.images?.find(img => img.isPrimary)?.url || related.images?.[0]?.url || '/images/hero/business_tools.webp'}
-                            alt={related.title}
-                            className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg flex-shrink-0"
-                            onError={(e) => {
-                              e.target.src = '/images/hero/business_tools.webp';
-                            }}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors line-clamp-2 text-sm sm:text-base">
-                              {related.title}
-                            </h4>
-                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
-                              {related.summary}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
             </div>
           </div>
         </div>
