@@ -54,218 +54,245 @@ const generateEmailHTML = (campaign, recipient, baseUrl) => {
   
   // Wrap in email template
   const emailTemplate = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="x-apple-disable-message-reformatting">
-      <title>${campaign.subject}</title>
-      <style type="text/css">
-        /* Reset styles */
-        body, table, td, p, a, li, blockquote {
-          -webkit-text-size-adjust: 100%;
-          -ms-text-size-adjust: 100%;
-        }
-        table, td {
-          mso-table-lspace: 0pt;
-          mso-table-rspace: 0pt;
-        }
-        img {
-          -ms-interpolation-mode: bicubic;
-          border: 0;
-          outline: none;
-          text-decoration: none;
-          display: block;
-        }
-        
-        /* Typography */
-        body {
-          margin: 0;
-          padding: 0;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-          background-color: #f5f7fa;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-        
-        /* Link styles */
-        a {
-          color: #303661;
-          text-decoration: none;
-          transition: color 0.2s ease;
-        }
-        a:hover {
-          color: #e0ae00;
-          text-decoration: underline;
-        }
-        
-        /* Content link styles */
-        .content a {
-          color: #303661;
-          text-decoration: underline;
-        }
-        .content a:hover {
-          color: #e0ae00;
-        }
-        .content a.button {
-          background-color: #303661;
-          color: #ffffff !important;
-          padding: 14px 28px;
-          border-radius: 6px;
-          text-decoration: none;
-          display: inline-block;
-          font-weight: 600;
-          font-size: 16px;
-          line-height: 1.5;
-          transition: background-color 0.2s ease;
-        }
-        .content a.button:hover {
-          background-color: #24284b;
-          color: #ffffff !important;
-          text-decoration: none;
-        }
-        
-        /* Responsive */
-        @media only screen and (max-width: 600px) {
-          .email-container {
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-          .email-padding {
-            padding: 30px 20px !important;
-          }
-          .logo-width {
-            width: 150px !important;
-            max-width: 150px !important;
-          }
-        }
-      </style>
-      <!--[if mso]>
-      <style type="text/css">
-        body, table, td {
-          font-family: Arial, sans-serif !important;
-        }
-        a.button {
-          background-color: #303661 !important;
-          color: #ffffff !important;
-        }
-      </style>
-      <![endif]-->
-    </head>
-    <body style="margin: 0; padding: 0; background-color: #f5f7fa;">
-      <!-- Preheader Text -->
-      <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
-        ${campaign.subject}
-      </div>
-      
-      <!-- Main Wrapper -->
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f7fa; padding: 40px 0;">
-        <tr>
-          <td align="center" style="padding: 0;">
-            <!-- Email Container -->
-            <table role="presentation" class="email-container" width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); max-width: 600px; width: 100%; margin: 0 auto;">
-              
-              <!-- Header with Logo -->
-              <tr>
-                <td style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); padding: 40px 40px 30px 40px; text-align: center; border-bottom: 2px solid #e0ae00;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="center">
-                        <img src="${logoUrl}" alt="Skyfalke Limited" class="logo-width" width="180" style="display:block;max-width:180px;height:auto;margin:0 auto;border:0;" />
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              
-              <!-- Content Area -->
-              <tr>
-                <td class="email-padding" style="padding: 50px 40px; background-color: #ffffff;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td class="content" style="color: #2d3748; font-size: 16px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-                        ${html}
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              
-              <!-- Footer -->
-              <tr>
-                <td style="background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%); padding: 0;">
-                  <!-- Company Info Section -->
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td class="email-padding" style="padding: 35px 40px 25px 40px; text-align: center;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="center" style="padding-bottom: 20px;">
-                              <p style="margin: 0 0 8px 0; color: #303661; font-size: 18px; font-weight: 700; line-height: 1.4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-                                Skyfalke Limited
-                              </p>
-                              <p style="margin: 0; color: #6c757d; font-size: 14px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-                                Empowering businesses with innovative solutions
-                        </p>
-                      </td>
-                    </tr>
-                    <tr>
-                            <td align="center" style="padding-top: 20px; padding-bottom: 20px;">
-                        <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
-                          <tr>
-                                  <td style="padding: 0 12px;">
-                                    <a href="https://skyfalke.com/?utm_source=newsletter&utm_medium=email&utm_campaign=email_campaign" style="color: #303661; text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 0; display: inline-block; border-bottom: 2px solid transparent; transition: border-color 0.2s ease;">Website</a>
-                                  </td>
-                                  <td style="padding: 0 8px; color: #dee2e6; font-size: 14px;">•</td>
-                                  <td style="padding: 0 12px;">
-                                    <a href="https://skyfalke.com/contact?utm_source=newsletter&utm_medium=email&utm_campaign=email_campaign" style="color: #303661; text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 0; display: inline-block; border-bottom: 2px solid transparent; transition: border-color 0.2s ease;">Contact Us</a>
-                            </td>
-                                </tr>
-                              </table>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                  
+  <!DOCTYPE html>
+  <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+    <title>${campaign.subject}</title>
+    <!--[if mso]>
+    <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+    <![endif]-->
+    <style type="text/css">
+      * { box-sizing: border-box; }
+      body, table, td, p, a, li, blockquote {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+      table, td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+        border-collapse: collapse !important;
+      }
+      img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+      body {
+        margin: 0 !important; padding: 0 !important;
+        background-color: #eef1f5;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      }
+  
+      /* CONTENT TYPOGRAPHY */
+      .content-cell h1, .content-cell h2, .content-cell h3 {
+        margin: 0 0 12px 0; color: #1a1f36; font-weight: 700; line-height: 1.3;
+      }
+      .content-cell h1 { font-size: 26px; }
+      .content-cell h2 { font-size: 20px; margin-top: 24px; }
+      .content-cell h3 { font-size: 17px; margin-top: 20px; }
+      .content-cell p {
+        margin: 0 0 18px 0; color: #3c4257; font-size: 15px; line-height: 1.75;
+      }
+      .content-cell p:last-child { margin-bottom: 0; }
+      .content-cell a { color: #303661; text-decoration: underline; }
+      .content-cell ul, .content-cell ol {
+        margin: 0 0 18px 0; padding-left: 22px;
+        color: #3c4257; font-size: 15px; line-height: 1.75;
+      }
+      .content-cell a.button, .content-cell a.btn {
+        display: inline-block;
+        background-color: #303661;
+        color: #ffffff !important;
+        font-size: 15px; font-weight: 600; line-height: 1;
+        text-decoration: none !important;
+        padding: 15px 34px; border-radius: 5px; letter-spacing: 0.3px;
+      }
+  
+      /* PREHEADER */
+      .preheader {
+        display: none !important; visibility: hidden; mso-hide: all;
+        font-size: 1px; line-height: 1px; max-height: 0; max-width: 0; opacity: 0; overflow: hidden;
+      }
+ 
+  
+      /* RESPONSIVE */
+      @media only screen and (max-width: 620px) {
+        .outer-wrap  { padding: 20px 0 !important; }
+        .card        { border-radius: 0 !important; }
+        .header-cell { padding: 24px 20px 20px !important; }
+        .hero-cell   { padding: 28px 20px !important; }
+        .body-cell   { padding: 32px 20px !important; }
+        .trust-cell  { padding: 18px 20px !important; }
+        .footer-cell { padding: 28px 20px !important; }
+        .logo        { width: 120px !important; }
+        .content-cell h1 { font-size: 21px !important; }
+        .badge-wrap  { display: none !important; }
+      }
+    </style>
+  </head>
+  <body style="margin:0;padding:0;background-color:#eef1f5;">
+  
+    <!-- Preheader text -->
+    <div class="preheader">
+      ${campaign.subject}&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;
+    </div>
+  
+    <!-- ══════════════════  PAGE WRAPPER  ══════════════════ -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+      style="background-color:#eef1f5;">
+      <tr>
+        <td class="outer-wrap" align="center" style="padding:48px 16px;">
+  
+          <!-- ─────────────  EMAIL CARD  ───────────── -->
+          <table role="presentation" class="card" width="600" cellpadding="0" cellspacing="0" border="0"
+            style="max-width:600px;width:100%;background-color:#ffffff;
+                   border-radius:8px;overflow:hidden;
+                   box-shadow:0 4px 20px rgba(0,0,0,0.10);">
+  
+            <!-- TOP ACCENT BAR: brand gradient -->
+            <tr>
+              <td style="height:5px;background:linear-gradient(90deg,#303661 0%,#4a5296 50%,#e0ae00 100%);
+                         font-size:0;line-height:0;">&nbsp;</td>
+            </tr>
+  
+            <!-- ══  HEADER: Logo + Date  ══ -->
+            <tr>
+              <td class="header-cell"
+                style="padding:30px 48px 24px;background-color:#ffffff;
+                       border-bottom:1px solid #eef1f5;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td valign="middle">
+                      <img src="${logoUrl}" alt="Skyfalke Limited" class="logo"
+                        width="148" style="display:block;height:auto;max-width:148px;border:0;" />
+                    </td>
+                    <td valign="middle" align="right"
+                      style="color:#8898aa;font-size:11px;font-weight:600;
+                             white-space:nowrap;letter-spacing:0.6px;text-transform:uppercase;
+                             font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                      ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+  
+            <!-- ══  HERO BAND: dark with subject title  ══ -->
+            <tr>
+              <td class="hero-cell"
+                style="background-color:#1a1f36;padding:36px 48px 32px;">
+                <p style="margin:0 0 10px;color:#e0ae00;font-size:10px;font-weight:700;
+                          letter-spacing:2px;text-transform:uppercase;
+                          font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                  Skyfalke Limited &nbsp;&#8202;&#8202;&#8202;&bull;&nbsp;&#8202;&#8202;&#8202; Official Communication
+                </p>
+                <h1 style="margin:0;color:#ffffff;font-size:25px;font-weight:700;
+                           line-height:1.35;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                  ${campaign.subject}
+                </h1>
+              </td>
+            </tr>
+  
+            <!-- ══  BODY  ══ -->
+            <tr>
+              <td class="body-cell" style="padding:44px 48px 40px;background-color:#ffffff;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="content-cell"
+                      style="color:#3c4257;font-size:15px;line-height:1.75;
+                             font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                      ${html}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+  
+            <!-- ══  FOOTER  ══ -->
+            <tr>
+              <td class="footer-cell"
+                style="padding:30px 48px 34px;background-color:#f8fafc;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  
+                  <!-- Nav links -->
+                  <tr>
+                    <td align="center" style="padding-bottom:18px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0"
+                        style="margin:0 auto;">
+                        <tr>
+                          <td style="padding:0 14px;">
+                            <a href="https://skyfalke.com/?utm_source=newsletter&utm_medium=email&utm_campaign=email_campaign"
+                              style="color:#303661;text-decoration:none;font-size:13px;font-weight:600;
+                                     font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                              Website
+                            </a>
+                          </td>
+                          <td style="color:#d1d9e0;font-size:12px;">&bull;</td>
+                          <td style="padding:0 14px;">
+                            <a href="https://skyfalke.com/contact?utm_source=newsletter&utm_medium=email&utm_campaign=email_campaign"
+                              style="color:#303661;text-decoration:none;font-size:13px;font-weight:600;
+                                     font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                              Contact Us
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+  
                   <!-- Divider -->
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td style="padding: 0 40px;">
-                        <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, #e9ecef 20%, #e9ecef 80%, transparent 100%); width: 100%;"></div>
-                      </td>
-                    </tr>
-                  </table>
-                  
-                  <!-- Legal & Unsubscribe Section -->
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td class="email-padding" style="padding: 25px 40px 30px 40px; text-align: center;">
-                        <p style="margin: 0 0 12px 0; color: #868e96; font-size: 12px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-                          You received this email because you are subscribed to Skyfalke Limited communications.
-                        </p>
-                        <p style="margin: 0 0 20px 0;">
-                          <a href="${unsubscribeLink}" style="color: #e0ae00; text-decoration: underline; font-size: 12px; font-weight: 500;">Unsubscribe from this list</a>
-                        </p>
-                        <p style="margin: 0; color: #adb5bd; font-size: 11px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-                          © ${new Date().getFullYear()} Skyfalke Limited. All rights reserved.
-                        </p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              
-            </table>
-          </td>
-        </tr>
-      </table>
-      ${trackingPixel}
-    </body>
-    </html>
+                  <tr>
+                    <td style="padding:0 0 18px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="border-top:1px solid #e8ecf0;font-size:0;line-height:0;">&nbsp;</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+  
+                  <!-- Legal -->
+                  <tr>
+                    <td align="center">
+                      <p style="margin:0 0 8px;color:#8898aa;font-size:12px;line-height:1.65;
+                                font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                        To make sure you keep getting these emails, please add strategic@skyfalke.com to your address book or allow list.
+                       </p>
+                      <p style="margin:0 0 14px;">
+                        <a href="${unsubscribeLink}"
+                          style="color:#8898aa;font-size:12px;text-decoration:underline;
+                                 font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                          Unsubscribe
+                        </a>
+                      </p>
+                      <p style="margin:0;color:#b0bec5;font-size:11px;line-height:1.5;
+                                font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                        &copy; ${new Date().getFullYear()} Skyfalke Limited &bull; All rights reserved.
+                      </p>
+                    </td>
+                  </tr>
+  
+                </table>
+              </td>
+            </tr>
+  
+            <!-- BOTTOM ACCENT BAR -->
+            <tr>
+              <td style="height:4px;background-color:#e0ae00;font-size:0;line-height:0;">&nbsp;</td>
+            </tr>
+  
+          </table>
+          <!-- /EMAIL CARD -->
+  
+        </td>
+      </tr>
+    </table>
+    <!-- /PAGE WRAPPER -->
+  
+    ${trackingPixel}
+  </body>
+  </html>
   `;
   
   return emailTemplate;
