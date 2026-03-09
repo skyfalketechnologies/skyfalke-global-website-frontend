@@ -9,7 +9,7 @@
  */
 export const getSEOTitle = (post) => {
   if (!post) return 'Skyfalke Blog';
-  return post.seo?.metaTitle || `${post.title} | Skyfalke Blog`;
+  return post.seo?.metaTitle || `${post.title}`;
 };
 
 /**

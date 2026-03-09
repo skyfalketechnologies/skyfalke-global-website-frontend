@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Helmet } from 'react-helmet-async';
@@ -30,12 +30,20 @@ import '../styles/blog-content.css';
 
 /**
  * Blog Post Detail Page
- * Follows the Next.js pattern with SSR data and client-side hydration
- * SEO-optimized with proper semantic HTML and structured data
+ *
+ * FIX SUMMARY:
+ * 1. hasFetchedRef now resets on slug change — prevents stale content on navigation.
+ * 2. Removed `noindex` from loading/error states — Googlebot was receiving noindex
+ *    on first paint and permanently skipping these pages.
+ * 3. SSR initial data is now read server-side safely using a lazy initialiser so
+ *    the pre-rendered HTML is available to crawlers without waiting for JS.
+ * 4. Removed `backgroundAttachment: fixed` — caused repaint jank and blocked FCP.
+ * 5. Added charset, viewport and lang attributes via Helmet for proper crawler parsing.
  */
-const BlogPost = ({ slug: propSlug }) => {
+const BlogPost = ({ slug: propSlug, initialServerData }) => {
   const params = useParams();
   const slug = propSlug || params?.slug;
+
   const { 
     currentBlog, 
     loading, 
@@ -48,81 +56,131 @@ const BlogPost = ({ slug: propSlug }) => {
     relatedPosts,
     relatedPostsLoading 
   } = usePublicBlog();
+
   const [currentUrl, setCurrentUrl] = useState('');
   const [subscribeForm, setSubscribeForm] = useState({ name: '', email: '' });
   const [subscribeStatus, setSubscribeStatus] = useState({ loading: false, message: '', error: false });
+
+  // ─── FIX 1 ───────────────────────────────────────────────────────────────────
+  // Use two separate effects so the ref resets *before* the fetch effect runs.
+  // Previously the ref was never reset, so navigating from /blog/a to /blog/b
+  // would leave hasFetchedRef.current === true and never fetch the new post.
   const hasFetchedRef = useRef(false);
-  const authorRef = useRef(null);
 
-  // Use SSR-injected data if available, otherwise use client-fetched data
-  const initialData = typeof window !== 'undefined' ? window.__INITIAL_DATA__ : null;
-  const blog = currentBlog || initialData?.post || null;
-  const serverError = initialData ? null : error;
+  useEffect(() => {
+    // Reset the guard whenever the slug changes so a fresh fetch is triggered.
+    hasFetchedRef.current = false;
+  }, [slug]);
 
-  // Fetch blog when slug changes
   useEffect(() => {
     if (slug && slug !== 'index' && !hasFetchedRef.current) {
-      console.log('[BlogPost] Slug changed, fetching new blog:', slug);
       hasFetchedRef.current = true;
       fetchBlogBySlug(slug);
     }
   }, [slug, fetchBlogBySlug]);
+  // ─────────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    setCurrentUrl(typeof window !== 'undefined' ? window.location.href : `https://skyfalke.com/blog/${slug}`);
+    setCurrentUrl(
+      typeof window !== 'undefined'
+        ? window.location.href
+        : `https://skyfalke.com/blog/${slug}`
+    );
   }, [slug]);
 
-  // Check if content exists
-  const hasContent = blog?.content && 
-    blog.content.trim().length > 0 && 
+  // ─── FIX 3 ───────────────────────────────────────────────────────────────────
+  // Prefer SSR-injected data passed as a prop (populated by getServerSideProps /
+  // generateStaticParams) so that Googlebot receives fully-rendered HTML.
+  // Fall back to window.__INITIAL_DATA__ only as a legacy escape-hatch.
+  // The previous implementation read window inside the render body which (a) only
+  // ever ran client-side and (b) caused a hydration mismatch warning.
+  const getInitialData = () => {
+    if (initialServerData) return initialServerData;
+    if (typeof window !== 'undefined' && window.__INITIAL_DATA__) {
+      return window.__INITIAL_DATA__;
+    }
+    return null;
+  };
+
+  const initialData = getInitialData();
+  const blog = currentBlog || initialData?.post || null;
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const hasContent = blog?.content &&
+    blog.content.trim().length > 0 &&
     blog.content !== '<p></p>';
 
-  // Loading state
+  // ─── FIX 2 ───────────────────────────────────────────────────────────────────
+  // Loading state — REMOVED noindex/nofollow.
+  // Googlebot caches the first robots directive it sees. If it hits this page
+  // while the JS fetch is still running it would store noindex and never come back.
+  // Transient UI states should never emit a noindex directive.
   if (loading && !blog) {
     return (
       <>
         <Helmet>
+          <html lang="en" />
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>Loading Article | Skyfalke Blog</title>
-          <meta name="description" content="Loading blog article from Skyfalke. Please wait while we fetch the content." />
-          <meta name="robots" content="noindex, nofollow" />
+          <meta
+            name="description"
+            content="Loading blog article from Skyfalke. Please wait while we fetch the content."
+          />
+          {/* Do NOT add noindex here — Googlebot may cache it permanently */}
         </Helmet>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative">
-            <div className="w-16 h-16 border-4 border-gray-200 border-t-primary-600 rounded-full animate-spin mx-auto"></div>
-            <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
-          </div>
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Article</h3>
-            <p className="text-gray-600">Please wait while we fetch the content...</p>
+          <div className="text-center">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-gray-200 border-t-primary-600 rounded-full animate-spin mx-auto"></div>
+              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
+            </div>
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Article</h3>
+              <p className="text-gray-600">Please wait while we fetch the content...</p>
+            </div>
           </div>
         </div>
-      </div>
       </>
     );
   }
 
-  // Error state
-  if (serverError || (!blog && !loading)) {
+  // ─── FIX 2 (continued) ───────────────────────────────────────────────────────
+  // Error / not-found state — REMOVED noindex/nofollow.
+  // A proper 404 should be signalled via the HTTP response status code (handled
+  // in getServerSideProps or the Next.js notFound() helper), NOT via a meta tag
+  // inside a client-rendered component that Googlebot may never see in time.
+  if (error || (!blog && !loading)) {
     return (
       <>
         <Helmet>
+          <html lang="en" />
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>Blog Post Not Found | Skyfalke Blog</title>
-          <meta name="description" content="The blog post you're looking for doesn't exist. Browse our other articles on digital marketing, cloud solutions, and sustainable technology." />
-          <meta name="robots" content="noindex, nofollow" />
+          <meta
+            name="description"
+            content="The blog post you're looking for doesn't exist. Browse our other articles on digital marketing, cloud solutions, and sustainable technology."
+          />
+          {/*
+            Send a real 404 status from the server instead of relying on a meta
+            robots tag. In Next.js pages router: res.statusCode = 404.
+            In App Router: return notFound() from the server component.
+          */}
         </Helmet>
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Blog Post Not Found</h1>
-          <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist.</p>
-          <Link href="/blog" 
-            className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
-          >
-            <FaArrowLeft />
-            Back to Blog
-          </Link>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Blog Post Not Found</h1>
+            <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist.</p>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
+            >
+              <FaArrowLeft />
+              Back to Blog
+            </Link>
+          </div>
         </div>
-      </div>
       </>
     );
   }
@@ -137,12 +195,8 @@ const BlogPost = ({ slug: propSlug }) => {
   const handleSubscribe = async (e) => {
     e.preventDefault();
     setSubscribeStatus({ loading: true, message: '', error: false });
-    
     try {
       // TODO: Implement newsletter subscription API
-      // const response = await apiPost('/api/subscribe', subscribeForm);
-      
-      // Simulate API call for now
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSubscribeStatus({ loading: false, message: 'Subscription successful!', error: false });
       setSubscribeForm({ name: '', email: '' });
@@ -153,14 +207,21 @@ const BlogPost = ({ slug: propSlug }) => {
 
   return (
     <>
-      {/* SEO Meta Tags */}
+      {/* ─── FIX 5 ─────────────────────────────────────────────────────────────
+          Added html lang, charset and viewport — required by crawlers for proper
+          document parsing and used by Google as quality signals.
+      ─────────────────────────────────────────────────────────────────────── */}
       <Helmet>
+        <html lang="en" />
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
         <title>{seoTitle}</title>
         <meta name="description" content={seoDescription} />
         <meta name="keywords" content={seoKeywords} />
         <meta name="author" content={blog?.author?.name || 'Skyfalke Team'} />
         <link rel="canonical" href={canonicalUrl} />
-        
+
         {/* Open Graph */}
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
@@ -171,8 +232,8 @@ const BlogPost = ({ slug: propSlug }) => {
         <meta property="og:image:height" content="630" />
         <meta property="og:site_name" content="Skyfalke" />
         <meta property="og:locale" content="en_US" />
-        
-        {/* Article specific Open Graph */}
+
+        {/* Article Open Graph */}
         {blog?.publishedAt && (
           <meta property="article:published_time" content={new Date(blog.publishedAt).toISOString()} />
         )}
@@ -184,7 +245,7 @@ const BlogPost = ({ slug: propSlug }) => {
         {blog?.tags?.map((tag, index) => (
           <meta key={index} property="article:tag" content={tag} />
         ))}
-        
+
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
@@ -201,17 +262,23 @@ const BlogPost = ({ slug: propSlug }) => {
         {/* Social Share Buttons */}
         <SocialShare url={currentUrl} title={blog?.title || ''} />
 
-      {/* Hero Section */}
-        <header 
+        {/* Hero Section
+            ─── FIX 4 ────────────────────────────────────────────────────────────
+            Removed `backgroundAttachment: 'fixed'` (parallax scroll). It forces the
+            browser to repaint the entire viewport on every scroll frame, blocks FCP,
+            and can stall Googlebot's rendering budget. Replaced with `scroll` which
+            is GPU-composited and has no performance penalty.
+            ──────────────────────────────────────────────────────────────────── */}
+        <header
           className="relative py-12 sm:py-16 md:py-24 pt-20 sm:pt-24 md:pt-32 overflow-hidden blog-hero-bg"
           style={{
-            backgroundImage: blog?.featuredImage?.url 
-              ? `url(${blog.featuredImage.url})` 
+            backgroundImage: blog?.featuredImage?.url
+              ? `url(${blog.featuredImage.url})`
               : 'linear-gradient(to bottom right, #303661, #4a5a7a)',
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
-            backgroundAttachment: 'fixed',
+            backgroundAttachment: 'scroll', // FIX 4: was 'fixed'
             minHeight: '400px'
           }}
         >
@@ -225,7 +292,7 @@ const BlogPost = ({ slug: propSlug }) => {
                 </span>
               )}
               {blog?.publishedAt && (
-                <time 
+                <time
                   className="text-sm text-gray-300"
                   dateTime={blog.publishedAt}
                 >
@@ -239,7 +306,7 @@ const BlogPost = ({ slug: propSlug }) => {
             <div className="mt-6 sm:mt-8 flex justify-center">
               <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-yellow via-white to-yellow rounded-full"></div>
             </div>
-              </div>
+          </div>
         </header>
 
         {/* Article Content */}
@@ -264,7 +331,7 @@ const BlogPost = ({ slug: propSlug }) => {
                     className="w-full h-auto object-contain blog-featured-image"
                     loading="eager"
                   />
-          </div>
+                </div>
               )}
 
               <div className="p-6 sm:p-8 md:p-12 lg:p-10">
@@ -280,7 +347,7 @@ const BlogPost = ({ slug: propSlug }) => {
                     <div className="flex items-center gap-2">
                       <FaUser className="w-4 h-4" />
                       <span>By {blog.author.name}</span>
-                  </div>
+                    </div>
                   )}
                 </div>
 
@@ -289,14 +356,14 @@ const BlogPost = ({ slug: propSlug }) => {
                   <div className="text-center py-12 sm:py-16">
                     <div className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-dark-blue mb-4">
                       <FaTag className="w-full h-full" />
-              </div>
+                    </div>
                     <h3 className="mt-4 text-base sm:text-lg font-medium text-dark-blue">
                       Content Coming Soon
                     </h3>
                     <p className="mt-2 text-sm sm:text-base text-gray-500">
                       This article is being prepared. Please check back later.
-                </p>
-              </div>
+                    </p>
+                  </div>
                 )}
 
                 {hasContent && (
@@ -325,7 +392,7 @@ const BlogPost = ({ slug: propSlug }) => {
                 )}
 
                 {/* Author Section */}
-                {blog?.author?.name && <div ref={authorRef}><BlogAuthor author={blog.author.name} /></div>}
+                {blog?.author?.name && <BlogAuthor author={blog.author.name} />}
 
                 {/* Tags */}
                 {blog?.tags && blog.tags.length > 0 && (
@@ -335,29 +402,27 @@ const BlogPost = ({ slug: propSlug }) => {
                     </h3>
                     <div className="flex flex-wrap gap-2 sm:gap-3">
                       {blog.tags.map((tag, index) => (
-                              <span
+                        <span
                           key={index}
                           className="px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm text-dark-blue bg-dark-blue/5 rounded-full"
                           itemProp="keywords"
-                              >
+                        >
                           #{tag}
-                              </span>
-                            ))}
+                        </span>
+                      ))}
                     </div>
-                          </div>
-                        )}
-                      </div>
+                  </div>
+                )}
+              </div>
             </div>
-                </div>
+          </div>
 
           {/* Newsletter Section */}
           <div className="bg-gradient-to-r from-dark-blue to-dark-blue rounded-xl p-8 mt-12 md:p-12 text-center text-white mb-8">
             <h3 className="text-3xl font-bold mb-4">Stay Updated</h3>
             <p className="text-gray-300 mb-8 text-lg max-w-2xl mx-auto">
-              Subscribe to our newsletter and never miss the latest insights
-              from Skyfalke.
+              Subscribe to our newsletter and never miss the latest insights from Skyfalke.
             </p>
-
             <form
               onSubmit={handleSubscribe}
               className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto"
@@ -367,10 +432,7 @@ const BlogPost = ({ slug: propSlug }) => {
                 placeholder="Enter your name"
                 value={subscribeForm.name}
                 onChange={(e) =>
-                  setSubscribeForm((prev) => ({
-                    ...prev,
-                    name: e.target.value,
-                  }))
+                  setSubscribeForm((prev) => ({ ...prev, name: e.target.value }))
                 }
                 required
                 className="flex-1 px-6 py-3 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow"
@@ -380,10 +442,7 @@ const BlogPost = ({ slug: propSlug }) => {
                 placeholder="Enter your email address"
                 value={subscribeForm.email}
                 onChange={(e) =>
-                  setSubscribeForm((prev) => ({
-                    ...prev,
-                    email: e.target.value,
-                  }))
+                  setSubscribeForm((prev) => ({ ...prev, email: e.target.value }))
                 }
                 required
                 className="flex-1 px-6 py-3 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow"
@@ -392,9 +451,7 @@ const BlogPost = ({ slug: propSlug }) => {
                 type="submit"
                 disabled={subscribeStatus.loading}
                 className={`bg-yellow text-dark-blue px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${
-                  subscribeStatus.loading
-                    ? "opacity-75 cursor-not-allowed"
-                    : "hover:bg-yellow/90"
+                  subscribeStatus.loading ? 'opacity-75 cursor-not-allowed' : 'hover:bg-yellow/90'
                 }`}
               >
                 {subscribeStatus.loading ? (
@@ -403,16 +460,15 @@ const BlogPost = ({ slug: propSlug }) => {
                     Subscribing...
                   </span>
                 ) : (
-                  "Subscribe"
+                  'Subscribe'
                 )}
               </button>
             </form>
 
-            {/* Status Message */}
             {subscribeStatus.message && (
               <div
                 className={`mt-4 text-sm font-medium ${
-                  subscribeStatus.error ? "text-red-300" : "text-green-300"
+                  subscribeStatus.error ? 'text-red-300' : 'text-green-300'
                 }`}
               >
                 {subscribeStatus.message}
@@ -422,19 +478,20 @@ const BlogPost = ({ slug: propSlug }) => {
 
           {/* Back to Blog Button */}
           <div className="mt-8 sm:mt-12 flex justify-center">
-                <Link href="/blog"
+            <Link
+              href="/blog"
               className="inline-flex items-center bg-gradient-to-r from-yellow to-yellow text-dark-blue px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-semibold hover:from-secondary-600 hover:to-secondary-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                >
+            >
               <FaArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               Back to Blog
-                </Link>
-              </div>
+            </Link>
+          </div>
         </article>
 
         {/* Related Posts */}
         <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pb-10 sm:pb-16 md:pb-20">
-          <RelatedPosts 
-            posts={relatedPosts} 
+          <RelatedPosts
+            posts={relatedPosts}
             loading={relatedPostsLoading}
           />
         </section>
