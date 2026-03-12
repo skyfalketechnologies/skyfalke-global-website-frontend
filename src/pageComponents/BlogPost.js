@@ -103,6 +103,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
 
   const initialData = getInitialData();
   const blog = currentBlog || initialData?.post || null;
+  const hasServerBlog = !!initialData?.post;
   // ─────────────────────────────────────────────────────────────────────────────
 
   const hasContent = blog?.content &&
@@ -136,7 +137,14 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
   // A proper 404 should be signalled via the HTTP response status code (handled
   // in getServerSideProps or the Next.js notFound() helper), NOT via a meta tag
   // inside a client-rendered component that Googlebot may never see in time.
-  if (error || (!blog && !loading)) {
+  //
+  // IMPORTANT: If we already have a fully-hydrated blog from the server
+  // (initialServerData), we must prioritise that over any client-side error
+  // coming from `usePublicBlog`. Otherwise a transient fetch error would cause
+  // the server-rendered HTML to show "Blog Post Not Found" even though the post
+  // exists — exactly the pattern that leads to Google seeing "No blog" or
+  // treating the URL as a soft 404.
+  if (!blog && !loading && !hasServerBlog) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
