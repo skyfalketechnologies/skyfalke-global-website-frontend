@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Helmet } from 'react-helmet-async';
 import { FaArrowLeft, FaClock, FaUser, FaTag } from 'react-icons/fa';
 import { usePublicBlog } from '../features/blog/hooks/usePublicBlog';
 import {
@@ -117,31 +116,18 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
   // Transient UI states should never emit a noindex directive.
   if (loading && !blog) {
     return (
-      <>
-        <Helmet>
-          <html lang="en" />
-          <meta charSet="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Loading Article | Skyfalke Blog</title>
-          <meta
-            name="description"
-            content="Loading blog article from Skyfalke. Please wait while we fetch the content."
-          />
-          {/* Do NOT add noindex here — Googlebot may cache it permanently */}
-        </Helmet>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-gray-200 border-t-primary-600 rounded-full animate-spin mx-auto"></div>
-              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
-            </div>
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Article</h3>
-              <p className="text-gray-600">Please wait while we fetch the content...</p>
-            </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-gray-200 border-t-primary-600 rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-primary-400 rounded-full animate-ping opacity-20"></div>
+          </div>
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Article</h3>
+            <p className="text-gray-600">Please wait while we fetch the content...</p>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -152,36 +138,19 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
   // inside a client-rendered component that Googlebot may never see in time.
   if (error || (!blog && !loading)) {
     return (
-      <>
-        <Helmet>
-          <html lang="en" />
-          <meta charSet="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Blog Post Not Found | Skyfalke Blog</title>
-          <meta
-            name="description"
-            content="The blog post you're looking for doesn't exist. Browse our other articles on digital marketing, cloud solutions, and sustainable technology."
-          />
-          {/*
-            Send a real 404 status from the server instead of relying on a meta
-            robots tag. In Next.js pages router: res.statusCode = 404.
-            In App Router: return notFound() from the server component.
-          */}
-        </Helmet>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Blog Post Not Found</h1>
-            <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist.</p>
-            <Link
-              href="/blog"
-              className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
-            >
-              <FaArrowLeft />
-              Back to Blog
-            </Link>
-          </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Blog Post Not Found</h1>
+          <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist.</p>
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"
+          >
+            <FaArrowLeft />
+            Back to Blog
+          </Link>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -207,54 +176,6 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
 
   return (
     <>
-      {/* ─── FIX 5 ─────────────────────────────────────────────────────────────
-          Added html lang, charset and viewport — required by crawlers for proper
-          document parsing and used by Google as quality signals.
-      ─────────────────────────────────────────────────────────────────────── */}
-      <Helmet>
-        <html lang="en" />
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-        <title>{seoTitle}</title>
-        <meta name="description" content={seoDescription} />
-        <meta name="keywords" content={seoKeywords} />
-        <meta name="author" content={blog?.author?.name || 'Skyfalke Team'} />
-        <link rel="canonical" href={canonicalUrl} />
-
-        {/* Open Graph */}
-        <meta property="og:title" content={seoTitle} />
-        <meta property="og:description" content={seoDescription} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={seoImage} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:site_name" content="Skyfalke" />
-        <meta property="og:locale" content="en_US" />
-
-        {/* Article Open Graph */}
-        {blog?.publishedAt && (
-          <meta property="article:published_time" content={new Date(blog.publishedAt).toISOString()} />
-        )}
-        {blog?.updatedAt && (
-          <meta property="article:modified_time" content={new Date(blog.updatedAt).toISOString()} />
-        )}
-        <meta property="article:author" content={blog?.author?.name || 'Skyfalke Team'} />
-        <meta property="article:section" content={blog?.category || 'Digital Marketing'} />
-        {blog?.tags?.map((tag, index) => (
-          <meta key={index} property="article:tag" content={tag} />
-        ))}
-
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={seoTitle} />
-        <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content={seoImage} />
-        <meta name="twitter:site" content="@skyfalke" />
-        <meta name="twitter:creator" content="@skyfalke" />
-      </Helmet>
-
       {/* Structured Data */}
       <BlogPostSchema post={blog} siteUrl="https://skyfalke.com" />
 
