@@ -75,11 +75,20 @@ const ProductDetail = ({ slug: propSlug, initialServerData }) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
+  // Track whether we have a trusted server-provided product for this slug.
+  const hasServerProduct =
+    !!initialServerData?.product && initialServerData.product.slug === slug;
+
   useEffect(() => {
     // If we already have server-injected data for this slug, use it for the
-    // initial render (better HTML for crawlers) and skip the immediate refetch.
-    // We still keep the effect so that navigating between products on the
-    // client will fetch fresh data.
+    // initial render (better HTML for crawlers) and avoid immediately
+    // refetching the same product. We still keep this effect so that client-
+    // side navigation between products triggers a fresh fetch.
+    if (hasServerProduct && product && product.slug === slug) {
+      setLoading(false);
+      return;
+    }
+
     fetchProduct();
   }, [slug]);
 
@@ -211,7 +220,11 @@ const ProductDetail = ({ slug: propSlug, initialServerData }) => {
     );
   }
 
-  if (error || !product) {
+  // IMPORTANT: if we already have a server-hydrated product for this slug,
+  // we should never replace it with a "not found" shell due to a transient
+  // client-side error. Proper 404s are handled via the Next.js route
+  // (`notFound()` in the product page), not here.
+  if ((error || !product) && !hasServerProduct) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">

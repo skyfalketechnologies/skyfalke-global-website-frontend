@@ -42,12 +42,15 @@ const JobDetail = ({ id: propId, initialServerData }) => {
     }
   }, []);
 
+  const hasServerJob =
+    !!initialServerData?.job && initialServerData.job._id === id;
+
   useEffect(() => {
     // If we already have a server-injected job for this id, use it for the
     // initial render (better SEO) and only fetch when navigating between jobs.
     if (!id) return;
 
-    if (job && job._id === id) {
+    if (hasServerJob && job && job._id === id) {
       // We still want related jobs and view tracking even when job came from SSR
       fetchRelatedJobs(job.category, job._id);
       setTimeout(() => {
@@ -192,7 +195,10 @@ const JobDetail = ({ id: propId, initialServerData }) => {
     );
   }
 
-  if (error || !job) {
+  // If we have a server-hydrated job for this id, do not render a client-side
+  // "Job Not Found" shell due to transient API errors. Real 404s are handled
+  // by the route via `notFound()`.
+  if ((error || !job) && !hasServerJob) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">

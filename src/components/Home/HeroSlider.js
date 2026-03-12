@@ -36,7 +36,7 @@ const HeroSlider = () => {
   const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', null
   const [errorMessage, setErrorMessage] = useState('');
 
-  const backgroundImage = "https://ik.imagekit.io/g3nahgeeu/hero/digital-marketing-min.JPG";
+  const backgroundImage = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp";
 
   const services = [
     "Digital Marketing",

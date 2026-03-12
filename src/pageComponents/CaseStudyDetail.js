@@ -51,17 +51,32 @@ const isBlockedImage = (url) => {
   return BLOCKED_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix));
 };
 
-const CaseStudyDetail = () => {
+const CaseStudyDetail = ({ slug: propSlug, initialServerData }) => {
   const params = useParams();
-  const slug = params?.slug;
+  const slug = propSlug || params?.slug;
   const router = useRouter();
-  const [caseStudy, setCaseStudy] = useState(null);
-  const [relatedCaseStudies, setRelatedCaseStudies] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [caseStudy, setCaseStudy] = useState(
+    () => initialServerData?.caseStudy || null
+  );
+  const [relatedCaseStudies, setRelatedCaseStudies] = useState(
+    () => initialServerData?.relatedCaseStudies || []
+  );
+  const [loading, setLoading] = useState(!initialServerData);
   const [error, setError] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
+  const hasServerCaseStudy =
+    !!initialServerData?.caseStudy && initialServerData.caseStudy.slug === slug;
+
   useEffect(() => {
+    // If we already have a server-injected case study for this slug, don't
+    // immediately refetch it; this preserves the SSR HTML that crawlers see.
+    // Still keep this effect so navigating between case studies refetches.
+    if (hasServerCaseStudy && caseStudy && caseStudy.slug === slug) {
+      setLoading(false);
+      return;
+    }
+
     fetchCaseStudy();
   }, [slug]);
 
@@ -70,18 +85,24 @@ const CaseStudyDetail = () => {
       setLoading(true);
       setError('');
       
-      // Check for SSR-injected initial data
-      const initialData = window.__INITIAL_DATA__;
+      // Prefer explicit SSR props when present; fall back to legacy
+      // window.__INITIAL_DATA__ only when needed.
+      let initialData = initialServerData;
+
+      if (!initialData && typeof window !== 'undefined' && window.__INITIAL_DATA__) {
+        initialData = window.__INITIAL_DATA__;
+      }
+
       if (initialData && initialData.caseStudy && initialData.caseStudy.slug === slug) {
-        console.log('Using SSR-injected data for case study');
         setCaseStudy(initialData.caseStudy);
         if (initialData.relatedCaseStudies) {
           setRelatedCaseStudies(initialData.relatedCaseStudies);
         }
-        
-        // Clear initial data to prevent reuse
-        window.__INITIAL_DATA__ = null;
-        
+
+        if (typeof window !== 'undefined') {
+          window.__INITIAL_DATA__ = null;
+        }
+
         setLoading(false);
         return;
       }
@@ -115,7 +136,10 @@ const CaseStudyDetail = () => {
     );
   }
 
-  if (error || !caseStudy) {
+  // If we have a server-hydrated caseStudy for this slug, do not show a
+  // client-side "not found" shell for transient fetch errors. True 404s
+  // should be surfaced via the route layer (notFound()).
+  if ((error || !caseStudy) && !hasServerCaseStudy) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
