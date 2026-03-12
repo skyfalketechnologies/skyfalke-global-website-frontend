@@ -26,8 +26,6 @@ import {
 const HiddenLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [accessCode, setAccessCode] = useState('');
-  const [showAccessForm, setShowAccessForm] = useState(false);
   const { login, isAuthenticated, loading } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const router = useRouter();
@@ -43,18 +41,6 @@ const HiddenLogin = () => {
       router.push(from);
     }
   }, [isAuthenticated, loading, router, from]);
-
-  const handleAccessCodeSubmit = (e) => {
-    e.preventDefault();
-    // Simple access code validation - you can make this more complex
-    const validCodes = ['SKY2024', 'ADMIN2024', 'SECURE2024'];
-    if (validCodes.includes(accessCode.toUpperCase())) {
-      setShowAccessForm(true);
-      setAccessCode('');
-    } else {
-      alert('Invalid access code.');
-    }
-  };
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -132,7 +118,7 @@ const HiddenLogin = () => {
           >
             {/* Logo */}
             <div className="flex justify-center mb-8">
-              <div className="w-24 h-24 flex items-center justify-center p-3 bg-white bg-opacity-10 rounded-2xl backdrop-blur-sm">
+              <div className="flex items-center justify-center p-3">
                 <img 
                   src="/images/logos/logo.svg" 
                   alt="Skyfalke Logo" 
@@ -141,81 +127,19 @@ const HiddenLogin = () => {
               </div>
             </div>
             
-            <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
-              System Access
-            </h1>
-            <p className="text-purple-200 text-lg font-medium">
-              Restricted portal
-            </p>
-            <div className="flex items-center justify-center mt-4 space-x-2 text-purple-300">
-              <FaShieldAlt className="h-4 w-4" />
-              <span className="text-sm font-medium">Authorized Personnel Only</span>
-            </div>
+            <h3 className="text-xl font-medium text-white mb-3 tracking-tight">
+              Hi, Welcome back
+            </h3>
           </motion.div>
 
-          {/* Access Code Form */}
-          {!showAccessForm && (
-            <motion.div 
-              className="bg-white bg-opacity-10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white border-opacity-20"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            >
-              <div className="space-y-6">
-                <div className="text-center">
-                  <FaKey className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-white mb-2">Access Verification Required</h3>
-                  <p className="text-purple-200 text-sm">Enter your access code to proceed</p>
-                </div>
-
-                <form onSubmit={handleAccessCodeSubmit} className="space-y-4">
-                  <div>
-                    <label htmlFor="accessCode" className="block text-sm font-semibold text-white mb-2">
-                      Access Code
-                    </label>
-                    <input
-                      id="accessCode"
-                      type="password"
-                      value={accessCode}
-                      onChange={(e) => setAccessCode(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-purple-400 border-opacity-30 placeholder-purple-300 text-white bg-white bg-opacity-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
-                      placeholder="Enter access code"
-                      required
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full flex justify-center items-center py-3 px-4 border border-transparent text-base font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    <FaArrowRight className="mr-2 h-4 w-4" />
-                    Verify Access
-                  </button>
-                </form>
-
-              </div>
-            </motion.div>
-          )}
-
           {/* Login Form */}
-          {showAccessForm && (
-            <motion.div 
+          <motion.div 
               className="bg-white bg-opacity-10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white border-opacity-20"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
-              {/* Security Status */}
-              <div className="mb-6 p-4 bg-white bg-opacity-5 rounded-xl border border-white border-opacity-10">
-                <div className="flex items-center space-x-3">
-                  <FaServer className="h-5 w-5 text-green-400" />
-                  <div>
-                    <h4 className="text-sm font-semibold text-white">Security Status</h4>
-                    <p className="text-xs text-green-300">Access verified</p>
-                  </div>
-                </div>
-              </div>
-
+            
               <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                 {/* Global Error */}
                 {errors.root && (
@@ -330,28 +254,14 @@ const HiddenLogin = () => {
                     ) : (
                       <>
                         <FaFingerprint className="mr-3 h-4 w-4" />
-                        Authenticate Access
+                        Let's go
                         <FaArrowRight className="ml-3 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
                       </>
                     )}
                   </button>
                 </div>
               </form>
-
-              {/* Security Notice */}
-              <div className="mt-8 p-4 bg-white bg-opacity-5 rounded-xl border border-white border-opacity-10">
-                <div className="flex items-start space-x-3">
-                  <FaShieldAlt className="h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h4 className="text-sm font-semibold text-white mb-1">Maximum Security Protocol</h4>
-                    <p className="text-xs text-purple-200 leading-relaxed">
-                      This is a restricted access area. All activities are monitored and logged for security purposes.
-                    </p>
-                  </div>
-                </div>
-              </div>
             </motion.div>
-          )}
 
           {/* Footer */}
           <motion.div 
@@ -361,7 +271,7 @@ const HiddenLogin = () => {
             transition={{ delay: 0.8, duration: 0.6 }}
           >
             <p className="text-purple-300 text-sm font-medium">
-              © 2024 Skyfalke. All rights reserved.
+              © {new Date().getFullYear()} Skyfalke Limited. All rights reserved.
             </p>
             <p className="text-purple-400 text-xs mt-1">
               Secure • Restricted • Monitored

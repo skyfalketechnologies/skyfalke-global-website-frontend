@@ -18,13 +18,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
 
-  // Initialize token from localStorage on client side only
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setToken(localStorage.getItem('token'));
-    }
-  }, []);
-
   // Set up api defaults
   useEffect(() => {
     if (token) {
@@ -34,24 +27,39 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Check if user is authenticated on app load
+  // Initialize auth state on app load (token + user) on client side only
   useEffect(() => {
-    const checkAuth = async () => {
-      if (token) {
-        try {
-          const response = await api.get('/api/auth/me');
-          setUser(response.data);
-        } catch (error) {
-          console.error('Auth check failed:', error);
-          localStorage.removeItem('token');
-          setToken(null);
-        }
+    const initializeAuth = async () => {
+      if (typeof window === 'undefined') {
+        return;
       }
-      setLoading(false);
+
+      const storedToken = localStorage.getItem('token');
+
+      // No token stored – mark auth as not loading
+      if (!storedToken) {
+        setLoading(false);
+        return;
+      }
+
+      // We have a token – set it and fetch the current user before clearing loading
+      setToken(storedToken);
+
+      try {
+        api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+        const response = await api.get('/api/auth/me');
+        setUser(response.data);
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        localStorage.removeItem('token');
+        setToken(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    checkAuth();
-  }, [token]);
+    initializeAuth();
+  }, []);
 
   const login = async (email, password) => {
     try {
@@ -91,34 +99,42 @@ export const AuthProvider = ({ children }) => {
       
       if (error.code === 'ERR_CERT_DATE_INVALID' || error.message?.includes('CERT_DATE_INVALID')) {
         errorMessage = 'SSL certificate error: The API server certificate is invalid or expired. Please contact support.';
-        console.error('Login error - SSL Certificate Issue:', {
-          message: error.message,
-          code: error.code,
-          apiUrl: api.defaults.baseURL
-        });
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Login error - SSL Certificate Issue:', {
+            message: error.message,
+            code: error.code,
+            apiUrl: api.defaults.baseURL
+          });
+        }
       } else if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
         errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection.';
-        console.error('Login error - Network Issue:', {
-          message: error.message,
-          code: error.code,
-          apiUrl: api.defaults.baseURL
-        });
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Login error - Network Issue:', {
+            message: error.message,
+            code: error.code,
+            apiUrl: api.defaults.baseURL
+          });
+        }
       } else if (error.response) {
         // Server responded with error status
         errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
-        console.error('Login error - Server Response:', {
-          status: error.response.status,
-          data: error.response.data,
-          message: error.response.data?.message
-        });
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Login error - Server Response:', {
+            status: error.response.status,
+            data: error.response.data,
+            message: error.response.data?.message
+          });
+        }
       } else {
         // Request was made but no response received
         errorMessage = error.message || 'Login failed. Please try again.';
-        console.error('Login error - Request Error:', {
-          message: error.message,
-          code: error.code,
-          stack: error.stack
-        });
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Login error - Request Error:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+          });
+        }
       }
       
       return { 

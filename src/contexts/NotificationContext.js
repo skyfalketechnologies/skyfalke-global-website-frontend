@@ -375,15 +375,8 @@ export const NotificationProvider = ({ children }) => {
         });
       })
       .catch((error) => {
-        // Only log if in development and error has meaningful information
-        if (process.env.NODE_ENV === 'development') {
-          const errorMessage = error?.message || error?.response?.data?.message || String(error);
-          // Only log if it's a meaningful error message (not just "Network Error" or empty)
-          if (errorMessage && errorMessage !== 'Network Error' && errorMessage !== '[object Object]') {
-            logger.error('Server health check failed:', errorMessage);
-          }
-        }
-        // Reset initialization flag even on error to allow retry
+        // Health check is best-effort only; ignore timeouts and failures
+        // to avoid noisy console errors in development.
         initializingRef.current = false;
       });
   }, [user, socket, getToken]);

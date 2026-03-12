@@ -25,18 +25,40 @@ import {
   FaPhone
 } from 'react-icons/fa';
 
-const JobDetail = () => {
+const JobDetail = ({ id: propId, initialServerData }) => {
   const params = useParams();
-  const id = params?.id;
+  const id = propId || params?.id;
   const router = useRouter();
-  const [job, setJob] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [job, setJob] = useState(() => initialServerData?.job || null);
+  const [loading, setLoading] = useState(!initialServerData);
   const [error, setError] = useState('');
   const [relatedJobs, setRelatedJobs] = useState([]);
 
+  const [currentUrl, setCurrentUrl] = useState('https://skyfalke.com/careers');
+
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
+  }, []);
+
+  useEffect(() => {
+    // If we already have a server-injected job for this id, use it for the
+    // initial render (better SEO) and only fetch when navigating between jobs.
+    if (!id) return;
+
+    if (job && job._id === id) {
+      // We still want related jobs and view tracking even when job came from SSR
+      fetchRelatedJobs(job.category, job._id);
+      setTimeout(() => {
+        trackJobView(job._id);
+      }, 1000);
+      setLoading(false);
+      return;
+    }
+
     fetchJobDetails();
-  }, [id]);
+  }, [id, job]);
 
   // Track job view with session storage to prevent duplicate counts
   const trackJobView = async (jobId) => {
@@ -82,7 +104,6 @@ const JobDetail = () => {
 
   const fetchJobDetails = async () => {
     try {
-      setLoading(true);
       setError('');
       
       const response = await apiGet(`/api/jobs/${id}`);
@@ -467,7 +488,7 @@ const JobDetail = () => {
                     <h3 className="text-lg font-bold text-gray-900 mb-4">Share This Job</h3>
                     <div className="flex space-x-3">
                       <a
-                        href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
+                      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-center text-sm font-medium transition-colors duration-200"

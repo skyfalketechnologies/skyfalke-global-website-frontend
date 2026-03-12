@@ -176,7 +176,9 @@ export function generateProductMetadata(product) {
     keywords: product.tags?.join(', ') || product.category || '',
     image: productImage,
     url: productUrl,
-    type: 'product',
+    // Use a valid Open Graph type supported by Next.js metadata
+    // 'website' is appropriate for product detail pages in this setup
+    type: 'website',
     canonical: productUrl,
   });
 }

@@ -6,13 +6,14 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 
 const JobDetail = dynamic(() => import('@/pageComponents/JobDetail'), {
   loading: () => <LoadingSpinner />,
-  ssr: false
+  // Allow this component to be server-rendered so crawlers see full HTML
+  ssr: true,
 });
 
-export default function JobDetailClient({ id }) {
+export default function JobDetailClient({ id, initialServerData }) {
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <JobDetail id={id} />
+      <JobDetail id={id} initialServerData={initialServerData} />
     </Suspense>
   );
 }

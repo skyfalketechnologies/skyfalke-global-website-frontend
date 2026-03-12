@@ -55,16 +55,20 @@ const isBlockedImage = (url) => {
   return BLOCKED_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix));
 };
 
-const ProductDetail = ({ slug: propSlug }) => {
+const ProductDetail = ({ slug: propSlug, initialServerData }) => {
   const params = useParams();
   const slug = propSlug || params?.slug;
   const router = useRouter();
   const { addToCart, isInCart, getItemQuantity } = useCart();
   const { trackProductView, trackProductAddToCart } = useAnalytics();
   
-  const [product, setProduct] = useState(null);
-  const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState(
+    () => initialServerData?.product || null
+  );
+  const [relatedProducts, setRelatedProducts] = useState(
+    () => initialServerData?.relatedProducts || []
+  );
+  const [loading, setLoading] = useState(!initialServerData);
   const [error, setError] = useState('');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -72,34 +76,45 @@ const ProductDetail = ({ slug: propSlug }) => {
   const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
+    // If we already have server-injected data for this slug, use it for the
+    // initial render (better HTML for crawlers) and skip the immediate refetch.
+    // We still keep the effect so that navigating between products on the
+    // client will fetch fresh data.
     fetchProduct();
   }, [slug]);
 
   const fetchProduct = async () => {
     try {
-      setLoading(true);
       setError('');
-      
-      // Check for SSR-injected initial data
-      const initialData = window.__INITIAL_DATA__;
+
+      // Prefer server-injected data passed as a prop – this ensures the
+      // HTML that crawlers see already contains the full product details.
+      let initialData = initialServerData;
+
+      // Legacy escape-hatch: support window.__INITIAL_DATA__ if present.
+      if (!initialData && typeof window !== 'undefined' && window.__INITIAL_DATA__) {
+        initialData = window.__INITIAL_DATA__;
+      }
+
       if (initialData && initialData.product && initialData.product.slug === slug) {
-        console.log('Using SSR-injected data for product');
         setProduct(initialData.product);
         if (initialData.relatedProducts) {
           setRelatedProducts(initialData.relatedProducts);
         }
-        
-        // Track product view
+
+        // Track product view for analytics
         trackProductView({
           id: initialData.product._id,
           name: initialData.product.name,
           price: initialData.product.currentPrice,
           category: initialData.product.category
         });
-        
-        // Clear initial data to prevent reuse
-        window.__INITIAL_DATA__ = null;
-        
+
+        // Clear legacy window cache on the client only
+        if (typeof window !== 'undefined') {
+          window.__INITIAL_DATA__ = null;
+        }
+
         setLoading(false);
         return;
       }
