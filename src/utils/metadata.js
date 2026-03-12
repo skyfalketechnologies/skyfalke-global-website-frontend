@@ -136,7 +136,7 @@ export function generateBlogMetadata(blog) {
     : DEFAULT_IMAGE;
 
   return generateMetadata({
-    title: `${blog.title} | Skyfalke Blog`,
+    title: `${blog.title}`,
     description: blog.excerpt || blog.description || `Read ${blog.title} on Skyfalke blog`,
     keywords: blog.tags?.join(', ') || blog.category || '',
     image: blogImage,
