@@ -37,7 +37,10 @@ const getApiBaseUrl = () => {
 // Create axios instance with default configuration
 const api = axios.create({
   baseURL: getApiBaseUrl(),
-  timeout: 30000, // 30 seconds
+  // Increase default timeout to better handle slower API endpoints like
+  // case studies aggregation, while still failing eventually instead of
+  // hanging indefinitely.
+  timeout: 60000, // 60 seconds
   headers: {
     'Content-Type': 'application/json',
   },
