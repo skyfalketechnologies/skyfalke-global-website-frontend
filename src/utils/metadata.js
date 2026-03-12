@@ -228,7 +228,6 @@ export function generateJobMetadata(job) {
     url: jobUrl,
     type: 'article',
     canonical: jobUrl,
-    noIndex: true, // Job postings typically shouldn't be indexed
   });
 }
 
