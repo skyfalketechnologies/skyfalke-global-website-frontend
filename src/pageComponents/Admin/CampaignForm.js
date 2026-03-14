@@ -18,8 +18,11 @@ import {
   FaInfoCircle,
   FaEnvelope,
   FaCog,
-  FaCalendarAlt
+  FaCalendarAlt,
+  FaFileExcel,
+  FaUpload
 } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 import { apiGet, apiPost, apiPut } from '../../utils/api';
 
 const CampaignForm = () => {
@@ -33,6 +36,8 @@ const CampaignForm = () => {
   const [status, setStatus] = useState({ type: null, message: '' });
   const [previewRecipients, setPreviewRecipients] = useState(null);
   const [loadingRecipients, setLoadingRecipients] = useState(false);
+  const [uploadingExcel, setUploadingExcel] = useState(false);
+  const [excelError, setExcelError] = useState(null);
   const [activeTab, setActiveTab] = useState('basic');
 
   const [formData, setFormData] = useState({
@@ -231,6 +236,85 @@ const CampaignForm = () => {
         customEmails: prev.recipients.customEmails.filter((_, i) => i !== index)
       }
     }));
+  };
+
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const parseExcelFile = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+          if (!rows.length) {
+            resolve([]);
+            return;
+          }
+          const headers = rows[0].map(h => String(h || '').toLowerCase().trim());
+          const emailCol = headers.findIndex(h => h === 'email' || h === 'e-mail' || h === 'email address');
+          const nameCol = headers.findIndex(h => h === 'name' || h === 'full name' || h === 'contact name');
+          const emails = [];
+          const seen = new Set();
+          for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            let email = '';
+            if (emailCol >= 0 && row[emailCol] != null) {
+              email = String(row[emailCol]).trim().toLowerCase();
+            } else if (row[0] != null) {
+              const first = String(row[0]).trim();
+              if (EMAIL_REGEX.test(first)) email = first.toLowerCase();
+            }
+            if (email && EMAIL_REGEX.test(email) && !seen.has(email)) {
+              seen.add(email);
+              emails.push(email);
+            }
+          }
+          resolve(emails);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const handleExcelUpload = async (e) => {
+    const file = e?.target?.files?.[0];
+    if (!file) return;
+    setExcelError(null);
+    setUploadingExcel(true);
+    try {
+      const emails = await parseExcelFile(file);
+      if (emails.length === 0) {
+        setExcelError('No valid email addresses found. Ensure the file has an "Email" column or emails in the first column.');
+        return;
+      }
+      const existing = new Set((formData.recipients.customEmails || []).map(e => e.toLowerCase().trim()));
+      const newEmails = emails.filter(email => !existing.has(email));
+      const merged = [...(formData.recipients.customEmails || []), ...newEmails];
+      setFormData(prev => ({
+        ...prev,
+        recipients: {
+          ...prev.recipients,
+          customEmails: merged
+        }
+      }));
+      setStatus({
+        type: 'success',
+        message: `Imported ${emails.length} email(s) from Excel (${newEmails.length} new, ${emails.length - newEmails.length} duplicates skipped).`
+      });
+      setTimeout(() => setStatus({ type: null, message: '' }), 5000);
+    } catch (err) {
+      console.error('Excel parse error:', err);
+      setExcelError(err?.message || 'Failed to parse Excel file. Use .xlsx or .xls with an Email column.');
+    } finally {
+      setUploadingExcel(false);
+      e.target.value = '';
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -521,10 +605,41 @@ const CampaignForm = () => {
                   </div>
 
                   {formData.recipientType === 'custom' && (
-                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg space-y-4">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                         Custom Email Addresses
                       </label>
+                      {/* Excel upload */}
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-700/50">
+                        <label className="flex flex-col items-center cursor-pointer">
+                          <input
+                            type="file"
+                            accept=".xlsx,.xls"
+                            onChange={handleExcelUpload}
+                            disabled={uploadingExcel}
+                            className="hidden"
+                          />
+                          <span className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50">
+                            {uploadingExcel ? (
+                              <>
+                                <FaSpinner className="animate-spin mr-2 h-4 w-4" />
+                                Parsing Excel...
+                              </>
+                            ) : (
+                              <>
+                                <FaFileExcel className="mr-2 h-4 w-4 text-green-600" />
+                                Upload recipients from Excel (.xlsx, .xls)
+                              </>
+                            )}
+                          </span>
+                          <span className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                            File should have an &quot;Email&quot; column, or emails in the first column. Names in a &quot;Name&quot; column are optional.
+                          </span>
+                        </label>
+                        {excelError && (
+                          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{excelError}</p>
+                        )}
+                      </div>
                       <div className="space-y-2 mb-3">
                         {formData.recipients.customEmails.map((email, index) => (
                           <div key={index} className="flex gap-2">
