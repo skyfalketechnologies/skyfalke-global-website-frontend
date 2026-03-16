@@ -301,6 +301,44 @@ router.get('/admin/:id', adminAuth, async (req, res) => {
   }
 });
 
+// Bulk update leads
+router.patch('/admin/bulk', adminAuth, async (req, res) => {
+  try {
+    const { leadIds, updates } = req.body;
+
+    if (!leadIds || !Array.isArray(leadIds) || leadIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Lead IDs are required'
+      });
+    }
+
+    const updateData = {};
+    if (updates.status) updateData.status = updates.status;
+    if (updates.lifecycleStage) updateData.lifecycleStage = updates.lifecycleStage;
+    if (updates.owner) updateData.owner = updates.owner;
+    if (updates.leadRating) updateData.leadRating = updates.leadRating;
+    if (updates.assignedAt) updateData.assignedAt = new Date();
+
+    const result = await Lead.updateMany(
+      { _id: { $in: leadIds } },
+      { $set: updateData }
+    );
+
+    res.json({
+      success: true,
+      message: `${result.modifiedCount} leads updated successfully`
+    });
+
+  } catch (error) {
+    console.error('Bulk update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update leads'
+    });
+  }
+});
+
 // Create new lead
 router.post('/admin', adminAuth, async (req, res) => {
   try {
@@ -750,43 +788,4 @@ router.delete('/admin/:id', adminAuth, async (req, res) => {
   }
 });
 
-// Bulk update leads
-router.patch('/admin/bulk', adminAuth, async (req, res) => {
-  try {
-    const { leadIds, updates } = req.body;
-
-    if (!leadIds || !Array.isArray(leadIds) || leadIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Lead IDs are required'
-      });
-    }
-
-    const updateData = {};
-    if (updates.status) updateData.status = updates.status;
-    if (updates.lifecycleStage) updateData.lifecycleStage = updates.lifecycleStage;
-    if (updates.owner) updateData.owner = updates.owner;
-    if (updates.leadRating) updateData.leadRating = updates.leadRating;
-    if (updates.assignedAt) updateData.assignedAt = new Date();
-
-    const result = await Lead.updateMany(
-      { _id: { $in: leadIds } },
-      updateData
-    );
-
-    res.json({
-      success: true,
-      message: `${result.modifiedCount} leads updated successfully`
-    });
-
-  } catch (error) {
-    console.error('Bulk update error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update leads'
-    });
-  }
-});
-
 module.exports = router;
-

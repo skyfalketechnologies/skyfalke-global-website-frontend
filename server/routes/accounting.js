@@ -389,23 +389,64 @@ router.get('/transactions', superAdminAuth, async (req, res) => {
   }
 });
 
-// Get single transaction
-router.get('/transactions/:id', superAdminAuth, async (req, res) => {
+// Get transaction stats
+router.get('/transactions/stats', superAdminAuth, async (req, res) => {
   try {
-    const transaction = await Transaction.findById(req.params.id)
-      .populate('account', 'name accountNumber')
-      .populate('toAccount', 'name accountNumber')
-      .populate('createdBy', 'name email')
-      .populate('approvedBy', 'name email');
-
-    if (!transaction) {
-      return res.status(404).json({ success: false, message: 'Transaction not found' });
+    const { startDate, endDate } = req.query;
+    const query = {};
+    if (startDate || endDate) {
+      query.date = {};
+      if (startDate) query.date.$gte = new Date(startDate);
+      if (endDate) query.date.$lte = new Date(endDate);
     }
 
-    res.json({ success: true, data: transaction });
+    // Get stats by type
+    const stats = await Transaction.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: '$type',
+          count: { $sum: 1 },
+          totalAmount: { $sum: '$amount' }
+        }
+      }
+    ]);
+
+    // Get total transactions count
+    const totalTransactions = await Transaction.countDocuments(query);
+    
+    // Get total income
+    const incomeQuery = { ...query, type: 'income' };
+    const totalIncomeResult = await Transaction.aggregate([
+      { $match: incomeQuery },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const totalIncome = totalIncomeResult[0]?.total || 0;
+    
+    // Get total expenses
+    const expenseQuery = { ...query, type: 'expense' };
+    const totalExpensesResult = await Transaction.aggregate([
+      { $match: expenseQuery },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const totalExpenses = totalExpensesResult[0]?.total || 0;
+
+    res.json({
+      success: true,
+      data: {
+        total: totalTransactions,
+        totalIncome: totalIncome,
+        totalExpenses: totalExpenses,
+        byType: stats
+      }
+    });
   } catch (error) {
-    console.error('Get transaction error:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch transaction' });
+    console.error('Transaction stats error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch stats',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -521,67 +562,6 @@ router.post('/transactions/:id/reconcile', superAdminAuth, async (req, res) => {
   } catch (error) {
     console.error('Reconcile transaction error:', error);
     res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// Get transaction stats
-router.get('/transactions/stats', superAdminAuth, async (req, res) => {
-  try {
-    const { startDate, endDate } = req.query;
-    const query = {};
-    if (startDate || endDate) {
-      query.date = {};
-      if (startDate) query.date.$gte = new Date(startDate);
-      if (endDate) query.date.$lte = new Date(endDate);
-    }
-
-    // Get stats by type
-    const stats = await Transaction.aggregate([
-      { $match: query },
-      {
-        $group: {
-          _id: '$type',
-          count: { $sum: 1 },
-          totalAmount: { $sum: '$amount' }
-        }
-      }
-    ]);
-
-    // Get total transactions count
-    const totalTransactions = await Transaction.countDocuments(query);
-    
-    // Get total income
-    const incomeQuery = { ...query, type: 'income' };
-    const totalIncomeResult = await Transaction.aggregate([
-      { $match: incomeQuery },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]);
-    const totalIncome = totalIncomeResult[0]?.total || 0;
-    
-    // Get total expenses
-    const expenseQuery = { ...query, type: 'expense' };
-    const totalExpensesResult = await Transaction.aggregate([
-      { $match: expenseQuery },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]);
-    const totalExpenses = totalExpensesResult[0]?.total || 0;
-
-    res.json({
-      success: true,
-      data: {
-        total: totalTransactions,
-        totalIncome: totalIncome,
-        totalExpenses: totalExpenses,
-        byType: stats
-      }
-    });
-  } catch (error) {
-    console.error('Transaction stats error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to fetch stats',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
   }
 });
 

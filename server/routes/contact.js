@@ -260,6 +260,42 @@ router.get('/admin/:id', adminAuth, async (req, res) => {
   }
 });
 
+// Bulk update contacts
+router.patch('/admin/bulk', adminAuth, async (req, res) => {
+  try {
+    const { contactIds, updates } = req.body;
+
+    if (!contactIds || !Array.isArray(contactIds) || contactIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact IDs are required'
+      });
+    }
+
+    const updateData = {};
+    if (updates.status) updateData.status = updates.status;
+    if (updates.priority) updateData.priority = updates.priority;
+    if (updates.assignedTo) updateData.assignedTo = updates.assignedTo;
+
+    const result = await Contact.updateMany(
+      { _id: { $in: contactIds } },
+      { $set: updateData }
+    );
+
+    res.json({
+      success: true,
+      message: `${result.modifiedCount} contacts updated successfully`
+    });
+
+  } catch (error) {
+    console.error('Bulk update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update contacts'
+    });
+  }
+});
+
 // Update contact status
 router.patch('/admin/:id/status', adminAuth, async (req, res) => {
   try {
@@ -425,42 +461,6 @@ router.delete('/admin/:id', adminAuth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete contact'
-    });
-  }
-});
-
-// Bulk update contacts
-router.patch('/admin/bulk', adminAuth, async (req, res) => {
-  try {
-    const { contactIds, updates } = req.body;
-
-    if (!contactIds || !Array.isArray(contactIds) || contactIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Contact IDs are required'
-      });
-    }
-
-    const updateData = {};
-    if (updates.status) updateData.status = updates.status;
-    if (updates.priority) updateData.priority = updates.priority;
-    if (updates.assignedTo) updateData.assignedTo = updates.assignedTo;
-
-    const result = await Contact.updateMany(
-      { _id: { $in: contactIds } },
-      updateData
-    );
-
-    res.json({
-      success: true,
-      message: `${result.modifiedCount} contacts updated successfully`
-    });
-
-  } catch (error) {
-    console.error('Bulk update error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update contacts'
     });
   }
 });

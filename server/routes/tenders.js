@@ -106,6 +106,37 @@ router.get('/admin/stats', adminAuth, dbCheck, async (req, res) => {
   }
 });
 
+// Bulk update tenders
+router.patch('/admin/bulk', adminAuth, dbCheck, async (req, res) => {
+  try {
+    const { tenderIds, updates } = req.body;
+
+    if (!tenderIds || !Array.isArray(tenderIds) || tenderIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tender IDs are required'
+      });
+    }
+
+    const result = await Tender.updateMany(
+      { _id: { $in: tenderIds } },
+      { $set: updates }
+    );
+
+    res.json({
+      success: true,
+      message: `${result.modifiedCount} tender(s) updated successfully`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Bulk update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update tenders'
+    });
+  }
+});
+
 // Get single tender by ID
 router.get('/admin/:id', adminAuth, dbCheck, async (req, res) => {
   try {
@@ -436,37 +467,6 @@ router.patch('/admin/:id/application', adminAuth, dbCheck, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update application status'
-    });
-  }
-});
-
-// Bulk update tenders
-router.patch('/admin/bulk', adminAuth, dbCheck, async (req, res) => {
-  try {
-    const { tenderIds, updates } = req.body;
-
-    if (!tenderIds || !Array.isArray(tenderIds) || tenderIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Tender IDs are required'
-      });
-    }
-
-    const result = await Tender.updateMany(
-      { _id: { $in: tenderIds } },
-      { $set: updates }
-    );
-
-    res.json({
-      success: true,
-      message: `${result.modifiedCount} tender(s) updated successfully`,
-      modifiedCount: result.modifiedCount
-    });
-  } catch (error) {
-    console.error('Bulk update error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update tenders'
     });
   }
 });

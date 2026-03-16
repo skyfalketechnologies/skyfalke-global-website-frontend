@@ -767,21 +767,21 @@ router.post('/admin/bulk', adminAuth, async (req, res) => {
       case 'publish':
         result = await Blog.updateMany(
           { _id: { $in: blogIds } },
-          { status: 'published', publishedAt: new Date() }
+          { $set: { status: 'published', publishedAt: new Date() } }
         );
         break;
       
       case 'unpublish':
         result = await Blog.updateMany(
           { _id: { $in: blogIds } },
-          { status: 'draft' }
+          { $set: { status: 'draft' } }
         );
         break;
       
       case 'archive':
         result = await Blog.updateMany(
           { _id: { $in: blogIds } },
-          { status: 'archived' }
+          { $set: { status: 'archived' } }
         );
         break;
       
