@@ -27,6 +27,8 @@ const Tenders = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
   const [filters, setFilters] = useState({
     status: '',
     assignee: '',
@@ -37,18 +39,19 @@ const Tenders = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedTenders, setSelectedTenders] = useState([]);
   const [bulkAction, setBulkAction] = useState('');
+  const [rowDensity, setRowDensity] = useState('comfortable'); // 'comfortable' | 'compact'
 
   useEffect(() => {
     fetchTenders();
     fetchStats();
-  }, [currentPage, filters, sortBy, sortOrder]);
+  }, [currentPage, filters, sortBy, sortOrder, pageSize]);
 
   const fetchTenders = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
         page: currentPage,
-        limit: 20,
+        limit: pageSize,
         sortBy,
         sortOrder,
         ...filters
@@ -57,6 +60,7 @@ const Tenders = () => {
       const response = await apiGet(`/api/tenders/admin/all?${params}`);
       setTenders(response.data.tenders);
       setTotalPages(response.data.pagination.totalPages);
+      setTotalItems(response.data.pagination.totalItems || 0);
     } catch (error) {
       console.error('Error fetching tenders:', error);
     } finally {
@@ -199,6 +203,15 @@ const Tenders = () => {
       currency: currency
     }).format(amount);
   };
+
+  const getItemRangeLabel = () => {
+    if (!totalItems) return 'No records';
+    const start = (currentPage - 1) * pageSize + 1;
+    const end = Math.min(currentPage * pageSize, totalItems);
+    return `Showing ${start}–${end} of ${totalItems}`;
+  };
+
+  const rowPaddingClass = rowDensity === 'compact' ? 'py-2' : 'py-4';
 
   return (
     <div className="p-6 space-y-6">
@@ -403,7 +416,72 @@ const Tenders = () => {
       )}
 
       {/* Tenders Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700/60 overflow-hidden">
+        {/* Table header controls (density, page size, quick stats) */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 px-6 py-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700/60">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">
+                Tenders & Opportunities
+              </span>
+              {Boolean(totalItems) && (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">
+                  {totalItems} active records
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Scroll through a long list comfortably with sticky headers and compact rows.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="hidden md:flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-full px-1 py-1">
+              <button
+                type="button"
+                onClick={() => setRowDensity('comfortable')}
+                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                  rowDensity === 'comfortable'
+                    ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-white'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                Comfortable
+              </button>
+              <button
+                type="button"
+                onClick={() => setRowDensity('compact')}
+                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                  rowDensity === 'compact'
+                    ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-white'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                Compact
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">Rows per page</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  const newSize = Number(e.target.value);
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+                className="px-2 py-1 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+              >
+                {[10, 20, 50, 100].map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
         {loading ? (
           <div className="flex items-center justify-center p-12">
             <FaSpinner className="animate-spin text-4xl text-primary-500" />
@@ -415,8 +493,9 @@ const Tenders = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-900">
+            <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm sticky top-0 z-10">
                 <tr>
                   <th className="px-6 py-3 text-left">
                     <input
@@ -445,11 +524,11 @@ const Tenders = () => {
                     Actions
                   </th>
                 </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {tenders.map((tender) => (
-                  <tr key={tender._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr key={tender._id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${rowDensity === 'compact' ? 'text-sm' : 'text-sm md:text-base'}`}>
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <input
                         type="checkbox"
                         checked={selectedTenders.includes(tender._id)}
@@ -457,7 +536,7 @@ const Tenders = () => {
                         className="rounded border-gray-300 text-primary-500 focus:ring-primary-500"
                       />
                     </td>
-                    <td className="px-6 py-4">
+                    <td className={`px-6 ${rowPaddingClass}`}>
                       <div className="flex items-center">
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -477,7 +556,7 @@ const Tenders = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <div className="flex items-center">
                         <FaBuilding className="mr-2 text-gray-400" />
                         <span className="text-sm text-gray-900 dark:text-white">
@@ -485,7 +564,7 @@ const Tenders = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <div className="flex items-center">
                         <FaCalendarAlt className="mr-2 text-gray-400" />
                         <span className={`text-sm ${isDeadlinePassed(tender.deadline) ? 'text-red-600 font-semibold' : isDeadlineApproaching(tender.deadline) ? 'text-yellow-600 font-semibold' : 'text-gray-900 dark:text-white'}`}>
@@ -493,12 +572,12 @@ const Tenders = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(tender.status)}`}>
                         {tender.status.replace('_', ' ').toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       {tender.assignee ? (
                         <div className="flex items-center">
                           <FaUser className="mr-2 text-gray-400" />
@@ -510,7 +589,7 @@ const Tenders = () => {
                         <span className="text-sm text-gray-400">Unassigned</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap text-sm font-medium`}>
                       <div className="flex items-center gap-2">
                         <Link href={`/system/dashboard/tenders/${tender._id}`}
                           className="text-primary-600 hover:text-primary-900 dark:text-primary-400"
@@ -535,31 +614,51 @@ const Tenders = () => {
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4 flex items-center justify-between">
-            <div className="text-sm text-gray-700 dark:text-gray-300">
-              Page {currentPage} of {totalPages}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+              <div className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                {getItemRangeLabel()}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Page {currentPage} of {totalPages}
+              </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="hidden sm:inline-flex px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white"
+              >
+                First
+              </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white text-xs sm:text-sm"
               >
                 Previous
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white text-xs sm:text-sm"
               >
                 Next
+              </button>
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="hidden sm:inline-flex px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white"
+              >
+                Last
               </button>
             </div>
           </div>
