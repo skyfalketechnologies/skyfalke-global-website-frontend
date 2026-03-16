@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -51,7 +52,7 @@ import NotificationDropdown from './NotificationDropdown';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout, isAuthenticated, isSuperAdmin } = useAuth();
+  const { user, logout, isAuthenticated, isSuperAdmin, loading } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
@@ -131,12 +132,21 @@ const AdminLayout = ({ children }) => {
     });
   }, [pathname]);
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated (only after loading is complete)
   useEffect(() => {
-    if (!isAuthenticated()) {
+    if (!loading && !isAuthenticated()) {
       router.push('/system/portal/access');
     }
-  }, [isAuthenticated, router]);
+  }, [loading, isAuthenticated, router]);
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated()) {
     return null; // Will redirect via useEffect
@@ -267,7 +277,18 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-100 dark:bg-gray-900">
+    <>
+      <Helmet>
+        <title>Admin Dashboard | Skyfalke</title>
+        {/* Set favicon for admin pages */}
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
+        <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/favicon-96x96.png" sizes="96x96" type="image/png" />
+        <link rel="apple-touch-icon" href="/favicon-192x192.png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/favicon-512x512.png" sizes="512x512" />
+      </Helmet>
+      <div className="h-screen flex overflow-hidden bg-gray-100 dark:bg-gray-900">
       {/* Mobile sidebar overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -386,6 +407,7 @@ const AdminLayout = ({ children }) => {
         </main>
       </div>
     </div>
+    </>
   );
 };
 

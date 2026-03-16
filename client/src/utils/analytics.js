@@ -13,11 +13,55 @@ const ANALYTICS_CONFIG = {
   DEBUG: process.env.NODE_ENV === 'development'
 };
 
+// Admin URL patterns to exclude from analytics tracking
+const ADMIN_URL_PATTERNS = [
+  '/system/dashboard',
+  '/system/portal',
+  '/system/',
+  '/admin',
+  '/administrator',
+  '/admin-panel'
+];
+
+// Check if current URL is an admin URL
+const isAdminURL = (url = null) => {
+  if (typeof window === 'undefined') return false;
+  
+  let pathname;
+  if (url) {
+    // If URL is provided, extract pathname from it
+    try {
+      const urlObj = url.startsWith('http') ? new URL(url) : { pathname: url };
+      pathname = urlObj.pathname;
+    } catch (e) {
+      // If URL parsing fails, treat as pathname
+      pathname = url;
+    }
+  } else {
+    pathname = window.location.pathname;
+  }
+  
+  return ADMIN_URL_PATTERNS.some(pattern => {
+    if (pattern.endsWith('/')) {
+      return pathname.startsWith(pattern);
+    }
+    return pathname === pattern || pathname.startsWith(pattern + '/');
+  });
+};
+
 // Initialize Google Analytics 4
 export const initializeGA4 = () => {
   if (typeof window === 'undefined' || !ANALYTICS_CONFIG.GA4_MEASUREMENT_ID) {
     if (ANALYTICS_CONFIG.DEBUG) {
       console.warn('GA4 not initialized: Missing measurement ID or not in browser environment');
+    }
+    return;
+  }
+
+  // Skip initialization on admin URLs
+  if (isAdminURL()) {
+    if (ANALYTICS_CONFIG.DEBUG) {
+      console.log('GA4 initialization skipped: Admin URL detected');
     }
     return;
   }
@@ -48,12 +92,22 @@ export const initializeGA4 = () => {
       }
       
       gtag('js', new Date());
-      gtag('config', ANALYTICS_CONFIG.GA4_MEASUREMENT_ID, {
-        page_title: document.title,
-        page_location: window.location.href,
-        debug_mode: ANALYTICS_CONFIG.DEBUG,
-        send_page_view: true
-      });
+      
+      // Only send page view if not on admin URL
+      if (!isAdminURL()) {
+        gtag('config', ANALYTICS_CONFIG.GA4_MEASUREMENT_ID, {
+          page_title: document.title,
+          page_location: window.location.href,
+          debug_mode: ANALYTICS_CONFIG.DEBUG,
+          send_page_view: true
+        });
+      } else {
+        // Initialize without page view tracking
+        gtag('config', ANALYTICS_CONFIG.GA4_MEASUREMENT_ID, {
+          debug_mode: ANALYTICS_CONFIG.DEBUG,
+          send_page_view: false
+        });
+      }
 
       window.gtag = gtag;
 
@@ -88,6 +142,14 @@ export const initializeMetaPixel = () => {
     return;
   }
 
+  // Skip initialization on admin URLs
+  if (isAdminURL()) {
+    if (ANALYTICS_CONFIG.DEBUG) {
+      console.log('Meta Pixel initialization skipped: Admin URL detected');
+    }
+    return;
+  }
+
   // Check cookie consent
   const cookieConsent = localStorage.getItem('cookieConsent');
   if (cookieConsent !== 'all') {
@@ -96,6 +158,7 @@ export const initializeMetaPixel = () => {
 
   // Load Meta Pixel script
   const script = document.createElement('script');
+  const shouldTrackPageView = !isAdminURL();
   script.innerHTML = `
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -106,19 +169,21 @@ export const initializeMetaPixel = () => {
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '${ANALYTICS_CONFIG.META_PIXEL_ID}');
-    fbq('track', 'PageView');
+    ${shouldTrackPageView ? "fbq('track', 'PageView');" : ''}
   `;
   document.head.appendChild(script);
 
-  // Add noscript fallback
-  const noscript = document.createElement('noscript');
-  const img = document.createElement('img');
-  img.height = 1;
-  img.width = 1;
-  img.style.display = 'none';
-  img.src = `https://www.facebook.com/tr?id=${ANALYTICS_CONFIG.META_PIXEL_ID}&ev=PageView&noscript=1`;
-  noscript.appendChild(img);
-  document.head.appendChild(noscript);
+  // Add noscript fallback (only if not admin URL)
+  if (shouldTrackPageView) {
+    const noscript = document.createElement('noscript');
+    const img = document.createElement('img');
+    img.height = 1;
+    img.width = 1;
+    img.style.display = 'none';
+    img.src = `https://www.facebook.com/tr?id=${ANALYTICS_CONFIG.META_PIXEL_ID}&ev=PageView&noscript=1`;
+    noscript.appendChild(img);
+    document.head.appendChild(noscript);
+  }
 
   // Meta Pixel initialized successfully
 };
@@ -126,6 +191,11 @@ export const initializeMetaPixel = () => {
 // Google Analytics 4 Event Tracking
 export const trackGA4Event = (eventName, parameters = {}) => {
   if (typeof window === 'undefined' || !window.gtag) {
+    return;
+  }
+
+  // Skip tracking on admin URLs
+  if (isAdminURL()) {
     return;
   }
 
@@ -149,6 +219,11 @@ export const trackMetaPixelEvent = (eventName, parameters = {}) => {
     return;
   }
 
+  // Skip tracking on admin URLs
+  if (isAdminURL()) {
+    return;
+  }
+
   // Check cookie consent
   const cookieConsent = localStorage.getItem('cookieConsent');
   if (cookieConsent !== 'all') {
@@ -162,6 +237,15 @@ export const trackMetaPixelEvent = (eventName, parameters = {}) => {
 
 // Page View Tracking
 export const trackPageView = (pageTitle = null, pageLocation = null) => {
+  // Skip tracking on admin URLs
+  const location = pageLocation || (typeof window !== 'undefined' ? window.location.href : '');
+  if (isAdminURL(location)) {
+    if (ANALYTICS_CONFIG.DEBUG) {
+      console.log('Page view tracking skipped: Admin URL detected');
+    }
+    return;
+  }
+
   // Check cookie consent
   const cookieConsent = localStorage.getItem('cookieConsent');
   if (cookieConsent !== 'all') {
@@ -169,7 +253,6 @@ export const trackPageView = (pageTitle = null, pageLocation = null) => {
   }
 
   const title = pageTitle || document.title;
-  const location = pageLocation || window.location.href;
 
   // GA4 Page View
   if (window.gtag) {
@@ -460,6 +543,11 @@ export const initializeAnalyticsWithConsent = () => {
 export const testGA4Connection = () => {
   if (typeof window === 'undefined' || !window.gtag) {
     console.warn('GA4 not available for testing');
+    return false;
+  }
+
+  // Skip test on admin URLs
+  if (isAdminURL()) {
     return false;
   }
 

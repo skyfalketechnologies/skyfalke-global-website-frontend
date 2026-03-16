@@ -57,12 +57,6 @@ const BlogCard = ({ post, featured = false }) => {
 
         <div className="flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center gap-4">
-            {post.author?.name && (
-              <div className="flex items-center gap-1">
-                <FaUser className="w-3 h-3" />
-                <span itemProp="author">{post.author.name}</span>
-              </div>
-            )}
             {post.publishedAt && (
               <div className="flex items-center gap-1">
                 <FaCalendar className="w-3 h-3" />

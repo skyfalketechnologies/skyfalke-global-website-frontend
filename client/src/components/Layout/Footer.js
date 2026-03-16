@@ -130,7 +130,7 @@ const Footer = () => {
     { name: 'Facebook', icon: FaFacebook, href: 'https://facebook.com/skyfalke', color: 'hover:bg-blue-600' },
     { name: 'Twitter', icon: FaTwitter, href: 'https://twitter.com/skyfalke', color: 'hover:bg-sky-500' },
     { name: 'LinkedIn', icon: FaLinkedin, href: 'https://linkedin.com/company/skyfalke', color: 'hover:bg-blue-700' },
-    { name: 'Instagram', icon: FaInstagram, href: 'https://instagram.com/skyfalkecloud', color: 'hover:bg-pink-600' }
+    { name: 'Instagram', icon: FaInstagram, href: 'https://instagram.com/skyfalkeofficial', color: 'hover:bg-pink-600' }
   ];
 
   const contactInfo = [

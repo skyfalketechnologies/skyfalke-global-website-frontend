@@ -6,6 +6,16 @@
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 const DEFAULT_IMAGE = `${BASE_URL}/favicon-512x512.png`;
 
+// Blocklist for images that must never be used as OG/Twitter images
+const BLOCKED_IMAGE_PREFIXES = [
+  'https://ik.imagekit.io/g3nahgeeu/customers/cfao.png',
+];
+
+const isBlockedImage = (url) => {
+  if (!url) return false;
+  return BLOCKED_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix));
+};
+
 /**
  * Generate metadata object for Next.js pages
  */
@@ -33,7 +43,17 @@ export function generateMetadata({
   articleTags = []
 }) {
   const fullUrl = canonical || url || BASE_URL;
-  const fullImageUrl = image && image.startsWith('http') ? image : `${BASE_URL}${image}`;
+
+  // Ensure we never use blocked images as the primary OG/Twitter image
+  let safeImage = image || DEFAULT_IMAGE;
+  if (isBlockedImage(safeImage)) {
+    safeImage = DEFAULT_IMAGE;
+  }
+
+  const fullImageUrl =
+    safeImage && safeImage.startsWith('http')
+      ? safeImage
+      : `${BASE_URL}${safeImage}`;
   const finalTitle = title || 'Skyfalke • Leading Digital Marketing & Technology Solutions Partner in Africa';
   const finalDescription = description || 'Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics.';
   const finalKeywords = keywords || 'digital marketing agency Africa, sustainable cloud hosting Kenya, AI business solutions, eco-friendly web hosting, renewable energy servers, digital transformation Africa, IT consultancy Kenya, creative services Africa, data analytics, business intelligence';
@@ -116,7 +136,7 @@ export function generateBlogMetadata(blog) {
     : DEFAULT_IMAGE;
 
   return generateMetadata({
-    title: `${blog.title} | Skyfalke Blog`,
+    title: `${blog.title}`,
     description: blog.excerpt || blog.description || `Read ${blog.title} on Skyfalke blog`,
     keywords: blog.tags?.join(', ') || blog.category || '',
     image: blogImage,
@@ -156,7 +176,9 @@ export function generateProductMetadata(product) {
     keywords: product.tags?.join(', ') || product.category || '',
     image: productImage,
     url: productUrl,
-    type: 'product',
+    // Use a valid Open Graph type supported by Next.js metadata
+    // 'website' is appropriate for product detail pages in this setup
+    type: 'website',
     canonical: productUrl,
   });
 }
@@ -208,7 +230,6 @@ export function generateJobMetadata(job) {
     url: jobUrl,
     type: 'article',
     canonical: jobUrl,
-    noIndex: true, // Job postings typically shouldn't be indexed
   });
 }
 

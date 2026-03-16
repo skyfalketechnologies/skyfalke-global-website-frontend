@@ -41,6 +41,7 @@ const Jobs = () => {
   useEffect(() => {
     fetchJobs();
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, searchTerm, selectedCategory, selectedStatus]);
 
   const fetchJobs = async () => {
@@ -56,12 +57,18 @@ const Jobs = () => {
 
       const response = await fetchJobsData(params);
       
+      // Handle different response structures
       if (response.success && response.data) {
-        setJobs(response.data.jobs || []);
-        setTotalPages(response.data.pagination?.totalPages || 1);
-        setTotalJobs(response.data.pagination?.totalJobs || 0);
+        // Try different possible response structures
+        const jobsData = response.data.data || response.data;
+        const jobs = jobsData.jobs || jobsData.data || (Array.isArray(jobsData) ? jobsData : []);
+        const pagination = jobsData.pagination || response.data.pagination;
+        
+        setJobs(jobs);
+        setTotalPages(pagination?.totalPages || pagination?.pages || 1);
+        setTotalJobs(pagination?.totalJobs || pagination?.total || jobs.length || 0);
       } else {
-        console.warn('Jobs API returned fallback data');
+        console.warn('Jobs API returned fallback data:', response);
         setJobs([]);
         setTotalPages(1);
         setTotalJobs(0);
@@ -83,7 +90,14 @@ const Jobs = () => {
       const response = await fetchJobsStats();
       
       if (response.success && response.data) {
-        setStats(response.data.overview || response.data);
+        // Handle different response structures
+        const statsData = response.data.overview || response.data.data || response.data;
+        setStats({
+          total: statsData.total || statsData.totalJobs || 0,
+          active: statsData.active || statsData.activeJobs || 0,
+          inactive: statsData.inactive || statsData.inactiveJobs || 0,
+          applications: statsData.applications || statsData.totalApplications || 0
+        });
       } else {
         console.warn('Jobs stats API returned fallback data');
         setStats({
@@ -94,9 +108,8 @@ const Jobs = () => {
         });
       }
     } catch (error) {
-      console.error('Error fetching stats:', error);
-      const errorMessage = handleAdminApiError(error, 'Failed to fetch job statistics');
-      console.warn('Using fallback stats due to API error:', errorMessage);
+      console.warn('Error fetching stats:', error);
+      // Don't set error state for stats - it's not critical
       setStats({
         total: 0,
         active: 0,

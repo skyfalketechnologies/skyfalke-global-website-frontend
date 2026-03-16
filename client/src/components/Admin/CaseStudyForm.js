@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useRouter, useParams } from 'next/navigation';
 import { apiGet, apiPost, apiPut } from '../../utils/api';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import RichTextEditor from '../RichTextEditor';
 import ImageUpload from '../ImageUpload';
 import {
   FaSave,
@@ -110,24 +109,6 @@ const CaseStudyForm = () => {
     'Not disclosed'
   ];
 
-  // Rich text editor configuration
-  const quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      ['link', 'blockquote', 'code-block'],
-      [{ 'align': [] }],
-      ['clean']
-    ],
-  };
-
-  const quillFormats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'indent', 'link', 'blockquote',
-    'code-block', 'align'
-  ];
 
   useEffect(() => {
     if (isEditing) {
@@ -535,15 +516,12 @@ const CaseStudyForm = () => {
                   Description *
                 </label>
                 <div className="border border-gray-300 rounded-lg dark:border-gray-600">
-                  <ReactQuill
-                    theme="snow"
-                  value={formData.description}
+                  <RichTextEditor
+                    value={formData.description}
                     onChange={(value) => handleRichTextChange('description', value)}
-                    modules={quillModules}
-                    formats={quillFormats}
-                  placeholder="Detailed description of the project"
+                    placeholder="Detailed description of the project"
                     style={{ minHeight: '150px' }}
-                />
+                  />
                 </div>
               </div>
 
@@ -552,15 +530,12 @@ const CaseStudyForm = () => {
                   Challenge *
                 </label>
                 <div className="border border-gray-300 rounded-lg dark:border-gray-600">
-                  <ReactQuill
-                    theme="snow"
-                  value={formData.challenge}
+                  <RichTextEditor
+                    value={formData.challenge}
                     onChange={(value) => handleRichTextChange('challenge', value)}
-                    modules={quillModules}
-                    formats={quillFormats}
-                  placeholder="What challenges did the client face?"
+                    placeholder="What challenges did the client face?"
                     style={{ minHeight: '120px' }}
-                />
+                  />
                 </div>
               </div>
 
@@ -569,15 +544,12 @@ const CaseStudyForm = () => {
                   Solution *
                 </label>
                 <div className="border border-gray-300 rounded-lg dark:border-gray-600">
-                  <ReactQuill
-                    theme="snow"
-                  value={formData.solution}
+                  <RichTextEditor
+                    value={formData.solution}
                     onChange={(value) => handleRichTextChange('solution', value)}
-                    modules={quillModules}
-                    formats={quillFormats}
-                  placeholder="How did you solve the problem?"
+                    placeholder="How did you solve the problem?"
                     style={{ minHeight: '120px' }}
-                />
+                  />
                 </div>
               </div>
 
@@ -586,15 +558,12 @@ const CaseStudyForm = () => {
                   Results *
                 </label>
                 <div className="border border-gray-300 rounded-lg dark:border-gray-600">
-                  <ReactQuill
-                    theme="snow"
-                  value={formData.results}
+                  <RichTextEditor
+                    value={formData.results}
                     onChange={(value) => handleRichTextChange('results', value)}
-                    modules={quillModules}
-                    formats={quillFormats}
-                  placeholder="What were the results and impact?"
+                    placeholder="What were the results and impact?"
                     style={{ minHeight: '120px' }}
-                />
+                  />
                 </div>
               </div>
             </div>

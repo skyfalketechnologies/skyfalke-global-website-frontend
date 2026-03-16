@@ -146,12 +146,7 @@ const BlogSection = () => {
                 {/* Content */}
                 <div className="p-6">
                   {/* Meta Info */}
-                  <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                    <div className="flex items-center space-x-1">
-                      <FaUser />
-                      <span>{blog.author?.name || blog.author || 'Skyfalke Team'}</span>
-                    </div>
-                  </div>
+                  
 
                   {/* Title */}
                   <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">

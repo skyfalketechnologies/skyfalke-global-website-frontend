@@ -37,7 +37,10 @@ const getApiBaseUrl = () => {
 // Create axios instance with default configuration
 const api = axios.create({
   baseURL: getApiBaseUrl(),
-  timeout: 30000, // 30 seconds
+  // Increase default timeout to better handle slower API endpoints like
+  // case studies aggregation, while still failing eventually instead of
+  // hanging indefinitely.
+  timeout: 60000, // 60 seconds
   headers: {
     'Content-Type': 'application/json',
   },
@@ -151,6 +154,17 @@ api.interceptors.response.use(
     if (error.response?.status === 429) {
       logger.warn('Rate limit exceeded. Please wait before making more requests.');
       // You could implement retry logic here with exponential backoff
+    }
+    
+    // Handle 500 Internal Server Error
+    if (error.response?.status >= 500 && error.response?.status < 600) {
+      // Server errors are handled gracefully by components
+      // Log as warning in development, but don't spam console
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Server error (${error.response.status}) on ${error.config?.method?.toUpperCase()} ${error.config?.url}:`, 
+          error.response?.data?.message || 'Internal server error');
+      }
+      // Don't throw - let the calling code handle it gracefully
     }
     
     // Handle 404 Not Found

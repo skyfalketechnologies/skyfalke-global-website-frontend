@@ -66,7 +66,12 @@ const CaseStudies = () => {
       if (selectedService !== 'All') params.append('service', selectedService);
       if (featuredOnly) params.append('featured', 'true');
 
-      const response = await apiGet(`/api/case-studies?${params}`);
+      // Use a per-call timeout so the UI fails fast if this specific
+      // endpoint is slow or unreachable, instead of hanging for the
+      // full global Axios timeout.
+      const response = await apiGet(`/api/case-studies?${params}`, {
+        timeout: 10000, // 10 seconds
+      });
       
       if (response.data.success) {
         setCaseStudies(response.data.data.caseStudies);

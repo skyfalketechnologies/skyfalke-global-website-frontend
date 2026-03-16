@@ -33,51 +33,97 @@ import {
   FaShippingFast
 } from 'react-icons/fa';
 
-const ProductDetail = ({ slug: propSlug }) => {
+// Helper utilities for safer SEO metadata
+const stripHtmlTags = (html) => {
+  if (!html || typeof html !== 'string') return '';
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+const truncateText = (text, maxLength = 160) => {
+  if (!text || typeof text !== 'string') return '';
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1)}…`;
+};
+
+// Blocklist for images that must never be used as OG/Twitter images
+const BLOCKED_IMAGE_PREFIXES = [
+  'https://ik.imagekit.io/g3nahgeeu/customers/cfao.png',
+];
+
+const isBlockedImage = (url) => {
+  if (!url) return false;
+  return BLOCKED_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix));
+};
+
+const ProductDetail = ({ slug: propSlug, initialServerData }) => {
   const params = useParams();
   const slug = propSlug || params?.slug;
   const router = useRouter();
   const { addToCart, isInCart, getItemQuantity } = useCart();
   const { trackProductView, trackProductAddToCart } = useAnalytics();
   
-  const [product, setProduct] = useState(null);
-  const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState(
+    () => initialServerData?.product || null
+  );
+  const [relatedProducts, setRelatedProducts] = useState(
+    () => initialServerData?.relatedProducts || []
+  );
+  const [loading, setLoading] = useState(!initialServerData);
   const [error, setError] = useState('');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
+  // Track whether we have a trusted server-provided product for this slug.
+  const hasServerProduct =
+    !!initialServerData?.product && initialServerData.product.slug === slug;
+
   useEffect(() => {
+    // If we already have server-injected data for this slug, use it for the
+    // initial render (better HTML for crawlers) and avoid immediately
+    // refetching the same product. We still keep this effect so that client-
+    // side navigation between products triggers a fresh fetch.
+    if (hasServerProduct && product && product.slug === slug) {
+      setLoading(false);
+      return;
+    }
+
     fetchProduct();
   }, [slug]);
 
   const fetchProduct = async () => {
     try {
-      setLoading(true);
       setError('');
-      
-      // Check for SSR-injected initial data
-      const initialData = window.__INITIAL_DATA__;
+
+      // Prefer server-injected data passed as a prop – this ensures the
+      // HTML that crawlers see already contains the full product details.
+      let initialData = initialServerData;
+
+      // Legacy escape-hatch: support window.__INITIAL_DATA__ if present.
+      if (!initialData && typeof window !== 'undefined' && window.__INITIAL_DATA__) {
+        initialData = window.__INITIAL_DATA__;
+      }
+
       if (initialData && initialData.product && initialData.product.slug === slug) {
-        console.log('Using SSR-injected data for product');
         setProduct(initialData.product);
         if (initialData.relatedProducts) {
           setRelatedProducts(initialData.relatedProducts);
         }
-        
-        // Track product view
+
+        // Track product view for analytics
         trackProductView({
           id: initialData.product._id,
           name: initialData.product.name,
           price: initialData.product.currentPrice,
           category: initialData.product.category
         });
-        
-        // Clear initial data to prevent reuse
-        window.__INITIAL_DATA__ = null;
-        
+
+        // Clear legacy window cache on the client only
+        if (typeof window !== 'undefined') {
+          window.__INITIAL_DATA__ = null;
+        }
+
         setLoading(false);
         return;
       }
@@ -174,7 +220,11 @@ const ProductDetail = ({ slug: propSlug }) => {
     );
   }
 
-  if (error || !product) {
+  // IMPORTANT: if we already have a server-hydrated product for this slug,
+  // we should never replace it with a "not found" shell due to a transient
+  // client-side error. Proper 404s are handled via the Next.js route
+  // (`notFound()` in the product page), not here.
+  if ((error || !product) && !hasServerProduct) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -205,25 +255,71 @@ const ProductDetail = ({ slug: propSlug }) => {
     );
   }
 
-  const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
-  const currentImage = product.images[selectedImageIndex] || primaryImage;
+  const primaryImage =
+    product.images.find((img) => img.isPrimary) || product.images[0];
+  let currentImage = product.images[selectedImageIndex] || primaryImage;
+
+  // Ensure we never use blocked images as OG/Twitter image
+  if (currentImage?.url && isBlockedImage(currentImage.url)) {
+    currentImage = { ...currentImage, url: '/images/hero/business_tools.webp' };
+  }
   const isInCartItem = isInCart(product._id);
   const cartQuantity = getItemQuantity(product._id);
+
+  // --- SEO metadata preparation ---
+  const baseUrl = process.env.REACT_APP_SITE_URL || 'https://skyfalke.com';
+  const canonicalUrl = `${baseUrl}/shop/product/${slug}`;
+
+  const metaTitle =
+    product.seo?.metaTitle ||
+    `${product.name} - Skyfalke Shop`;
+
+  const rawDescription =
+    product.seo?.metaDescription ||
+    product.shortDescription ||
+    stripHtmlTags(product.description);
+
+  const metaDescription = truncateText(rawDescription, 160);
+
+  const metaKeywords = Array.isArray(product.tags)
+    ? product.tags.join(', ')
+    : `${product.name}, ${product.category}, Skyfalke, merchandise`;
 
   return (
     <>
       <Helmet>
-        <title>{product.name} - Skyfalke Shop</title>
-        <meta name="description" content={product.shortDescription} />
-        <meta name="keywords" content={`${product.name}, ${product.category}, Skyfalke, merchandise`} />
-        <meta property="og:title" content={product.name} />
-        <meta property="og:description" content={product.shortDescription} />
-        <meta property="og:image" content={currentImage?.url} />
+        <title>{metaTitle}</title>
+        {metaDescription && (
+          <meta name="description" content={metaDescription} />
+        )}
+        {metaKeywords && (
+          <meta name="keywords" content={metaKeywords} />
+        )}
+
+        {/* Canonical URL */}
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph */}
+        <meta property="og:title" content={metaTitle} />
+        {metaDescription && (
+          <meta property="og:description" content={metaDescription} />
+        )}
+        {currentImage?.url && (
+          <meta property="og:image" content={currentImage.url} />
+        )}
         <meta property="og:type" content="product" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="Skyfalke" />
+
+        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={product.name} />
-        <meta name="twitter:description" content={product.shortDescription} />
-        <meta name="twitter:image" content={currentImage?.url} />
+        <meta name="twitter:title" content={metaTitle} />
+        {metaDescription && (
+          <meta name="twitter:description" content={metaDescription} />
+        )}
+        {currentImage?.url && (
+          <meta name="twitter:image" content={currentImage.url} />
+        )}
       </Helmet>
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

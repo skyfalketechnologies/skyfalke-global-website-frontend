@@ -5,16 +5,10 @@ on:
     branches:
       - main
       - master
-    paths:
-      - 'client/**'
-      - '.github/workflows/vercel.yml'
   pull_request:
     branches:
       - main
       - master
-    paths:
-      - 'client/**'
-      - '.github/workflows/vercel.yml'
 
 jobs:
   deploy:
@@ -24,40 +18,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Determine working directory
-        id: set-dir
+      - name: Verify working directory
         run: |
           echo "Current directory: $(pwd)"
           echo "Checking directory structure:"
           ls -la | head -10
-          if [ -f "package.json" ] && [ -f "next.config.js" ]; then
-            echo "Already in client directory (has package.json and next.config.js)"
-            echo "dir=." >> $GITHUB_OUTPUT
-          elif [ -d "client" ] && [ -f "client/package.json" ] && [ -f "client/next.config.js" ]; then
-            echo "Need to cd into client directory"
-            echo "dir=client" >> $GITHUB_OUTPUT
-          else
-            echo "ERROR: Cannot find client directory with package.json and next.config.js"
+          if [ ! -f "package.json" ] || [ ! -f "next.config.js" ]; then
+            echo "ERROR: package.json or next.config.js not found in root"
             echo "Root contents:"
             ls -la
-            if [ -d "client" ]; then
-              echo "Client directory contents:"
-              ls -la client/ | head -20
-            fi
             exit 1
           fi
-          echo "Working directory will be: ${{ steps.set-dir.outputs.dir }}"
+          echo "✓ Verified: package.json and next.config.js found"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ${{ (steps.set-dir.outputs.dir == 'client' && 'client/package-lock.json') || 'package-lock.json' }}
+          cache-dependency-path: 'package-lock.json'
 
       - name: Install dependencies
         run: |
-          cd ${{ steps.set-dir.outputs.dir }}
           pwd
           echo "Current directory contents:"
           ls -la | head -20
@@ -78,7 +60,6 @@ jobs:
 
       - name: Build project
         run: |
-          cd ${{ steps.set-dir.outputs.dir }}
           pwd
           echo "Verifying we're in the right directory:"
           ls -la | grep -E "(package.json|next.config)"
@@ -97,7 +78,6 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
-          working-directory: ${{ steps.set-dir.outputs.dir }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

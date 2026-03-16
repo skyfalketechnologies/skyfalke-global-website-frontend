@@ -35,6 +35,8 @@ const Leads = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
   const [filters, setFilters] = useState({
     status: '',
     lifecycleStage: '',
@@ -46,18 +48,19 @@ const Leads = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedLeads, setSelectedLeads] = useState([]);
   const [bulkAction, setBulkAction] = useState('');
+  const [rowDensity, setRowDensity] = useState('comfortable'); // 'comfortable' | 'compact'
 
   useEffect(() => {
     fetchLeads();
     fetchStats();
-  }, [currentPage, filters, sortBy, sortOrder]);
+  }, [currentPage, filters, sortBy, sortOrder, pageSize]);
 
   const fetchLeads = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
         page: currentPage,
-        limit: 20,
+        limit: pageSize,
         sortBy,
         sortOrder,
         ...filters
@@ -66,6 +69,7 @@ const Leads = () => {
       const response = await apiGet(`/api/leads/admin/all?${params}`);
       setLeads(response.data.leads);
       setTotalPages(response.data.pagination.totalPages);
+      setTotalItems(response.data.pagination.totalItems || 0);
     } catch (error) {
       console.error('Error fetching leads:', error);
     } finally {
@@ -195,6 +199,15 @@ const Leads = () => {
       day: 'numeric'
     });
   };
+
+  const getItemRangeLabel = () => {
+    if (!totalItems) return 'No records';
+    const start = (currentPage - 1) * pageSize + 1;
+    const end = Math.min(currentPage * pageSize, totalItems);
+    return `Showing ${start}–${end} of ${totalItems}`;
+  };
+
+  const rowPaddingClass = rowDensity === 'compact' ? 'py-2' : 'py-4';
 
   return (
     <div className="p-6 space-y-6">
@@ -404,10 +417,76 @@ const Leads = () => {
       )}
 
       {/* Leads Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700/60 overflow-hidden">
+        {/* Table header controls (density, page size, quick stats) */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 px-6 py-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700/60">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">
+                Leads Overview
+              </span>
+              {Boolean(totalItems) && (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">
+                  {totalItems} records
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Scroll comfortably through long lead lists with sticky headers and adjustable density.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="hidden md:flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-full px-1 py-1">
+              <button
+                type="button"
+                onClick={() => setRowDensity('comfortable')}
+                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                  rowDensity === 'comfortable'
+                    ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-white'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                Comfortable
+              </button>
+              <button
+                type="button"
+                onClick={() => setRowDensity('compact')}
+                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                  rowDensity === 'compact'
+                    ? 'bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-white'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                Compact
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">Rows per page</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  const newSize = Number(e.target.value);
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+                className="px-2 py-1 text-xs border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+              >
+                {[10, 20, 50, 100].map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+          <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
+            <table className="w-full">
+              <thead className="bg-gray-50/95 dark:bg-gray-700/95 backdrop-blur-sm sticky top-0 z-10">
               <tr>
                 <th className="px-6 py-3 text-left">
                   <input
@@ -463,8 +542,8 @@ const Leads = () => {
                   Actions
                 </th>
               </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-12 text-center">
@@ -481,8 +560,13 @@ const Leads = () => {
                 </tr>
               ) : (
                 leads.map((lead) => (
-                  <tr key={lead._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr
+                    key={lead._id}
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                      rowDensity === 'compact' ? 'text-sm' : 'text-sm md:text-base'
+                    }`}
+                  >
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <input
                         type="checkbox"
                         checked={selectedLeads.includes(lead._id)}
@@ -490,7 +574,7 @@ const Leads = () => {
                         className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
@@ -513,12 +597,12 @@ const Leads = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <div className={`text-sm font-semibold ${getScoreColor(lead.leadScore)}`}>
                         {lead.leadScore || 0}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <div className="flex items-center">
                         {getRatingIcon(lead.leadRating)}
                         <span className="ml-2 text-sm text-gray-600 dark:text-gray-400 capitalize">
@@ -526,7 +610,7 @@ const Leads = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <select
                         value={lead.status}
                         onChange={(e) => handleStatusChange(lead._id, e.target.value)}
@@ -541,15 +625,15 @@ const Leads = () => {
                         <option value="unqualified">Unqualified</option>
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap`}>
                       <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
                         {lead.source?.replace('_', ' ') || 'N/A'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap text-sm text-gray-500 dark:text-gray-400`}>
                       {formatDate(lead.createdAt)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className={`px-6 ${rowPaddingClass} whitespace-nowrap text-sm font-medium`}>
                       <div className="flex items-center space-x-2">
                         <Link href={`/system/dashboard/leads/${lead._id}`}
                           className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
@@ -575,53 +659,51 @@ const Leads = () => {
                   </tr>
                 ))
               )}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
-            <div className="flex-1 flex justify-between sm:hidden">
+          <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+              <div className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                {getItemRangeLabel()}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Page {currentPage} of {totalPages}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="hidden sm:inline-flex px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white"
+              >
+                First
+              </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white text-xs sm:text-sm"
               >
                 Previous
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white text-xs sm:text-sm"
               >
                 Next
               </button>
-            </div>
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  Showing page <span className="font-medium">{currentPage}</span> of{' '}
-                  <span className="font-medium">{totalPages}</span>
-                </p>
-              </div>
-              <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                        page === currentPage
-                          ? 'z-10 bg-primary-50 border-primary-500 text-primary-600 dark:bg-primary-900 dark:border-primary-700 dark:text-primary-300'
-                          : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </nav>
-              </div>
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="hidden sm:inline-flex px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white"
+              >
+                Last
+              </button>
             </div>
           </div>
         )}
