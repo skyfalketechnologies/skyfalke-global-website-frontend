@@ -11,12 +11,14 @@ import {
   RelatedPosts,
   TableOfContents,
   SocialShare,
-  Breadcrumbs
+  Breadcrumbs,
+  CommentSection
 } from '../features/blog/components';
 import {
   formatBlogDate,
   getReadingTime
 } from '../features/blog/utils/formatters';
+import { injectHeadingIds } from '../features/blog/utils/content';
 import { 
   getSEOTitle,
   getSEODescription,
@@ -43,17 +45,20 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
   const params = useParams();
   const slug = propSlug || params?.slug;
 
-  const { 
-    currentBlog, 
-    loading, 
-    error, 
+  const {
+    currentBlog,
+    loading,
+    error,
     fetchBlogBySlug,
     comments,
     fetchComments,
     commentsLoading,
     commentsError,
+    submitComment,
+    submitCommentLoading,
+    submitCommentError,
     relatedPosts,
-    relatedPostsLoading 
+    relatedPostsLoading
   } = usePublicBlog();
 
   const [currentUrl, setCurrentUrl] = useState('');
@@ -109,6 +114,9 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
   const hasContent = blog?.content &&
     blog.content.trim().length > 0 &&
     blog.content !== '<p></p>';
+
+  // Inject IDs into headings so TOC links and scroll spy work (same HTML for TOC + render)
+  const contentWithIds = hasContent ? injectHeadingIds(blog.content) : '';
 
   // ─── FIX 2 ───────────────────────────────────────────────────────────────────
   // Loading state — REMOVED noindex/nofollow.
@@ -242,7 +250,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
         <article className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-20">
           <div className="flex gap-8">
             {/* Table of Contents Sidebar */}
-            {hasContent && <TableOfContents content={blog.content} />}
+            {hasContent && <TableOfContents content={contentWithIds} />}
 
             {/* Main Content */}
             <div className="flex-1 bg-white rounded-xl overflow-hidden">
@@ -316,7 +324,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
                       prose-hr:my-8 prose-hr:border-gray-200"
                     id="blog-content"
                     itemProp="articleBody"
-                    dangerouslySetInnerHTML={{ __html: blog.content }}
+                    dangerouslySetInnerHTML={{ __html: contentWithIds }}
                   />
                 )}
 
@@ -342,6 +350,17 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
                     </div>
                   </div>
                 )}
+
+                {/* Comments */}
+                <CommentSection
+                  blogId={blog?._id}
+                  comments={comments}
+                  commentsLoading={commentsLoading}
+                  commentsError={commentsError}
+                  submitComment={submitComment}
+                  submitCommentLoading={submitCommentLoading}
+                  submitCommentError={submitCommentError}
+                />
               </div>
             </div>
           </div>

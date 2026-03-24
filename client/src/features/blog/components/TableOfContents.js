@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
 /**
  * Table of Contents Component - Generates TOC from headings
@@ -7,7 +7,6 @@ import React, { useState, useEffect, useRef } from 'react';
 const TableOfContents = ({ content }) => {
   const [headings, setHeadings] = useState([]);
   const [activeHeading, setActiveHeading] = useState('');
-  const contentRef = useRef(null);
 
   useEffect(() => {
     if (!content) return;
@@ -15,20 +14,12 @@ const TableOfContents = ({ content }) => {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = content;
     const headingElements = tempDiv.querySelectorAll('h2, h3, h4');
-    
-    const tocItems = Array.from(headingElements).map((element, index) => {
-      const id = element.id || `heading-${index}`;
-      if (!element.id) {
-        element.id = id;
-      }
-      
-      return {
-        id,
-        text: element.textContent.trim(),
-        level: element.tagName.toLowerCase(),
-        element
-      };
-    });
+
+    const tocItems = Array.from(headingElements).map((element, index) => ({
+      id: element.id || `heading-${index}`,
+      text: element.textContent.trim(),
+      level: element.tagName.toLowerCase()
+    }));
 
     setHeadings(tocItems);
   }, [content]);

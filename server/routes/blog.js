@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const Blog = require('../models/Blog');
+const BlogComment = require('../models/BlogComment');
 const { auth, adminAuth } = require('../middleware/auth');
 const ImageKitService = require('../services/imageKitService');
 
@@ -149,15 +150,30 @@ router.get('/admin/all', adminAuth, async (req, res) => {
       .populate('author', 'name')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .lean();
 
     const total = await Blog.countDocuments(query);
+
+    const blogIds = blogs.map(b => b._id);
+    const commentCounts = blogIds.length
+      ? await BlogComment.aggregate([
+          { $match: { blog: { $in: blogIds } } },
+          { $group: { _id: '$blog', count: { $sum: 1 } } }
+        ])
+      : [];
+    const countByBlog = Object.fromEntries(commentCounts.map(c => [String(c._id), c.count]));
+
+    const blogsWithCounts = blogs.map(blog => ({
+      ...blog,
+      commentCount: countByBlog[String(blog._id)] ?? 0
+    }));
 
     console.log('Found blogs:', blogs.length);
     console.log('Total blogs:', total);
 
     res.json({
-      blogs,
+      blogs: blogsWithCounts,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
       total
@@ -471,6 +487,24 @@ router.get('/admin/:id', adminAuth, async (req, res) => {
     res.json(blog);
   } catch (error) {
     console.error('Get admin blog error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get blog comments for admin (all statuses)
+router.get('/admin/:id/comments', adminAuth, async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+    const comments = await BlogComment.find({ blog: req.params.id })
+      .sort({ createdAt: -1 })
+      .select('name email comment status createdAt _id')
+      .lean();
+    res.json({ comments, total: comments.length });
+  } catch (error) {
+    console.error('Get admin blog comments error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -1126,7 +1160,7 @@ router.get('/admin/:id/preview', adminAuth, async (req, res) => {
   }
 });
 
-// Get blog comments (placeholder for future implementation)
+// Get blog comments
 router.get('/:id/comments', async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
@@ -1135,15 +1169,22 @@ router.get('/:id/comments', async (req, res) => {
       return res.status(404).json({ message: 'Blog not found' });
     }
 
-    // Placeholder for comments system
-    res.json({ comments: [], total: 0 });
+    const comments = await BlogComment.find({
+      blog: req.params.id,
+      status: 'approved'
+    })
+      .sort({ createdAt: -1 })
+      .select('name comment createdAt')
+      .lean();
+
+    res.json({ comments, total: comments.length });
   } catch (error) {
     console.error('Get blog comments error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Add blog comment (placeholder for future implementation)
+// Add blog comment
 router.post('/:id/comments', async (req, res) => {
   try {
     const { name, email, comment } = req.body;
@@ -1152,13 +1193,40 @@ router.post('/:id/comments', async (req, res) => {
       return res.status(400).json({ message: 'Name, email, and comment are required' });
     }
 
-    // Placeholder for comments system
-    res.status(201).json({ 
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    const blogComment = new BlogComment({
+      blog: req.params.id,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      comment: comment.trim(),
+      status: 'approved'
+    });
+
+    await blogComment.save();
+
+    const saved = await BlogComment.findById(blogComment._id)
+      .select('name comment createdAt _id')
+      .lean();
+
+    res.status(201).json({
       message: 'Comment added successfully',
-      comment: { name, email, comment, createdAt: new Date() }
+      comment: saved
     });
   } catch (error) {
     console.error('Add blog comment error:', error);
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: 'Validation failed',
+        errors: Object.keys(error.errors).map(key => ({
+          field: key,
+          message: error.errors[key].message
+        }))
+      });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 });

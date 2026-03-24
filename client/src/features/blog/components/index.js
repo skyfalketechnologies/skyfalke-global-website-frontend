@@ -4,4 +4,4 @@ export { default as RelatedPosts } from './RelatedPosts';
 export { default as TableOfContents } from './TableOfContents';
 export { default as SocialShare } from './SocialShare';
 export { default as Breadcrumbs } from './Breadcrumbs';
-
+export { default as CommentSection } from './CommentSection';

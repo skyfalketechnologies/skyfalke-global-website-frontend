@@ -23,7 +23,9 @@ import {
   FaTwitter,
   FaFacebook,
   FaTrophy,
-  FaChartBar
+  FaChartBar,
+  FaComment,
+  FaTimes
 } from 'react-icons/fa';
 import BlogStats from '../../components/Admin/BlogStats';
 import { useAuth } from '../../contexts/AuthContext';
@@ -43,6 +45,13 @@ const Blogs = () => {
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
   const [stats, setStats] = useState(null);
+  const [commentsModal, setCommentsModal] = useState({
+    open: false,
+    blogId: null,
+    blogTitle: '',
+    comments: [],
+    loading: false
+  });
   const { user } = useAuth();
 
   // Get SEO score color
@@ -154,6 +163,31 @@ const Blogs = () => {
     }
   };
 
+  const openCommentsModal = async (blog) => {
+    setCommentsModal({
+      open: true,
+      blogId: blog._id,
+      blogTitle: blog.title,
+      comments: [],
+      loading: true
+    });
+    try {
+      const response = await apiGet(`/api/blogs/admin/${blog._id}/comments`);
+      setCommentsModal(prev => ({
+        ...prev,
+        comments: response.data?.comments ?? [],
+        loading: false
+      }));
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+      setCommentsModal(prev => ({ ...prev, comments: [], loading: false }));
+    }
+  };
+
+  const closeCommentsModal = () => {
+    setCommentsModal({ open: false, blogId: null, blogTitle: '', comments: [], loading: false });
+  };
+
   const handleFeaturedToggle = async (blogId, currentFeatured) => {
     try {
       const response = await apiPatch(`/api/blogs/${blogId}/featured`, { isFeatured: !currentFeatured });
@@ -189,6 +223,29 @@ const Blogs = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const formatDateTime = (dateString) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getCommentStatusBadge = (status) => {
+    const config = {
+      approved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+      rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+    };
+    return (
+      <span className={`px-2 py-0.5 text-xs font-medium rounded ${config[status] || config.pending}`}>
+        {status}
+      </span>
+    );
   };
 
   return (
@@ -415,12 +472,24 @@ const Blogs = () => {
                             </button>
                             
                             <button
+                              onClick={() => openCommentsModal(blog)}
+                              className="relative p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              title="View comments"
+                            >
+                              <FaComment className="h-4 w-4" />
+                              {blog.commentCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 min-w-[1.25rem] h-5 px-1 flex items-center justify-center text-[10px] font-semibold text-white bg-primary-600 rounded-full">
+                                  {blog.commentCount > 99 ? '99+' : blog.commentCount}
+                                </span>
+                              )}
+                            </button>
+                            <button
                               onClick={() => router.push(`/system/dashboard/blogs/${blog._id}/edit`)}
                               className="p-1 text-blue-400 hover:text-blue-600 dark:hover:text-blue-300"
                               title="Edit"
                             >
-                          <FaEdit className="h-4 w-4" />
-                        </button>
+                              <FaEdit className="h-4 w-4" />
+                            </button>
                             
                             <button
                               onClick={() => handleDelete(blog._id)}
@@ -486,6 +555,61 @@ const Blogs = () => {
             </>
           )}
         </div>
+
+        {/* Comments modal */}
+        {commentsModal.open && (
+          <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div className="flex min-h-screen items-center justify-center p-4">
+              <div className="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 transition-opacity" onClick={closeCommentsModal} />
+              <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">
+                    Comments — {commentsModal.blogTitle}
+                  </h3>
+                  <button
+                    onClick={closeCommentsModal}
+                    className="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <FaTimes className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="p-4 overflow-y-auto flex-1">
+                  {commentsModal.loading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+                    </div>
+                  ) : commentsModal.comments.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400 text-center py-8">No comments yet.</p>
+                  ) : (
+                    <ul className="space-y-4">
+                      {commentsModal.comments.map((c) => (
+                        <li key={c._id} className="border-b border-gray-100 dark:border-gray-700 pb-4 last:border-0">
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="font-medium text-gray-900 dark:text-white">{c.name}</div>
+                            {getCommentStatusBadge(c.status)}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{c.email}</div>
+                          <time className="text-xs text-gray-400 dark:text-gray-500 mt-1 block">
+                            {formatDateTime(c.createdAt)}
+                          </time>
+                          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{c.comment}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                  <button
+                    onClick={closeCommentsModal}
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
 
     </>

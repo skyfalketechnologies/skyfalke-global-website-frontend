@@ -12,6 +12,8 @@ export const usePublicBlog = () => {
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState(null);
+  const [submitCommentLoading, setSubmitCommentLoading] = useState(false);
+  const [submitCommentError, setSubmitCommentError] = useState(null);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [relatedPostsLoading, setRelatedPostsLoading] = useState(false);
   const hasFetchedRef = useRef(false);
@@ -81,19 +83,43 @@ export const usePublicBlog = () => {
     try {
       setCommentsLoading(true);
       setCommentsError(null);
-      
-      // TODO: Implement comments API endpoint
-      // const response = await apiGet(`/api/blogs/${blogId}/comments`);
-      // setComments(response.data || []);
-      
-      // For now, set empty array
-      setComments([]);
+      const response = await apiGet(`/api/blogs/${blogId}/comments`);
+      setComments(response.data?.comments ?? []);
     } catch (err) {
       console.error('[usePublicBlog] Error fetching comments:', err);
       setCommentsError('Failed to load comments');
       setComments([]);
     } finally {
       setCommentsLoading(false);
+    }
+  }, []);
+
+  /**
+   * Submit a new comment for a blog post
+   */
+  const submitComment = useCallback(async (blogId, { name, email, comment }) => {
+    if (!blogId || !name?.trim() || !email?.trim() || !comment?.trim()) {
+      return { success: false, error: 'Name, email, and comment are required' };
+    }
+    try {
+      setSubmitCommentLoading(true);
+      setSubmitCommentError(null);
+      const response = await apiPost(`/api/blogs/${blogId}/comments`, {
+        name: name.trim(),
+        email: email.trim(),
+        comment: comment.trim()
+      });
+      const newComment = response.data?.comment;
+      if (newComment) {
+        setComments(prev => [newComment, ...prev]);
+      }
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to post comment';
+      setSubmitCommentError(message);
+      return { success: false, error: message };
+    } finally {
+      setSubmitCommentLoading(false);
     }
   }, []);
 
@@ -165,6 +191,9 @@ export const usePublicBlog = () => {
     fetchComments,
     commentsLoading,
     commentsError,
+    submitComment,
+    submitCommentLoading,
+    submitCommentError,
     relatedPosts,
     relatedPostsLoading
   };
