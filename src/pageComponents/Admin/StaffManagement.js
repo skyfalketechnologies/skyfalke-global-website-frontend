@@ -19,7 +19,8 @@ import {
   FaLock,
   FaUnlock,
   FaEnvelope,
-  FaCalendar
+  FaCalendar,
+  FaWallet
 } from 'react-icons/fa';
 import { apiGet, apiPost, apiPut, apiDelete } from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -164,6 +165,8 @@ const StaffManagement = () => {
         return FaUserShield;
       case 'admin':
         return FaUserTie;
+      case 'accounts':
+        return FaWallet;
       default:
         return FaUser;
     }
@@ -175,6 +178,8 @@ const StaffManagement = () => {
         return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
       case 'admin':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'accounts':
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
@@ -232,6 +237,7 @@ const StaffManagement = () => {
             <option value="">All Roles</option>
             <option value="super_admin">Super Admin</option>
             <option value="admin">Admin</option>
+            <option value="accounts">Accounts</option>
             <option value="editor">Editor</option>
           </select>
           <select
@@ -309,6 +315,7 @@ const StaffManagement = () => {
                   >
                     <option value="editor">Editor</option>
                     <option value="admin">Admin</option>
+                    <option value="accounts">Accounts (Finance)</option>
                     {!editingStaff && <option value="super_admin" disabled>Super Admin (Cannot create)</option>}
                   </select>
                 </div>

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -10,20 +10,13 @@ import { adminApiGet, adminApiDelete } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Accounts = () => {
-  const { isSuperAdmin } = useAuth();
+  const router = useRouter();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ type: '', isActive: '', search: '' });
 
-  useEffect(() => {
-    fetchAccounts();
-  }, [filters]);
-
-  if (!isSuperAdmin()) {
-    return <Navigate to="/system/dashboard" replace />;
-  }
-
-  const fetchAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams(
@@ -31,14 +24,25 @@ const Accounts = () => {
       );
       const response = await adminApiGet(`/api/accounting/accounts?${params}`);
       if (response.success && response.data) {
-        setAccounts(response.data.data || []);
+        const payload = response.data.data ?? response.data;
+        setAccounts(Array.isArray(payload) ? payload : []);
       }
     } catch (error) {
       console.error('Error fetching accounts:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
+    fetchAccounts();
+  }, [authLoading, canAccessAccounting, fetchAccounts]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) router.replace('/system/dashboard');
+  }, [authLoading, canAccessAccounting, router]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this account?')) {
@@ -54,6 +58,14 @@ const Accounts = () => {
     }
   };
 
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
+
   if (loading && accounts.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -66,8 +78,8 @@ const Accounts = () => {
     <div className="space-y-6">
       <div className="md:flex md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Account Management</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage your chart of accounts</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Chart of Accounts</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Structure accounts for reporting and the general ledger</p>
         </div>
         <Link href="/system/dashboard/accounting/accounts/new"
           className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700"

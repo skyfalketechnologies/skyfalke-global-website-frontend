@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 
 const AuthContext = createContext();
@@ -177,6 +177,16 @@ export const AuthProvider = ({ children }) => {
     return user?.role === 'super_admin' || user?.email === 'mronald@skyfalke.com';
   };
 
+  /** Accounting & Finance module: Super Admin or Accounts role only */
+  const canAccessAccounting = useCallback(() => {
+    if (!user) return false;
+    return (
+      user.role === 'super_admin' ||
+      user.role === 'accounts' ||
+      user.email === 'mronald@skyfalke.com'
+    );
+  }, [user]);
+
   const getToken = () => {
     return token;
   };
@@ -191,6 +201,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isAdmin,
     isSuperAdmin,
+    canAccessAccounting,
     getToken
   };
 

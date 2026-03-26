@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  FaDollarSign, 
-  FaChartLine, 
-  FaWallet, 
+import {
+  FaChartLine,
+  FaWallet,
   FaFileInvoice,
   FaSpinner,
   FaPlus,
@@ -19,7 +17,8 @@ import { adminApiGet } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 const AccountingDashboard = () => {
-  const { isSuperAdmin } = useAuth();
+  const router = useRouter();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const [stats, setStats] = useState({
     totalIncome: 0,
     totalExpenses: 0,
@@ -30,15 +29,7 @@ const AccountingDashboard = () => {
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  if (!isSuperAdmin()) {
-    return <Navigate to="/system/dashboard" replace />;
-  }
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const [transactionsRes, expensesRes, accountsRes, transactionStatsRes] = await Promise.all([
@@ -56,19 +47,22 @@ const AccountingDashboard = () => {
         setRecentExpenses(expensesRes.data.data || []);
       }
 
-      if (accountsRes.success && accountsRes.data) {
-        setStats(prev => ({
+      const accountsPayload = accountsRes.data?.data ?? accountsRes.data;
+      if (accountsRes.success && accountsPayload) {
+        const list = Array.isArray(accountsPayload) ? accountsPayload : [];
+        setStats((prev) => ({
           ...prev,
-          totalAccounts: accountsRes.data.length || 0
+          totalAccounts: list.length
         }));
       }
 
-      if (transactionStatsRes.success && transactionStatsRes.data) {
-        setStats(prev => ({
+      const statsPayload = transactionStatsRes.data?.data ?? transactionStatsRes.data;
+      if (transactionStatsRes.success && statsPayload) {
+        setStats((prev) => ({
           ...prev,
-          totalIncome: transactionStatsRes.data.totalIncome || 0,
-          totalExpenses: transactionStatsRes.data.totalExpenses || 0,
-          netIncome: (transactionStatsRes.data.totalIncome || 0) - (transactionStatsRes.data.totalExpenses || 0)
+          totalIncome: statsPayload.totalIncome || 0,
+          totalExpenses: statsPayload.totalExpenses || 0,
+          netIncome: (statsPayload.totalIncome || 0) - (statsPayload.totalExpenses || 0)
         }));
       }
     } catch (error) {
@@ -76,7 +70,27 @@ const AccountingDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
+    fetchDashboardData();
+  }, [authLoading, canAccessAccounting, fetchDashboardData]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) {
+      router.replace('/system/dashboard');
+    }
+  }, [authLoading, canAccessAccounting, router]);
+
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -109,7 +123,7 @@ const AccountingDashboard = () => {
       link: '/system/dashboard/accounting/reports'
     },
     {
-      title: 'Total Accounts',
+      title: 'Chart of Accounts',
       value: stats.totalAccounts,
       icon: FaWallet,
       color: 'from-purple-500 to-purple-600',
@@ -119,7 +133,6 @@ const AccountingDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="md:flex md:items-center md:justify-between">
         <div className="flex-1 min-w-0">
           <motion.h2
@@ -127,14 +140,21 @@ const AccountingDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-2xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:text-3xl sm:truncate"
           >
-            Accounting Dashboard
+            Accounting & Finance
           </motion.h2>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage finances, expenses, accounts, and transactions
+            Invoicing, ledger, reconciliation, and financial reporting
           </p>
         </div>
-        <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
-          <Link href="/system/dashboard/accounting/transactions/new"
+        <div className="mt-4 flex md:mt-0 md:ml-4 flex-wrap gap-2">
+          <Link
+            href="/system/dashboard/accounting/journal"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            Journal
+          </Link>
+          <Link
+            href="/system/dashboard/accounting/transactions/new"
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
             <FaPlus className="mr-2 -ml-1 h-4 w-4" />
@@ -143,7 +163,6 @@ const AccountingDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {statsCards.map((stat, index) => {
           const Icon = stat.icon;
@@ -182,9 +201,7 @@ const AccountingDashboard = () => {
         })}
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Transactions */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -196,7 +213,8 @@ const AccountingDashboard = () => {
               <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                 Recent Transactions
               </h3>
-              <Link href="/system/dashboard/accounting/transactions"
+              <Link
+                href="/system/dashboard/accounting/transactions"
                 className="text-sm text-primary-600 hover:text-primary-500"
               >
                 View all
@@ -214,11 +232,13 @@ const AccountingDashboard = () => {
                         {transaction.account?.name} • {new Date(transaction.date).toLocaleDateString()}
                       </div>
                     </div>
-                    <div className={`text-sm font-medium ${
-                      transaction.type === 'income' 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`}>
+                    <div
+                      className={`text-sm font-medium ${
+                        transaction.type === 'income'
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      }`}
+                    >
                       {transaction.type === 'income' ? '+' : '-'}KES {transaction.amount.toLocaleString()}
                     </div>
                   </div>
@@ -232,7 +252,6 @@ const AccountingDashboard = () => {
           </div>
         </motion.div>
 
-        {/* Pending Expenses */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -244,7 +263,8 @@ const AccountingDashboard = () => {
               <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                 Pending Expenses
               </h3>
-              <Link href="/system/dashboard/accounting/expenses?status=pending"
+              <Link
+                href="/system/dashboard/accounting/expenses?status=pending"
                 className="text-sm text-primary-600 hover:text-primary-500"
               >
                 View all
@@ -281,4 +301,3 @@ const AccountingDashboard = () => {
 };
 
 export default AccountingDashboard;
-

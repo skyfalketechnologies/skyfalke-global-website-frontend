@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import Link from 'next/link';
@@ -10,7 +10,8 @@ import { adminApiGet, adminApiPost } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Transactions = () => {
-  const { isSuperAdmin } = useAuth();
+  const router = useRouter();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -24,15 +25,7 @@ const Transactions = () => {
     search: '' 
   });
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [page, filters]);
-
-  if (!isSuperAdmin()) {
-    return <Navigate to="/system/dashboard" replace />;
-  }
-
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -50,7 +43,17 @@ const Transactions = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, filters]);
+
+  useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
+    fetchTransactions();
+  }, [authLoading, canAccessAccounting, fetchTransactions]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) router.replace('/system/dashboard');
+  }, [authLoading, canAccessAccounting, router]);
 
   const handleApprove = async (id) => {
     if (window.confirm('Are you sure you want to approve this transaction? This will update account balances.')) {
@@ -107,6 +110,14 @@ const Transactions = () => {
       default: return FaArrowUp;
     }
   };
+
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
 
   if (loading && transactions.length === 0) {
     return (

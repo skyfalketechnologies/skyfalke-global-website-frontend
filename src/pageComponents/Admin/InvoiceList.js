@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { apiGet, apiDelete } from '../../utils/api';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   FaPlus,
   FaEdit,
@@ -21,10 +23,13 @@ import {
   FaCheckCircle,
   FaClock,
   FaExclamationTriangle,
-  FaTimesCircle
+  FaTimesCircle,
+  FaSpinner
 } from 'react-icons/fa';
 
 const InvoiceList = () => {
+  const router = useRouter();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingEmails, setSendingEmails] = useState(new Set());
@@ -37,9 +42,15 @@ const InvoiceList = () => {
   const [stats, setStats] = useState({});
 
   useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
     fetchInvoices();
     fetchStats();
-  }, [currentPage, statusFilter, searchTerm]);
+  }, [currentPage, statusFilter, searchTerm, authLoading, canAccessAccounting]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) router.replace('/system/dashboard');
+  }, [authLoading, canAccessAccounting, router]);
 
   // Auto-clear messages
   useEffect(() => {
@@ -194,6 +205,14 @@ const InvoiceList = () => {
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
     }
   };
+
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

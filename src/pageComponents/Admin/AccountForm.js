@@ -5,11 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import { adminApiGet, adminApiPost, adminApiPut } from '../../utils/adminApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AccountForm = () => {
   const params = useParams();
   const id = params?.id;
   const router = useRouter();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const isEditing = Boolean(id);
 
   const [loading, setLoading] = useState(false);
@@ -49,12 +51,6 @@ const AccountForm = () => {
     'accounts-payable'
   ];
 
-  useEffect(() => {
-    if (isEditing) {
-      fetchAccount();
-    }
-  }, [id]);
-
   const fetchAccount = async () => {
     try {
       setLoading(true);
@@ -88,6 +84,18 @@ const AccountForm = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
+    if (isEditing) {
+      fetchAccount();
+    }
+  }, [id, authLoading, canAccessAccounting, isEditing]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) router.replace('/system/dashboard');
+  }, [authLoading, canAccessAccounting, router]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -160,6 +168,14 @@ const AccountForm = () => {
       setSaving(false);
     }
   };
+
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

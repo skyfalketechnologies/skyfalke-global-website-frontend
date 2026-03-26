@@ -5,11 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import { adminApiGet, adminApiPost, adminApiPut } from '../../utils/adminApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TransactionForm = () => {
   const params = useParams();
   const id = params?.id;
   const router = useRouter();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const isEditing = Boolean(id);
 
   const [loading, setLoading] = useState(false);
@@ -32,13 +34,6 @@ const TransactionForm = () => {
     status: 'completed',
     notes: ''
   });
-
-  useEffect(() => {
-    if (isEditing) {
-      fetchTransaction();
-    }
-    fetchAccounts();
-  }, [id]);
 
   const fetchTransaction = async () => {
     try {
@@ -73,12 +68,26 @@ const TransactionForm = () => {
     try {
       const response = await adminApiGet('/api/accounting/accounts?isActive=true');
       if (response.success && response.data) {
-        setAccounts(response.data.data || []);
+        const payload = response.data.data ?? response.data;
+        setAccounts(Array.isArray(payload) ? payload : []);
       }
     } catch (err) {
       console.error('Error fetching accounts:', err);
     }
   };
+
+  useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
+    if (isEditing) {
+      fetchTransaction();
+    }
+    fetchAccounts();
+  }, [id, authLoading, canAccessAccounting, isEditing]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) router.replace('/system/dashboard');
+  }, [authLoading, canAccessAccounting, router]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -143,6 +152,14 @@ const TransactionForm = () => {
       setSaving(false);
     }
   };
+
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

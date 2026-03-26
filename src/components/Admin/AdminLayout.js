@@ -46,13 +46,16 @@ import {
   FaProjectDiagram,
   FaTasks,
   FaUsersCog,
-  FaFileContract
+  FaFileContract,
+  FaBook,
+  FaUniversity,
+  FaHistory
 } from 'react-icons/fa';
 import NotificationDropdown from './NotificationDropdown';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout, isAuthenticated, isSuperAdmin, loading } = useAuth();
+  const { user, logout, isAuthenticated, isSuperAdmin, canAccessAccounting, loading } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
@@ -320,6 +323,7 @@ const AdminLayout = ({ children }) => {
                 user={user} 
                 onLogout={handleLogout}
                 isSuperAdmin={isSuperAdmin}
+                canAccessAccounting={canAccessAccounting}
               />
             </motion.div>
           </motion.div>
@@ -336,6 +340,7 @@ const AdminLayout = ({ children }) => {
             user={user} 
             onLogout={handleLogout}
             isSuperAdmin={isSuperAdmin}
+            canAccessAccounting={canAccessAccounting}
           />
         </div>
       </div>
@@ -411,7 +416,7 @@ const AdminLayout = ({ children }) => {
   );
 };
 
-const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, onLogout, isSuperAdmin }) => {
+const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, onLogout, isSuperAdmin, canAccessAccounting }) => {
   // Filter navigation groups based on user role
   // Ensure isSuperAdmin is a function and navigationGroups is an array
   const checkIsSuperAdmin = () => {
@@ -421,10 +426,21 @@ const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, o
     return false;
   };
 
+  const checkAccountingAccess = () => {
+    if (typeof canAccessAccounting === 'function') {
+      return canAccessAccounting();
+    }
+    return false;
+  };
+
   const filteredNavigationGroups = (navigationGroups || []).map(group => {
-    // Only show HR Management and Accounting & Finance to super admins
-    if (group.id === 'hr' || group.id === 'accounting') {
+    if (group.id === 'hr') {
       if (!checkIsSuperAdmin()) {
+        return null;
+      }
+    }
+    if (group.id === 'accounting') {
+      if (!checkAccountingAccess()) {
         return null;
       }
     }
