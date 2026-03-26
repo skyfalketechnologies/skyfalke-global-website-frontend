@@ -139,11 +139,29 @@ const AccountForm = () => {
 
     try {
       setSaving(true);
+
+      const openingRaw = formData.openingBalanceDate;
+      const parsedOpening = openingRaw ? new Date(openingRaw) : new Date();
+      const openingBalanceDate = Number.isNaN(parsedOpening.getTime()) ? new Date() : parsedOpening;
+
       const submitData = {
-        ...formData,
+        name: formData.name.trim(),
+        type: formData.type,
+        category: formData.category?.trim() || undefined,
+        currency: formData.currency || 'KES',
         balance: parseFloat(formData.balance) || 0,
         openingBalance: parseFloat(formData.openingBalance) || 0,
-        openingBalanceDate: new Date(formData.openingBalanceDate)
+        openingBalanceDate,
+        isActive: Boolean(formData.isActive),
+        bankDetails: {
+          bankName: formData.bankDetails?.bankName?.trim() || '',
+          accountName: formData.bankDetails?.accountName?.trim() || '',
+          accountNumber: formData.bankDetails?.accountNumber?.trim() || '',
+          branch: formData.bankDetails?.branch?.trim() || '',
+          swiftCode: formData.bankDetails?.swiftCode?.trim() || '',
+          iban: formData.bankDetails?.iban?.trim() || ''
+        },
+        notes: formData.notes?.trim() || undefined
       };
 
       let response;
@@ -162,7 +180,12 @@ const AccountForm = () => {
         setError(response.error?.message || 'Failed to save account');
       }
     } catch (err) {
-      setError(err.message || 'An error occurred while saving');
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          'An error occurred while saving'
+      );
       console.error('Error saving account:', err);
     } finally {
       setSaving(false);

@@ -140,11 +140,15 @@ const adminApiCall = async (apiFunction, endpoint, data = null, config = {}) => 
       fallbackData = FALLBACK_DATA.stats;
     }
     
+    const body = error.response?.data;
+    const bodyMsg =
+      (body && typeof body === 'object' && (body.message || (typeof body.error === 'string' ? body.error : null))) ||
+      undefined;
     return {
       success: false,
       data: fallbackData,
       error: {
-        message: error.response?.data?.message || error.message || 'API request failed',
+        message: bodyMsg || error.message || 'API request failed',
         status: error.response?.status || 0,
         endpoint: endpoint
       }

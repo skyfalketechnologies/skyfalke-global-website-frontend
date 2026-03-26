@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaPlus, FaEdit, FaCheck, FaTimes, FaSpinner, FaSearch, FaFileInvoice } from 'react-icons/fa';
@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const Expenses = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { loading: authLoading, canAccessAccounting } = useAuth();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +43,13 @@ const Expenses = () => {
       setLoading(false);
     }
   }, [page, filters]);
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status) {
+      setFilters((prev) => ({ ...prev, status }));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (authLoading || !canAccessAccounting()) return;

@@ -31,7 +31,7 @@ const TransactionForm = () => {
     category: '',
     reference: '',
     paymentMethod: 'bank',
-    status: 'completed',
+    status: 'pending_approval',
     notes: ''
   });
 
@@ -52,7 +52,7 @@ const TransactionForm = () => {
           category: transaction.category || '',
           reference: transaction.reference || '',
           paymentMethod: transaction.paymentMethod || 'bank',
-          status: transaction.status || 'completed',
+          status: transaction.status || 'pending_approval',
           notes: transaction.notes || ''
         });
       }
@@ -124,11 +124,23 @@ const TransactionForm = () => {
     try {
       setSaving(true);
       const submitData = {
-        ...formData,
-        amount: parseFloat(formData.amount),
+        type: formData.type,
         date: new Date(formData.date),
-        toAccount: formData.type === 'transfer' ? formData.toAccount : undefined
+        account: formData.account,
+        amount: parseFloat(formData.amount),
+        currency: formData.currency || 'KES',
+        description: formData.description.trim(),
+        category: formData.category?.trim() || undefined,
+        reference: formData.reference?.trim() || undefined,
+        paymentMethod: formData.paymentMethod,
+        notes: formData.notes?.trim() || undefined
       };
+      if (formData.type === 'transfer' && formData.toAccount) {
+        submitData.toAccount = formData.toAccount;
+      }
+      if (isEditing) {
+        submitData.status = formData.status;
+      }
 
       let response;
       if (isEditing) {
@@ -146,7 +158,7 @@ const TransactionForm = () => {
         setError(response.error?.message || 'Failed to save transaction');
       }
     } catch (err) {
-      setError(err.message || 'An error occurred while saving');
+      setError(err.response?.data?.message || err.message || 'An error occurred while saving');
       console.error('Error saving transaction:', err);
     } finally {
       setSaving(false);

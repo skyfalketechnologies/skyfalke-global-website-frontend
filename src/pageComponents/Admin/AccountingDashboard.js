@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 import {
   FaChartLine,
   FaWallet,
-  FaFileInvoice,
   FaSpinner,
   FaPlus,
   FaArrowUp,
@@ -16,6 +15,75 @@ import {
 import { adminApiGet } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
+/** adminApiGet returns { success, data: axiosBody }. Server sends { success, data: payload }. */
+function unwrapInnerData(res) {
+  if (!res?.success || res.data == null) return null;
+  const body = res.data;
+  if (typeof body !== 'object' || body === null) return null;
+  if (Array.isArray(body)) return null;
+  const nested = body.data;
+  if (nested != null && typeof nested === 'object' && !Array.isArray(nested)) {
+    return nested;
+  }
+  if ('totalIncome' in body || 'accountCount' in body || 'period' in body) {
+    return body;
+  }
+  return null;
+}
+
+function unwrapList(res) {
+  if (!res?.success || res.data == null) return [];
+  const body = res.data;
+  const arr = body?.data;
+  return Array.isArray(arr) ? arr : [];
+}
+
+function mtdDateRange() {
+  const start = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const end = new Date();
+  const fmt = (d) => d.toISOString().split('T')[0];
+  return { start, end, startStr: fmt(start), endStr: fmt(end) };
+}
+
+/** When /dashboard/summary fails (404 on older APIs, etc.), rebuild from existing endpoints. */
+async function fetchSummaryFallback() {
+  const { start, end, startStr, endStr } = mtdDateRange();
+  const qs = new URLSearchParams({
+    startDate: startStr,
+    endDate: endStr,
+    status: 'approved,pending_approval,completed'
+  });
+  const [txStatsRes, accStatsRes, txPendingRes, expPendingRes] = await Promise.all([
+    adminApiGet(`/api/accounting/transactions/stats?${qs}`),
+    adminApiGet('/api/accounting/accounts/stats'),
+    adminApiGet('/api/accounting/transactions?limit=1&page=1&status=pending_approval'),
+    adminApiGet('/api/accounting/expenses?limit=1&page=1&status=pending')
+  ]);
+
+  const txStats = unwrapInnerData(txStatsRes);
+  const accStats = unwrapInnerData(accStatsRes);
+  const txPendingTotal = txStatsRes.success && txStatsRes.data?.pagination?.total != null
+    ? Number(txStatsRes.data.pagination.total)
+    : 0;
+  const expPendingTotal = expPendingRes.success && expPendingRes.data?.pagination?.total != null
+    ? Number(expPendingRes.data.pagination.total)
+    : 0;
+
+  const totalIncome = txStats ? Number(txStats.totalIncome) || 0 : 0;
+  const totalExpenses = txStats ? Number(txStats.totalExpenses) || 0 : 0;
+
+  return {
+    period: { startDate: start, endDate: end },
+    totalIncome,
+    totalExpenses,
+    netIncome: totalIncome - totalExpenses,
+    pendingExpenses: expPendingTotal,
+    pendingTransactions: txPendingTotal,
+    accountCount: accStats ? Number(accStats.active) || 0 : 0,
+    unreconciledTransactions: 0
+  };
+}
+
 const AccountingDashboard = () => {
   const router = useRouter();
   const { loading: authLoading, canAccessAccounting } = useAuth();
@@ -23,50 +91,71 @@ const AccountingDashboard = () => {
     totalIncome: 0,
     totalExpenses: 0,
     netIncome: 0,
-    totalAccounts: 0
+    totalAccounts: 0,
+    pendingExpenses: 0,
+    pendingTransactions: 0,
+    unreconciledTransactions: 0
   });
+  const [periodLabel, setPeriodLabel] = useState('');
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
 
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
-      const [transactionsRes, expensesRes, accountsRes, transactionStatsRes] = await Promise.all([
-        adminApiGet('/api/accounting/transactions?limit=5'),
-        adminApiGet('/api/accounting/expenses?limit=5&status=pending'),
-        adminApiGet('/api/accounting/accounts'),
-        adminApiGet('/api/accounting/transactions/stats')
+      setFetchError('');
+      const [summaryRes, transactionsRes, expensesRes] = await Promise.all([
+        adminApiGet('/api/accounting/dashboard/summary'),
+        adminApiGet('/api/accounting/transactions?limit=5&page=1'),
+        adminApiGet('/api/accounting/expenses?limit=5&page=1&status=pending')
       ]);
 
-      if (transactionsRes.success && transactionsRes.data) {
-        setRecentTransactions(transactionsRes.data.data || []);
+      let summary = unwrapInnerData(summaryRes);
+      if (!summaryRes.success || !summary) {
+        try {
+          summary = await fetchSummaryFallback();
+          setFetchError('');
+        } catch (fbErr) {
+          console.error('Accounting dashboard fallback failed:', fbErr);
+          setFetchError(
+            summaryRes.error?.message ||
+              'Could not load dashboard summary. Totals may be incomplete.'
+          );
+        }
+      } else {
+        setFetchError('');
       }
 
-      if (expensesRes.success && expensesRes.data) {
-        setRecentExpenses(expensesRes.data.data || []);
+      if (summary && typeof summary === 'object') {
+        setStats({
+          totalIncome: Number(summary.totalIncome) || 0,
+          totalExpenses: Number(summary.totalExpenses) || 0,
+          netIncome:
+            (Number(summary.totalIncome) || 0) - (Number(summary.totalExpenses) || 0),
+          totalAccounts: Number(summary.accountCount) || 0,
+          pendingExpenses: Number(summary.pendingExpenses) || 0,
+          pendingTransactions: Number(summary.pendingTransactions) || 0,
+          unreconciledTransactions: Number(summary.unreconciledTransactions) || 0
+        });
+        const p = summary.period;
+        if (p?.startDate && p?.endDate) {
+          const start = new Date(p.startDate);
+          const end = new Date(p.endDate);
+          setPeriodLabel(
+            `${start.toLocaleDateString()} – ${end.toLocaleDateString()} · income & expense (approved + pending)`
+          );
+        } else {
+          setPeriodLabel('Month to date · income & expense (approved + pending)');
+        }
       }
 
-      const accountsPayload = accountsRes.data?.data ?? accountsRes.data;
-      if (accountsRes.success && accountsPayload) {
-        const list = Array.isArray(accountsPayload) ? accountsPayload : [];
-        setStats((prev) => ({
-          ...prev,
-          totalAccounts: list.length
-        }));
-      }
-
-      const statsPayload = transactionStatsRes.data?.data ?? transactionStatsRes.data;
-      if (transactionStatsRes.success && statsPayload) {
-        setStats((prev) => ({
-          ...prev,
-          totalIncome: statsPayload.totalIncome || 0,
-          totalExpenses: statsPayload.totalExpenses || 0,
-          netIncome: (statsPayload.totalIncome || 0) - (statsPayload.totalExpenses || 0)
-        }));
-      }
+      setRecentTransactions(unwrapList(transactionsRes));
+      setRecentExpenses(unwrapList(expensesRes));
     } catch (error) {
       console.error('Error fetching accounting dashboard data:', error);
+      setFetchError('Failed to load dashboard data.');
     } finally {
       setLoading(false);
     }
@@ -102,28 +191,28 @@ const AccountingDashboard = () => {
 
   const statsCards = [
     {
-      title: 'Total Income',
+      title: 'Income (MTD)',
       value: `KES ${stats.totalIncome.toLocaleString()}`,
       icon: FaArrowUp,
       color: 'from-green-500 to-green-600',
       link: '/system/dashboard/accounting/transactions?type=income'
     },
     {
-      title: 'Total Expenses',
+      title: 'Expenses (MTD)',
       value: `KES ${stats.totalExpenses.toLocaleString()}`,
       icon: FaArrowDown,
       color: 'from-red-500 to-red-600',
       link: '/system/dashboard/accounting/expenses'
     },
     {
-      title: 'Net Income',
+      title: 'Net (MTD)',
       value: `KES ${stats.netIncome.toLocaleString()}`,
       icon: FaChartLine,
       color: stats.netIncome >= 0 ? 'from-blue-500 to-blue-600' : 'from-orange-500 to-orange-600',
       link: '/system/dashboard/accounting/reports'
     },
     {
-      title: 'Chart of Accounts',
+      title: 'Active accounts',
       value: stats.totalAccounts,
       icon: FaWallet,
       color: 'from-purple-500 to-purple-600',
@@ -145,6 +234,9 @@ const AccountingDashboard = () => {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Invoicing, ledger, reconciliation, and financial reporting
           </p>
+          {periodLabel && (
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{periodLabel}</p>
+          )}
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4 flex-wrap gap-2">
           <Link
@@ -162,6 +254,41 @@ const AccountingDashboard = () => {
           </Link>
         </div>
       </div>
+
+      {fetchError && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3 text-sm text-amber-900 dark:text-amber-100">
+          {fetchError}
+        </div>
+      )}
+
+      {(stats.pendingExpenses > 0 || stats.pendingTransactions > 0 || stats.unreconciledTransactions > 0) && (
+        <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">
+          {stats.pendingTransactions > 0 && (
+            <Link
+              href="/system/dashboard/accounting/transactions?status=pending_approval"
+              className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-3 py-1.5 hover:bg-gray-200 dark:hover:bg-gray-600"
+            >
+              {stats.pendingTransactions} transaction{stats.pendingTransactions !== 1 ? 's' : ''} awaiting approval
+            </Link>
+          )}
+          {stats.pendingExpenses > 0 && (
+            <Link
+              href="/system/dashboard/accounting/expenses?status=pending"
+              className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-3 py-1.5 hover:bg-gray-200 dark:hover:bg-gray-600"
+            >
+              {stats.pendingExpenses} pending expense{stats.pendingExpenses !== 1 ? 's' : ''}
+            </Link>
+          )}
+          {stats.unreconciledTransactions > 0 && (
+            <Link
+              href="/system/dashboard/accounting/bank-reconciliation"
+              className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-3 py-1.5 hover:bg-gray-200 dark:hover:bg-gray-600"
+            >
+              {stats.unreconciledTransactions} unreconciled in period
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {statsCards.map((stat, index) => {
@@ -239,7 +366,9 @@ const AccountingDashboard = () => {
                           : 'text-red-600 dark:text-red-400'
                       }`}
                     >
-                      {transaction.type === 'income' ? '+' : '-'}KES {transaction.amount.toLocaleString()}
+                      {transaction.type === 'income' ? '+' : '-'}
+                      {(transaction.currency || 'KES')}{' '}
+                      {Number(transaction.amount).toLocaleString()}
                     </div>
                   </div>
                 ))
@@ -283,7 +412,8 @@ const AccountingDashboard = () => {
                       </div>
                     </div>
                     <div className="text-sm font-medium text-red-600 dark:text-red-400">
-                      KES {expense.amount.toLocaleString()}
+                      {(expense.currency || 'KES')}{' '}
+                      {Number(expense.amount).toLocaleString()}
                     </div>
                   </div>
                 ))

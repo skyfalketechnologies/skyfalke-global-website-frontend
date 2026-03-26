@@ -11,9 +11,12 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const Transactions = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { loading: authLoading, canAccessAccounting } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState({ 
@@ -28,22 +31,45 @@ const Transactions = () => {
   const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
+      setLoadError('');
       const params = new URLSearchParams({
-        page,
-        limit: 20,
+        page: String(page),
+        limit: '20',
         ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== ''))
       });
       const response = await adminApiGet(`/api/accounting/transactions?${params}`);
       if (response.success && response.data) {
         setTransactions(response.data.data || []);
         setTotalPages(response.data.pagination?.pages || 1);
+      } else {
+        setTransactions([]);
+        setLoadError(response.error?.message || 'Could not load transactions.');
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
+      setLoadError('Could not load transactions.');
+      setTransactions([]);
     } finally {
       setLoading(false);
+      setHasFetched(true);
     }
   }, [page, filters]);
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    const type = searchParams.get('type');
+    if (status || type) {
+      setFilters((prev) => ({
+        ...prev,
+        ...(status ? { status } : {}),
+        ...(type ? { type } : {})
+      }));
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters.type, filters.status, filters.account, filters.startDate, filters.endDate, filters.search]);
 
   useEffect(() => {
     if (authLoading || !canAccessAccounting()) return;
@@ -62,7 +88,7 @@ const Transactions = () => {
         if (response.success) {
           fetchTransactions();
         } else {
-          alert(response.message || 'Failed to approve transaction');
+          alert(response.error?.message || 'Failed to approve transaction');
         }
       } catch (error) {
         console.error('Error approving transaction:', error);
@@ -79,7 +105,7 @@ const Transactions = () => {
         if (response.success) {
           fetchTransactions();
         } else {
-          alert(response.message || 'Failed to reject transaction');
+          alert(response.error?.message || 'Failed to reject transaction');
         }
       } catch (error) {
         console.error('Error rejecting transaction:', error);
@@ -94,6 +120,8 @@ const Transactions = () => {
         const response = await adminApiPost(`/api/accounting/transactions/${id}/reconcile`);
         if (response.success) {
           fetchTransactions();
+        } else {
+          alert(response.error?.message || 'Failed to reconcile transaction');
         }
       } catch (error) {
         console.error('Error reconciling transaction:', error);
@@ -119,7 +147,7 @@ const Transactions = () => {
     );
   }
 
-  if (loading && transactions.length === 0) {
+  if (!hasFetched && loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <FaSpinner className="animate-spin text-4xl text-primary-600" />
@@ -129,6 +157,11 @@ const Transactions = () => {
 
   return (
     <div className="space-y-6">
+      {loadError && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3 text-sm text-amber-900 dark:text-amber-100">
+          {loadError}
+        </div>
+      )}
       <div className="md:flex md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Transaction Management</h2>
@@ -219,7 +252,7 @@ const Transactions = () => {
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div className={`bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden ${loading && hasFetched ? 'opacity-75' : ''}`}>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -248,6 +281,13 @@ const Transactions = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              {transactions.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                    No transactions match your filters. Create one or adjust filters.
+                  </td>
+                </tr>
+              )}
               {transactions.map((transaction) => {
                 const TypeIcon = getTypeIcon(transaction.type);
                 return (
@@ -288,7 +328,8 @@ const Transactions = () => {
                         : 'text-gray-900 dark:text-gray-100'
                     }`}>
                       {transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : ''}
-                      {transaction.currency} {transaction.amount?.toLocaleString()}
+                      {(transaction.currency || 'KES')}{' '}
+                      {Number(transaction.amount).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                       {new Date(transaction.date).toLocaleDateString()}
@@ -363,7 +404,7 @@ const Transactions = () => {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {totalPages > 1 && transactions.length > 0 && (
           <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-600">
             <div className="flex-1 flex justify-between sm:hidden">
               <button
