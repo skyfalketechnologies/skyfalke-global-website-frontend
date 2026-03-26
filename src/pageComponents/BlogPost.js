@@ -305,22 +305,29 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
 
                 {hasContent && (
                   <div
-                    className="prose prose-sm sm:prose-base md:prose-lg max-w-none
+                    className="blog-article-body prose prose-sm sm:prose-base md:prose-lg max-w-none
                       prose-headings:font-bold prose-headings:text-dark-blue prose-headings:tracking-tight
                       prose-h1:text-4xl prose-h1:mb-8 prose-h1:mt-12
                       prose-h2:text-3xl prose-h2:mb-6 prose-h2:mt-10
                       prose-h3:text-2xl prose-h3:mb-4 prose-h3:mt-8
                       prose-h4:text-xl prose-h4:mb-4 prose-h4:mt-6
+                      prose-h5:text-lg prose-h5:font-semibold prose-h5:text-dark-blue prose-h5:mt-8 prose-h5:mb-3
+                      prose-h6:text-base prose-h6:font-semibold prose-h6:text-gray-700 prose-h6:mt-6 prose-h6:mb-2
                       prose-p:text-gray-600 prose-p:leading-relaxed prose-p:mb-6
                       prose-a:text-yellow prose-a:no-underline hover:prose-a:underline prose-a:font-medium
                       prose-strong:text-dark-blue prose-strong:font-bold
                       prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
+                      prose-figure:my-8 prose-figure:max-w-none
+                      prose-figcaption:mt-2 prose-figcaption:text-sm prose-figcaption:text-gray-500 prose-figcaption:italic
                       prose-blockquote:border-l-4 prose-blockquote:border-yellow prose-blockquote:pl-4 prose-blockquote:italic
                       prose-ul:list-disc prose-ul:pl-6 prose-ul:my-6
                       prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-6
                       prose-li:mb-2 prose-li:text-gray-600
+                      prose-table:w-full prose-table:border-collapse prose-table:my-8
+                      prose-th:border prose-th:border-gray-200 prose-th:bg-dark-blue prose-th:text-white prose-th:px-4 prose-th:py-3 prose-th:text-left
+                      prose-td:border prose-td:border-gray-200 prose-td:px-4 prose-td:py-3 prose-td:align-top
                       prose-code:text-yellow prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-                      prose-pre:bg-gray-900 prose-pre:text-white prose-pre:p-4 prose-pre:rounded-lg
+                      prose-pre:bg-gray-900 prose-pre:text-white prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
                       prose-hr:my-8 prose-hr:border-gray-200"
                     id="blog-content"
                     itemProp="articleBody"

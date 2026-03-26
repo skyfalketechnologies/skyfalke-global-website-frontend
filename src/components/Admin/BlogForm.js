@@ -4,13 +4,17 @@ import { useRouter } from 'next/navigation';
 import { FaSave, FaGlobe, FaTwitter, FaFacebook, FaUpload, FaImage, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
 import Strike from '@tiptap/extension-strike';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
+import Gapcursor from '@tiptap/extension-gapcursor';
+import Placeholder from '@tiptap/extension-placeholder';
+import { BlogImage } from './blogEditor/BlogImageExtension';
+import BlogEditorToolbar from './blogEditor/BlogEditorToolbar';
 import { apiPost, apiPut, apiGet } from '../../utils/api';
 import SEOAnalyzer from './SEOAnalyzer';
 
@@ -69,8 +73,8 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
           levels: [1, 2, 3, 4, 5, 6],
         },
       }),
-      Image.configure({
-        inline: true,
+      BlogImage.configure({
+        inline: false,
         allowBase64: false,
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded-lg',
@@ -84,6 +88,19 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
       }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
+      }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'blog-editor-table',
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      Gapcursor,
+      Placeholder.configure({
+        placeholder: 'Write your article here. Use the toolbar for headings, lists, quotes, tables, and images.',
       }),
       Underline,
       Strike,
@@ -103,52 +120,40 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4',
-        'data-placeholder': 'Write your blog content here...',
+        class:
+          'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[380px] max-w-none px-5 py-6',
       },
     },
   });
 
-  // Handle image upload for editor content
-  const handleEditorImageUpload = async () => {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
-
-    input.onchange = async () => {
-      const file = input.files[0];
-      if (!file) return;
-
-      // Prompt for alt text
-      const altText = prompt('Enter alt text for this image (for accessibility and SEO):', '');
-      if (altText === null) return; // User cancelled
-
-      setUploadingImage(true);
-      try {
-        const formData = new FormData();
-        formData.append('image', file);
-
-        const response = await apiPost('/api/blogs/upload-image', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          }
-        });
-
-        if (response.data && response.data.image && editor) {
-          const imageUrl = response.data.image.url;
-          editor.chain().focus().setImage({ 
-            src: imageUrl, 
-            alt: altText || '' 
-          }).run();
-        }
-      } catch (error) {
-        console.error('Image upload error:', error);
-        alert('Failed to upload image. Please try again.');
-      } finally {
-        setUploadingImage(false);
+  const handleInsertImageFromFile = async ({ file, alt, caption, align }) => {
+    if (!file || !editor) return;
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const response = await apiPost('/api/blogs/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (response.data?.image) {
+        editor.chain().focus().setImage({
+          src: response.data.image.url,
+          alt: alt || '',
+          caption: caption || '',
+          align: align || 'center',
+        }).run();
+        return;
       }
-    };
+      throw new Error('Invalid upload response');
+    } catch (error) {
+      console.error('Image upload error:', error);
+      alert('Failed to upload image. Please try again.');
+      throw error;
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   // Fetch blog data if editing
@@ -294,6 +299,57 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
       }
       .dark .ProseMirror blockquote {
         border-left-color: #e0ae00;
+      }
+      .ProseMirror table.blog-editor-table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 100%;
+        margin: 1rem 0;
+        overflow: hidden;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+      }
+      .dark .ProseMirror table.blog-editor-table {
+        border-color: #4b5563;
+      }
+      .ProseMirror table.blog-editor-table td,
+      .ProseMirror table.blog-editor-table th {
+        border: 1px solid #e5e7eb;
+        padding: 0.5rem 0.75rem;
+        vertical-align: top;
+        min-width: 4rem;
+      }
+      .dark .ProseMirror table.blog-editor-table td,
+      .dark .ProseMirror table.blog-editor-table th {
+        border-color: #4b5563;
+      }
+      .ProseMirror table.blog-editor-table th {
+        background-color: #f3f4f6;
+        font-weight: 600;
+      }
+      .dark .ProseMirror table.blog-editor-table th {
+        background-color: #374151;
+      }
+      .ProseMirror figure.blog-content-figure {
+        margin: 1.25rem 0;
+      }
+      .ProseMirror figure.blog-content-figure img {
+        margin: 0 auto;
+        display: block;
+      }
+      .ProseMirror .blog-content-figcaption {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-style: italic;
+        text-align: center;
+      }
+      .ProseMirror .tableWrapper {
+        overflow-x: auto;
+        margin: 1rem 0;
+      }
+      .ProseMirror.resize-cursor {
+        cursor: col-resize;
       }
     `;
     // Remove existing style if present
@@ -821,221 +877,25 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
                      Content *
                    </label>
                    
-                   {/* Toolbar */}
-                   {editor && (
-                     <div className="border border-b-0 rounded-t-lg bg-gray-50 dark:bg-gray-700 p-2 flex flex-wrap gap-2">
-                       {/* Headings */}
-                       <select
-                         onChange={(e) => {
-                           const value = e.target.value;
-                           if (value === 'paragraph') {
-                             editor.chain().focus().setParagraph().run();
-                           } else {
-                             editor.chain().focus().toggleHeading({ level: parseInt(value) }).run();
-                           }
-                         }}
-                         value={
-                           editor.isActive('heading', { level: 1 }) ? '1' :
-                           editor.isActive('heading', { level: 2 }) ? '2' :
-                           editor.isActive('heading', { level: 3 }) ? '3' :
-                           editor.isActive('heading', { level: 4 }) ? '4' :
-                           editor.isActive('heading', { level: 5 }) ? '5' :
-                           editor.isActive('heading', { level: 6 }) ? '6' :
-                           'paragraph'
-                         }
-                         className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                       >
-                         <option value="paragraph">Paragraph</option>
-                         <option value="1">Heading 1</option>
-                         <option value="2">Heading 2</option>
-                         <option value="3">Heading 3</option>
-                         <option value="4">Heading 4</option>
-                         <option value="5">Heading 5</option>
-                         <option value="6">Heading 6</option>
-                       </select>
-                       
-                       <div className="border-l border-gray-300 dark:border-gray-600 mx-1"></div>
-                       
-                       {/* Text Formatting */}
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().toggleBold().run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('bold') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                       >
-                         <strong>B</strong>
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().toggleItalic().run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('italic') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                       >
-                         <em>I</em>
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().toggleUnderline().run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('underline') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                       >
-                         <u>U</u>
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().toggleStrike().run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('strike') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                       >
-                         <s>S</s>
-                       </button>
-                       
-                       <div className="border-l border-gray-300 dark:border-gray-600 mx-1"></div>
-                       
-                       {/* Lists */}
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().toggleBulletList().run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('bulletList') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                         title="Bullet List"
-                       >
-                         <span className="font-bold">•</span>
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('orderedList') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                         title="Numbered List"
-                       >
-                         <span className="font-bold">1.</span>
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().liftListItem('listItem').run()}
-                         className="px-3 py-1 text-sm rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                         title="Decrease Indent"
-                         disabled={!editor.isActive('bulletList') && !editor.isActive('orderedList')}
-                       >
-                         ↶
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
-                         className="px-3 py-1 text-sm rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                         title="Increase Indent"
-                         disabled={!editor.isActive('bulletList') && !editor.isActive('orderedList')}
-                       >
-                         ↷
-                       </button>
-                       
-                       <div className="border-l border-gray-300 dark:border-gray-600 mx-1"></div>
-                       
-                       {/* Blockquote */}
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('blockquote') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                         title="Quote"
-                       >
-                         "
-                       </button>
-                       
-                       {/* Code Block */}
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('codeBlock') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                         title="Code Block"
-                       >
-                         &lt;/&gt;
-                       </button>
-                       
-                       {/* Inline Code */}
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().toggleCode().run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('code') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                         title="Inline Code"
-                       >
-                         &lt;code&gt;
-                       </button>
-                       
-                       {/* Horizontal Rule */}
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().setHorizontalRule().run()}
-                         className="px-3 py-1 text-sm rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                         title="Horizontal Line"
-                       >
-                         ─
-                       </button>
-                       
-                       <div className="border-l border-gray-300 dark:border-gray-600 mx-1"></div>
-                       
-                       {/* Alignment */}
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().setTextAlign('left').run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive({ textAlign: 'left' }) ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                       >
-                         ⬅
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().setTextAlign('center').run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive({ textAlign: 'center' }) ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                       >
-                         ⬌
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().setTextAlign('right').run()}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive({ textAlign: 'right' }) ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                       >
-                         ➡
-                       </button>
-                       
-                       <div className="border-l border-gray-300 dark:border-gray-600 mx-1"></div>
-                       
-                       {/* Link */}
-                       <button
-                         type="button"
-                         onClick={() => {
-                           const url = window.prompt('Enter URL:');
-                           if (url) {
-                             editor.chain().focus().setLink({ href: url }).run();
-                           }
-                         }}
-                         className={`px-3 py-1 text-sm rounded ${editor.isActive('link') ? 'bg-primary-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-                       >
-                         🔗
-                       </button>
-                       
-                       {/* Image */}
-                       <button
-                         type="button"
-                         onClick={handleEditorImageUpload}
-                         disabled={uploadingImage}
-                         className="px-3 py-1 text-sm rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
-                       >
-                         {uploadingImage ? '⏳' : '🖼️'}
-                       </button>
-                       
-                       <div className="border-l border-gray-300 dark:border-gray-600 mx-1"></div>
-                       
-                       {/* Clear Formatting */}
-                       <button
-                         type="button"
-                         onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}
-                         className="px-3 py-1 text-sm rounded bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                       >
-                         Clear
-                       </button>
-                     </div>
-                   )}
-                   
-                   {/* Editor */}
-                   <div className={`border rounded-b-lg bg-white dark:bg-gray-800 ${errors.content ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'}`}>
+                   <div
+                     className={`overflow-hidden rounded-xl border bg-white shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-primary-500/30 dark:bg-gray-800 ${
+                       errors.content ? 'border-red-300 dark:border-red-600' : 'border-gray-200 dark:border-gray-600'
+                     }`}
+                   >
+                     {editor && (
+                       <div className="sticky top-0 z-20">
+                         <BlogEditorToolbar
+                           editor={editor}
+                           uploadingImage={uploadingImage}
+                           onInsertImageFromFile={handleInsertImageFromFile}
+                         />
+                       </div>
+                     )}
+                     <div className={`border-t border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-900/40 ${errors.content ? '' : ''}`}>
                      {editor ? (
                        <EditorContent 
                          editor={editor}
-                         className="min-h-[300px] p-4 prose prose-sm max-w-none dark:prose-invert"
+                         className="min-h-[380px] max-w-none dark:prose-invert"
                        />
                      ) : (
                        <div className="h-64 flex items-center justify-center">
@@ -1045,11 +905,12 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
                          </div>
                        </div>
                      )}
+                     </div>
                    </div>
                    <div className="mt-2 flex items-center justify-between">
                      <div className="flex-1">
                        <p className="text-xs text-gray-500">
-                         Tip: Use headings (H1-H6) to structure your content. When adding images, you'll be prompted to enter alt text for better SEO and accessibility.
+                         Tip: Use the toolbar for structure (headings, lists, quotes, tables). Insert images with the image button—add alt text and optional captions; click an image to edit alignment, alt, or caption.
                        </p>
                        {errors.content && (
                          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.content.message}</p>

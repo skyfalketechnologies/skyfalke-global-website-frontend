@@ -233,6 +233,20 @@
     max-width: 100% !important;
     height: auto;
   }
+
+  /* CMS article figures: keep natural image width; stack floated figures */
+  .prose figure.blog-content-figure img {
+    width: auto !important;
+    max-width: 100% !important;
+  }
+
+  .prose figure.blog-content-figure[data-align="left"],
+  .prose figure.blog-content-figure[data-align="right"] {
+    float: none;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 @media (min-width: 769px) {
@@ -254,6 +268,55 @@
   color: #6b7280;
   margin-top: 0.5rem;
   font-style: italic;
+}
+
+/* Article images: alignment + captions (editor exports figure[data-blog-image]) */
+.prose figure.blog-content-figure {
+  clear: both;
+  margin: 2rem 0;
+}
+
+.prose figure.blog-content-figure::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.prose figure.blog-content-figure[data-align="left"] {
+  float: left;
+  max-width: min(50%, 28rem);
+  margin: 1rem 1.5rem 1rem 0;
+  text-align: center;
+}
+
+.prose figure.blog-content-figure[data-align="right"] {
+  float: right;
+  max-width: min(50%, 28rem);
+  margin: 1rem 0 1rem 1.5rem;
+  text-align: center;
+}
+
+.prose figure.blog-content-figure[data-align="center"] {
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+  text-align: center;
+}
+
+.prose figure.blog-content-figure[data-align="full"] {
+  float: none;
+  width: 100%;
+  max-width: 100%;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.prose figure.blog-content-figure img {
+  width: auto !important;
+  max-width: 100% !important;
+  margin: 0 auto;
+  display: block;
 }
 
 /* Table Styling */
@@ -282,6 +345,92 @@
 
 .prose tr:hover {
   background-color: #f9fafb;
+}
+
+/* TipTap table wrapper (saved HTML includes div.tableWrapper) */
+#blog-content .tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.75rem 0;
+  max-width: 100%;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+}
+
+#blog-content .tableWrapper table {
+  margin: 0;
+  min-width: min(100%, 40rem);
+}
+
+/* Cell borders for any article table (including blog-editor-table) */
+#blog-content table:not(.blog-editor-table) th,
+#blog-content table:not(.blog-editor-table) td {
+  border: 1px solid #e5e7eb;
+}
+
+#blog-content table.blog-editor-table {
+  border: 1px solid #e5e7eb;
+}
+
+#blog-content table.blog-editor-table th,
+#blog-content table.blog-editor-table td {
+  border: 1px solid #e5e7eb;
+}
+
+/* TipTap uses block+ in cells — tighten paragraph spacing */
+#blog-content td > p,
+#blog-content th > p {
+  margin: 0 0 0.5rem 0;
+}
+
+#blog-content td > p:last-child,
+#blog-content th > p:last-child {
+  margin-bottom: 0;
+}
+
+#blog-content td ul,
+#blog-content td ol,
+#blog-content th ul,
+#blog-content th ol {
+  margin: 0.5rem 0;
+}
+
+/* Extra heading levels from editor */
+.blog-article-body h5,
+#blog-content h5 {
+  font-family: 'Nexa-Heavy', 'Nexa', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #303661;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+  line-height: 1.35;
+}
+
+.blog-article-body h6,
+#blog-content h6 {
+  font-family: 'Nexa', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+  margin-top: 1.25rem;
+  line-height: 1.4;
+}
+
+/* Underline mark from editor */
+#blog-content u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Nested lists */
+#blog-content ul ul,
+#blog-content ol ol,
+#blog-content ul ol,
+#blog-content ol ul {
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
 }
 
 /* Horizontal Rule */
