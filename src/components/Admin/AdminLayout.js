@@ -49,7 +49,8 @@ import {
   FaFileContract,
   FaBook,
   FaUniversity,
-  FaHistory
+  FaHistory,
+  FaFilePdf
 } from 'react-icons/fa';
 import NotificationDropdown from './NotificationDropdown';
 
@@ -94,7 +95,8 @@ const AdminLayout = ({ children }) => {
     // Auto-expand System if any System route is active
     if (pathname.startsWith('/system/dashboard/staff') ||
         pathname.startsWith('/system/dashboard/sitemap') ||
-        pathname.startsWith('/system/dashboard/settings')) {
+        pathname.startsWith('/system/dashboard/settings') ||
+        pathname.startsWith('/system/dashboard/pdf-editor')) {
       groups.system = true;
     }
 
@@ -127,7 +129,8 @@ const AdminLayout = ({ children }) => {
       // Auto-expand System if any System route is active
       if (pathname.startsWith('/system/dashboard/staff') ||
           pathname.startsWith('/system/dashboard/sitemap') ||
-          pathname.startsWith('/system/dashboard/settings')) {
+          pathname.startsWith('/system/dashboard/settings') ||
+          pathname.startsWith('/system/dashboard/pdf-editor')) {
         updated.system = true;
       }
 
@@ -263,6 +266,7 @@ const AdminLayout = ({ children }) => {
       items: [
         { name: 'Staff Management', href: '/system/dashboard/staff', icon: FaUsers, current: pathname.startsWith('/system/dashboard/staff') },
         { name: 'Sitemap Manager', href: '/system/dashboard/sitemap', icon: FaSitemap, current: pathname === '/system/dashboard/sitemap' },
+        { name: 'PDF Editor', href: '/system/dashboard/pdf-editor', icon: FaFilePdf, current: pathname.startsWith('/system/dashboard/pdf-editor') },
         { name: 'Settings', href: '/system/dashboard/settings', icon: FaCog, current: pathname === '/system/dashboard/settings' },
       ]
     },
