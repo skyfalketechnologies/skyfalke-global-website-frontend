@@ -19,12 +19,32 @@ const AccountingBankReconciliation = () => {
   const [loading, setLoading] = useState(true);
 
   const loadBanks = useCallback(async () => {
-    const res = await adminApiGet('/api/accounting/accounts?isActive=true');
-    if (res.success && res.data) {
-      const payload = res.data.data ?? res.data;
+    // Prefer explicit account types used for reconciliation.
+    const [bankRes, cashRes] = await Promise.all([
+      adminApiGet('/api/accounting/accounts?isActive=true&type=bank'),
+      adminApiGet('/api/accounting/accounts?isActive=true&type=cash')
+    ]);
+
+    const bankList = bankRes.success
+      ? (Array.isArray(bankRes.data?.data) ? bankRes.data.data : [])
+      : [];
+    const cashList = cashRes.success
+      ? (Array.isArray(cashRes.data?.data) ? cashRes.data.data : [])
+      : [];
+
+    const merged = [...bankList, ...cashList];
+    const deduped = Array.from(new Map(merged.map((a) => [a._id, a])).values());
+
+    // Backward compatibility: some tenants may have bank ledgers typed as "asset".
+    if (deduped.length === 0) {
+      const fallbackRes = await adminApiGet('/api/accounting/accounts?isActive=true');
+      const payload = fallbackRes.success ? fallbackRes.data?.data : [];
       const list = Array.isArray(payload) ? payload : [];
       setBankAccounts(list.filter((a) => ['bank', 'cash', 'asset'].includes(a.type)));
+      return;
     }
+
+    setBankAccounts(deduped);
   }, []);
 
   const loadSessions = useCallback(async () => {
@@ -114,14 +134,20 @@ const AccountingBankReconciliation = () => {
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
               className="mt-1 w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600"
+              disabled={bankAccounts.length === 0}
             >
-              <option value="">Select…</option>
+              <option value="">{bankAccounts.length === 0 ? 'No bank/cash accounts found' : 'Select…'}</option>
               {bankAccounts.map((a) => (
                 <option key={a._id} value={a._id}>
-                  {a.accountNumber} — {a.name}
+                  {a.accountNumber} — {a.name} ({a.type})
                 </option>
               ))}
             </select>
+            {bankAccounts.length === 0 && (
+              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                Create an active account with type <strong>bank</strong> or <strong>cash</strong> first.
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Statement date</label>
