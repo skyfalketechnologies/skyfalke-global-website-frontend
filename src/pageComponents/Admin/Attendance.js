@@ -9,7 +9,7 @@ import { adminApiGet } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Attendance = () => {
-  const { isSuperAdmin } = useAuth();
+  const { canAccessHRModule } = useAuth();
   const router = useRouter();
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,8 +23,8 @@ const Attendance = () => {
   });
 
   useEffect(() => {
-    if (!isSuperAdmin()) {
-      alert('Access denied. Super admin role required to access HR Management.');
+    if (!canAccessHRModule()) {
+      alert('Access denied. HR or Admin role required.');
       router.push('/system/dashboard');
       return;
     }

@@ -9,7 +9,7 @@ import { adminApiGet, adminApiDelete } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Employees = () => {
-  const { isSuperAdmin } = useAuth();
+  const { canAccessHRModule } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -19,8 +19,8 @@ const Employees = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isSuperAdmin()) {
-      alert('Access denied. Super admin role required to access HR Management.');
+    if (!canAccessHRModule()) {
+      alert('Access denied. HR or Admin role required.');
       router.push('/system/dashboard');
       return;
     }
@@ -76,7 +76,7 @@ const Employees = () => {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Employees</h2>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage your employees</p>
         </div>
-        {isSuperAdmin() && (
+        {canAccessHRModule() && (
           <Link href="/system/dashboard/hr/employees/new"
             className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700"
           >
@@ -153,6 +153,9 @@ const Employees = () => {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Portal login
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -186,6 +189,13 @@ const Employees = () => {
                     }`}>
                       {employee.employmentInfo?.status}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                    {employee.user?.email ? (
+                      <span title={employee.user.name}>{employee.user.email}</span>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <Link href={`/system/dashboard/hr/employees/${employee._id}/edit`}

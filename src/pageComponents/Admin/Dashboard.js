@@ -36,8 +36,14 @@ import {
 
 const Dashboard = () => {
   const router = useRouter();
-  const { canAccessAccounting } = useAuth();
+  const { canAccessAccounting, user } = useAuth();
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.role === 'employee') {
+      router.replace('/system/dashboard/portal');
+    }
+  }, [user?.role, router]);
   const [apiError, setApiError] = useState(null);
   const [stats, setStats] = useState({
     totalVisitors: 0,

@@ -177,12 +177,50 @@ export const AuthProvider = ({ children }) => {
     return user?.role === 'super_admin' || user?.email === 'mronald@skyfalke.com';
   };
 
-  /** Accounting & Finance module: Super Admin or Accounts role only */
+  /** Any staff role that may open /system/dashboard (CMS + Employee Portal) */
+  const canAccessSystemDashboard = useCallback(() => {
+    if (!user) return false;
+    const staff = [
+      'super_admin',
+      'admin',
+      'editor',
+      'accounts',
+      'hr',
+      'employee',
+      'finance'
+    ];
+    return staff.includes(user.role) || user.email === 'mronald@skyfalke.com';
+  }, [user]);
+
+  /** CMS content areas: admins + editors */
+  const canAccessCMS = useCallback(() => {
+    if (!user) return false;
+    return (
+      user.role === 'super_admin' ||
+      user.role === 'admin' ||
+      user.role === 'editor' ||
+      user.email === 'mronald@skyfalke.com'
+    );
+  }, [user]);
+
+  /** HR Management sidebar (employees, attendance) — HR, Admin, Super Admin */
+  const canAccessHRModule = useCallback(() => {
+    if (!user) return false;
+    return (
+      user.role === 'super_admin' ||
+      user.role === 'admin' ||
+      user.role === 'hr' ||
+      user.email === 'mronald@skyfalke.com'
+    );
+  }, [user]);
+
+  /** Accounting & Finance module: Super Admin, Finance, or Accounts */
   const canAccessAccounting = useCallback(() => {
     if (!user) return false;
     return (
       user.role === 'super_admin' ||
       user.role === 'accounts' ||
+      user.role === 'finance' ||
       user.email === 'mronald@skyfalke.com'
     );
   }, [user]);
@@ -201,6 +239,9 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isAdmin,
     isSuperAdmin,
+    canAccessSystemDashboard,
+    canAccessCMS,
+    canAccessHRModule,
     canAccessAccounting,
     getToken
   };

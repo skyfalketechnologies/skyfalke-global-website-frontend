@@ -26,7 +26,7 @@ import {
 const HiddenLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login, isAuthenticated, loading } = useAuth();
+  const { login, isAuthenticated, loading, user } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,9 +38,10 @@ const HiddenLogin = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated() && !loading) {
-      router.push(from);
+      const dest = user?.role === 'employee' ? '/system/dashboard/portal' : from;
+      router.push(dest);
     }
-  }, [isAuthenticated, loading, router, from]);
+  }, [isAuthenticated, loading, router, from, user]);
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -48,7 +49,10 @@ const HiddenLogin = () => {
       const result = await login(data.email, data.password);
       
       if (result.success) {
-        router.push(from);
+        const u = result.user;
+        const dest =
+          u?.role === 'employee' ? '/system/dashboard/portal' : from;
+        router.push(dest);
       } else {
         setError('root', {
           type: 'manual',

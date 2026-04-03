@@ -56,8 +56,14 @@ const StaffManagement = () => {
     fetchStaff();
   }, [currentPage, searchTerm, filters]);
 
+  useEffect(() => {
+    if (!isSuperAdmin()) {
+      router.replace('/system/dashboard');
+    }
+  }, [isSuperAdmin, router]);
+
   if (!isSuperAdmin()) {
-    return <Navigate to="/system/dashboard" replace />;
+    return null;
   }
 
   const fetchStaff = async () => {
@@ -238,6 +244,9 @@ const StaffManagement = () => {
             <option value="super_admin">Super Admin</option>
             <option value="admin">Admin</option>
             <option value="accounts">Accounts</option>
+            <option value="finance">Finance</option>
+            <option value="hr">HR</option>
+            <option value="employee">Employee</option>
             <option value="editor">Editor</option>
           </select>
           <select
@@ -315,7 +324,10 @@ const StaffManagement = () => {
                   >
                     <option value="editor">Editor</option>
                     <option value="admin">Admin</option>
-                    <option value="accounts">Accounts (Finance)</option>
+                    <option value="accounts">Accounts</option>
+                    <option value="finance">Finance</option>
+                    <option value="hr">HR</option>
+                    <option value="employee">Employee (portal)</option>
                     {!editingStaff && <option value="super_admin" disabled>Super Admin (Cannot create)</option>}
                   </select>
                 </div>
