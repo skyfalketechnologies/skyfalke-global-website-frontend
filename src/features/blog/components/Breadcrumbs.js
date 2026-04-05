@@ -19,15 +19,23 @@ const Breadcrumbs = ({ items = [] }) => {
     }))
   ].filter(item => item.href && item.href !== '#'); // Only filter out items with no valid href
 
+  const base = 'https://skyfalke.com';
   const schemaBreadcrumbs = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: breadcrumbItems.map((item, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: item.name, // Name is guaranteed to be present and non-empty
-      item: `https://skyfalke.com${item.href}`
-    }))
+    itemListElement: breadcrumbItems.map((item, index) => {
+      const url = `${base}${item.href}`;
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        item: {
+          '@type': 'WebPage',
+          '@id': url,
+          name: item.name,
+        },
+      };
+    }),
   };
 
   return (
@@ -58,8 +66,11 @@ const Breadcrumbs = ({ items = [] }) => {
                   className="hover:text-yellow transition-colors"
                   itemProp="item"
                 >
-                  {index === 0 && <FaHome className="w-4 h-4" />}
-                  {index > 0 && <span itemProp="name">{item.name}</span>}
+                  {index === 0 && <FaHome className="w-4 h-4" aria-hidden />}
+                  {/* Google requires ListItem name or item.name; icon-only home had neither in microdata */}
+                  <span itemProp="name" className={index === 0 ? 'sr-only' : ''}>
+                    {item.name}
+                  </span>
                 </Link>
               )}
               <meta itemProp="position" content={index + 1} />

@@ -6,6 +6,13 @@ const DEFAULT_SITE =
   'https://skyfalke.com';
 
 const BlogPostSchema = ({ post, siteUrl = DEFAULT_SITE }) => {
+  const base = String(siteUrl).replace(/\/$/, '');
+  /** Breadcrumb `item` as WebPage so Google gets `item.name`, not only a URL node without a name. */
+  const breadcrumbWebPage = (name, path) => ({
+    '@type': 'WebPage',
+    '@id': `${base}${path}`,
+    name,
+  });
   if (!post) return null;
 
   const generateArticleSchema = () => {
@@ -69,19 +76,19 @@ const BlogPostSchema = ({ post, siteUrl = DEFAULT_SITE }) => {
           "@type": "ListItem",
           "position": 1,
           "name": "Home",
-          "item": siteUrl
+          "item": breadcrumbWebPage("Home", "/")
         },
         {
           "@type": "ListItem",
           "position": 2,
           "name": "Blog",
-          "item": `${siteUrl}/blog`
+          "item": breadcrumbWebPage("Blog", "/blog")
         },
         {
           "@type": "ListItem",
           "position": 3,
           "name": postTitle,
-          "item": `${siteUrl}/blog/${postSlug}`
+          "item": breadcrumbWebPage(postTitle, `/blog/${postSlug}`)
         }
       ]
     };
@@ -105,19 +112,22 @@ const BlogPostSchema = ({ post, siteUrl = DEFAULT_SITE }) => {
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": siteUrl
+            "item": breadcrumbWebPage("Home", "/")
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Blog",
-            "item": `${siteUrl}/blog`
+            "item": breadcrumbWebPage("Blog", "/blog")
           },
           {
             "@type": "ListItem",
             "position": 3,
             "name": (post.title && post.title.trim()) || "Blog Post",
-            "item": `${siteUrl}/blog/${post.slug || 'post'}`
+            "item": breadcrumbWebPage(
+              (post.title && post.title.trim()) || "Blog Post",
+              `/blog/${post.slug || 'post'}`
+            )
           }
         ]
       }
