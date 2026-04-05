@@ -7,55 +7,17 @@ export const generateOrganizationSchema = () => {
     "@type": "Organization",
     "name": "Skyfalke",
     "url": "https://skyfalke.com",
-    "logo": "https://skyfalke.com/images/logos/logo.svg",
-    "description": "Skyfalke offers sustainable and reliable web hosting powered by 100% renewable energy. Enjoy eco-friendly domain registration, server renting, and cloud computing services with top-notch performance.",
-    "foundingDate": "2020",
+    "logo": "https://skyfalke.com/logo.png",
+    "description":
+      "Digital growth and automation systems for modern organizations — combining AI, cloud, data, and digital marketing.",
     "address": {
       "@type": "PostalAddress",
-      "addressCountry": "Global",
-      "addressRegion": "Africa"
-    },
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer service",
-      "email": "info@skyfalke.com",
-      "url": "https://skyfalke.com/contact"
+      "addressCountry": "KE"
     },
     "sameAs": [
       "https://www.linkedin.com/company/skyfalke",
-      "https://twitter.com/skyfalke",
-      "https://facebook.com/skyfalke"
-    ],
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "Digital Services",
-      "itemListElement": [
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Green Web Hosting",
-            "description": "Eco-friendly web hosting powered by renewable energy"
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Digital Marketing",
-            "description": "Comprehensive digital marketing solutions"
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Cloud Computing",
-            "description": "Sustainable cloud computing services"
-          }
-        }
-      ]
-    }
+      "https://twitter.com/skyfalke"
+    ]
   };
 };
 
@@ -65,7 +27,8 @@ export const generateWebsiteSchema = () => {
     "@type": "WebSite",
     "name": "Skyfalke",
     "url": "https://skyfalke.com",
-    "description": "Sustainable Cloud Solutions Partner In Africa & Beyond",
+    "description":
+      "Digital growth and automation systems for modern organizations — combining AI, cloud, data, and digital marketing.",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
@@ -79,7 +42,7 @@ export const generateWebsiteSchema = () => {
       "name": "Skyfalke",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://skyfalke.com/images/logos/logo.svg"
+        "url": "https://skyfalke.com/logo.png"
       }
     }
   };

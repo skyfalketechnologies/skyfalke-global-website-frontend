@@ -7,11 +7,21 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'),
   title: {
-    default: 'Skyfalke • Leading Digital Marketing & Technology Solutions Partner in Africa',
+    default: 'Skyfalke | Digital Growth & Automation Systems for Modern Organizations',
     template: '%s | Skyfalke',
   },
-  description: 'Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics. Serving Africa & beyond with eco-friendly solutions.',
-  keywords: ['digital marketing agency Africa', 'sustainable cloud hosting Kenya', 'AI business solutions', 'eco-friendly web hosting', 'renewable energy servers', 'digital transformation Africa', 'IT consultancy Kenya', 'creative services Africa', 'data analytics', 'business intelligence'],
+  description:
+    'Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter — combining AI, cloud, data, and digital marketing into one connected system.',
+  keywords: [
+    'business automation Kenya',
+    'digital transformation Africa',
+    'AI solutions for SMEs',
+    'cloud services Nairobi',
+    'workflow automation',
+    'digital marketing agency Kenya',
+    'enterprise backup',
+    'data systems',
+  ],
   authors: [{ name: 'Skyfalke' }],
   creator: 'Skyfalke',
   publisher: 'Skyfalke',
@@ -29,29 +39,31 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com',
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
     siteName: 'Skyfalke',
-    title: 'Skyfalke • Leading Digital Marketing & Technology Solutions Partner in Africa',
-    description: 'Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics.',
+    title: 'Skyfalke | Digital Growth & Automation Systems',
+    description:
+      'We help forward-thinking organizations automate workflows, leverage AI, and build scalable digital systems that drive real growth.',
     images: [
       {
-        url: '/favicon-512x512.png',
+        url: 'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp',
         width: 1200,
         height: 630,
-        alt: 'Skyfalke - Digital Marketing & Technology Solutions',
+        alt: 'Skyfalke — digital growth and automation systems',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Skyfalke • Leading Digital Marketing & Technology Solutions',
-    description: 'Leading digital marketing & technology solutions partner in Africa',
-    images: ['/favicon-512x512.png'],
+    title: 'Skyfalke | Digital Growth & Automation Systems',
+    description:
+      'AI, cloud, automation, and digital marketing — unified into one growth system for modern organizations.',
+    images: ['https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp'],
     site: '@skyfalke',
     creator: '@skyfalke',
   },
   alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com',
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
   },
   // Favicon / app icons for all pages
   icons: {

@@ -54,9 +54,9 @@ export function generateMetadata({
     safeImage && safeImage.startsWith('http')
       ? safeImage
       : `${BASE_URL}${safeImage}`;
-  const finalTitle = title || 'Skyfalke • Leading Digital Marketing & Technology Solutions Partner in Africa';
-  const finalDescription = description || 'Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics.';
-  const finalKeywords = keywords || 'digital marketing agency Africa, sustainable cloud hosting Kenya, AI business solutions, eco-friendly web hosting, renewable energy servers, digital transformation Africa, IT consultancy Kenya, creative services Africa, data analytics, business intelligence';
+  const finalTitle = title || 'Skyfalke | Digital Growth & Automation Systems for Modern Organizations';
+  const finalDescription = description || 'Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter — combining AI, cloud, data, and digital marketing into one connected system.';
+  const finalKeywords = keywords || 'business automation Kenya, digital transformation Africa, AI solutions for SMEs, cloud services Nairobi, workflow automation, digital marketing agency Kenya, enterprise backup, data systems';
 
   const metadata = {
     title: finalTitle,
@@ -238,9 +238,20 @@ export function generateJobMetadata(job) {
  */
 export const pageMetadata = {
   home: generateMetadata({
-    title: 'Skyfalke • Leading Digital Marketing & Technology Solutions Firm Serving Africa & Beyond',
-    description: 'Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics. Serving Africa & beyond with eco-friendly solutions.',
-    keywords: 'digital marketing agency Africa, sustainable cloud hosting Kenya, AI business solutions, eco-friendly web hosting, renewable energy servers, digital transformation Africa, IT consultancy Kenya, creative services Africa, data analytics, business intelligence',
+    title: 'Skyfalke | Digital Growth & Automation Systems for Modern Organizations',
+    description:
+      'Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter — combining AI, cloud, data, and digital marketing into one connected system.',
+    keywords:
+      'business automation Kenya, digital transformation Africa, AI solutions for SMEs, cloud services Nairobi, workflow automation, digital marketing agency Kenya, enterprise backup, data systems',
+    url: `${BASE_URL}/`,
+    canonical: `${BASE_URL}/`,
+    image: 'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp',
+    ogTitle: 'Skyfalke | Digital Growth & Automation Systems',
+    ogDescription:
+      'We help forward-thinking organizations automate workflows, leverage AI, and build scalable digital systems that drive real growth.',
+    twitterTitle: 'Skyfalke | Digital Growth & Automation Systems',
+    twitterDescription:
+      'AI, cloud, automation, and digital marketing — unified into one growth system for modern organizations.',
   }),
 
   about: generateMetadata({
