@@ -82,22 +82,53 @@
     <!-- Google Fonts with display=swap -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
         
-    <!-- Organization structured data -->
+    <!-- Global Organization + WebSite (aligns with getGlobalSchemaJsonLd in app/layout.js) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Skyfalke",
-      "url": "https://skyfalke.com",
-      "logo": "https://skyfalke.com/logo.png",
-      "description": "Digital growth and automation systems for modern organizations — combining AI, cloud, data, and digital marketing.",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "KE"
-      },
-      "sameAs": [
-        "https://www.linkedin.com/company/skyfalke",
-        "https://twitter.com/skyfalke"
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://skyfalke.com/#organization",
+          "name": "Skyfalke",
+          "url": "https://skyfalke.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://skyfalke.com/images/logos/logo.svg",
+            "width": 200,
+            "height": 60
+          },
+          "description": "Digital growth and automation systems for modern organizations — combining AI, cloud, data, and digital marketing.",
+          "address": { "@type": "PostalAddress", "addressCountry": "KE" },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "email": "info@skyfalke.com",
+            "telephone": "+254-717-797-238",
+            "url": "https://skyfalke.com/contact"
+          },
+          "sameAs": [
+            "https://www.linkedin.com/company/skyfalke",
+            "https://twitter.com/skyfalke"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://skyfalke.com/#website",
+          "name": "Skyfalke",
+          "url": "https://skyfalke.com",
+          "description": "Digital growth and automation systems for modern organizations — combining AI, cloud, data, and digital marketing.",
+          "publisher": { "@id": "https://skyfalke.com/#organization" },
+          "inLanguage": "en-US",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://skyfalke.com/blog?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }
       ]
     }
     </script>

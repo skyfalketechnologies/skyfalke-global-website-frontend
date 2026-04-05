@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Helmet } from 'react-helmet-async';
 import { FaSearch, FaFilter, FaArrowRight, FaSpinner } from 'react-icons/fa';
 import { useBlogList } from '../features/blog/hooks';
 import { BlogCard, Breadcrumbs } from '../features/blog/components';
@@ -13,6 +12,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
  * Blog Listing Page
  * SEO-optimized with proper semantic HTML
  */
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
+
 const Blog = () => {
   const { blogs, loading, error, pagination, filters, updateFilters, goToPage } = useBlogList();
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,11 +46,17 @@ const Blog = () => {
   return (
     <>
       <SEOHead
+        pageType="blog-index"
         title="Blog | Skyfalke - Digital Marketing & Technology Insights"
         description="Read the latest insights on digital marketing, cloud solutions, sustainable technology, and business growth strategies from Skyfalke."
         keywords="digital marketing blog, cloud solutions, technology insights, business growth, SEO tips, sustainable technology"
-        url="https://skyfalke.com/blog"
+        url={`${SITE_URL}/blog`}
+        canonical={`${SITE_URL}/blog`}
         type="website"
+        breadcrumbs={[
+          { name: 'Home', url: `${SITE_URL}/` },
+          { name: 'Blog', url: `${SITE_URL}/blog` },
+        ]}
       />
 
       <main className="bg-gray-50 min-h-screen">

@@ -75,6 +75,7 @@ const CourseDetail = () => {
     <>
       <SEOHead
         pageType="course"
+        data={course}
         title={`${course.title} - Skyfalke Academy`}
         description={course.shortDescription}
         keywords={`${course.category}, ${course.level}, online course, ${course.title}, Skyfalke Academy`}

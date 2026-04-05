@@ -116,6 +116,12 @@ const CloudSolutions = () => {
     <>
       <SEOHead
         pageType="service"
+        data={{
+          name: 'Managed Cloud Solutions',
+          description:
+            'Cloud architecture, migration, DevOps, security, and managed services on AWS, Azure, GCP, and Digital Ocean.',
+          category: 'Cloud computing services',
+        }}
         title="Managed Cloud Solutions | Skyfalke Cloud"
         description="Empowering businesses to scale with secure, efficient, and future-ready cloud solutions. Expert cloud engineering services for AWS, Azure, GCP, and Digital Ocean."
         keywords="cloud solutions, cloud engineering, AWS, Azure, Google Cloud, Digital Ocean, cloud migration, DevOps, cloud security, managed cloud services, cloud architecture"

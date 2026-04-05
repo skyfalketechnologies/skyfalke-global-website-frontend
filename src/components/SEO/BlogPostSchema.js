@@ -1,7 +1,11 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
+const DEFAULT_SITE =
+  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_SITE_URL) ||
+  'https://skyfalke.com';
+
+const BlogPostSchema = ({ post, siteUrl = DEFAULT_SITE }) => {
   if (!post) return null;
 
   const generateArticleSchema = () => {
@@ -120,44 +124,10 @@ const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
     };
   };
 
-  const generateOrganizationSchema = () => {
-    return {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Skyfalke",
-      "url": siteUrl,
-      "logo": {
-        "@type": "ImageObject",
-        "url": `${siteUrl}/images/logos/logo.svg`,
-        "width": 200,
-        "height": 60
-      },
-      "description": "Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics.",
-      "foundingDate": "2020",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "Global",
-        "addressRegion": "Africa"
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer service",
-        "email": "info@skyfalke.com",
-        "url": `${siteUrl}/contact`
-      },
-      "sameAs": [
-        "https://www.linkedin.com/company/skyfalke",
-        "https://twitter.com/skyfalke",
-        "https://facebook.com/skyfalke"
-      ]
-    };
-  };
-
   const schemas = [
     generateArticleSchema(),
     generateBreadcrumbSchema(),
     generateWebPageSchema(),
-    generateOrganizationSchema()
   ];
 
   return (

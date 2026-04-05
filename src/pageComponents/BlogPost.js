@@ -193,7 +193,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
   return (
     <>
       {/* Structured Data */}
-      <BlogPostSchema post={blog} siteUrl="https://skyfalke.com" />
+      <BlogPostSchema post={blog} />
 
       <main className="bg-gray-50 min-h-screen relative">
         {/* Social Share Buttons */}
