@@ -5,6 +5,15 @@ import api from '../utils/api';
 
 const AuthContext = createContext();
 
+/** True when the request never reached the server (API down, DNS, CORS preflight failure, etc.) */
+const isUnreachableError = (error) => {
+  if (!error || error.response) return false;
+  const code = error.code;
+  if (code === 'ERR_NETWORK' || code === 'ECONNABORTED') return true;
+  const msg = typeof error.message === 'string' ? error.message : '';
+  return msg.includes('Network Error');
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -50,9 +59,25 @@ export const AuthProvider = ({ children }) => {
         const response = await api.get('/api/auth/me');
         setUser(response.data);
       } catch (error) {
-        console.error('Auth check failed:', error);
-        localStorage.removeItem('token');
-        setToken(null);
+        const status = error.response?.status;
+
+        if (status === 401 || status === 403) {
+          localStorage.removeItem('token');
+          setToken(null);
+        } else if (isUnreachableError(error) || (status >= 500 && status < 600)) {
+          // API unreachable or server error: keep token so a valid session resumes when API is back
+          if (process.env.NODE_ENV === 'development') {
+            console.debug(
+              '[Auth] Session not validated (API unavailable or server error).'
+            );
+          }
+        } else {
+          localStorage.removeItem('token');
+          setToken(null);
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('[Auth] Session invalid:', status ?? error.code);
+          }
+        }
       } finally {
         setLoading(false);
       }

@@ -52,10 +52,10 @@ const CustomerMarquee = () => {
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-            You are in the right hands
+            Trusted by Leading Businesses Across Industries
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Trusted by leading businesses and brands from all industries.
+          From fast-growing SMEs to established enterprises, organizations across East Africa rely on Skyfalke to power their digital operations.
           </p>
         </div>
 

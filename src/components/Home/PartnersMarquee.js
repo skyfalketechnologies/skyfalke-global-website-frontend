@@ -80,10 +80,10 @@ const PartnersMarquee = () => {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Working With Industry Leaders
+          Backed by the World&apos;s Leading Technology Platforms
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            We partner with the world's leading technology companies to deliver exceptional solutions for our clients.
+          We're certified partners with the platforms that power modern business, so you get enterprise-grade solutions delivered with local expertise.
           </p>
         </motion.div>
 

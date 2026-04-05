@@ -3,107 +3,66 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { 
-  FaArrowRight,
-  FaRocket,
-  FaPlug,
-  FaDatabase,
-  FaCogs,
-  FaCheckCircle
-} from 'react-icons/fa';
+import { FaArrowRight } from 'react-icons/fa';
+
+const SKYFALKE_SOLUTION_ICON =
+  'https://ik.imagekit.io/g3nahgeeu/icons/skyfalke-solution-icon.webp';
+
+const PROBLEM_SECTION_IMAGE =
+  'https://ik.imagekit.io/g3nahgeeu/skyfalke-solutions.webp';
 
 const ServicesOverview = () => {
-  const services = [
-    {
-      id: 1,
-      title: "Business Tools",
-      subtitle: "Optimize & Automate",
-      description: "Streamline operations and boost productivity with our comprehensive business optimization tools.",
-      link: "/services#business-tools",
-      bgImage: "https://ik.imagekit.io/g3nahgeeu/social-media-and-marketing-virtual-icons-screen-ta-2024-12-19-16-42-30-utc-min.jpg",
-    },
-    {
-      id: 2,
-      title: "Cloud Solutions",
-      subtitle: "Scalable & Secure",
-      description: "Enterprise-grade cloud infrastructure for scalable, secure, and reliable business operations.",
-      link: "https://skyfalke.co.ke",
-      external: true,
-      bgImage: "https://ik.imagekit.io/g3nahgeeu/bdr.webp?updatedAt=1755866661657",
-    },
-    {
-      id: 3,
-      title: "Creative Services",
-      subtitle: "Design & Innovate",
-      description: "Elevate your brand with creative design solutions and engaging digital experiences.",
-      link: "/services#creative",
-      bgImage: "https://ik.imagekit.io/g3nahgeeu/creative-services.webp",
-    }
-  ];
-
-  const problems = [
-    {
-      icon: FaPlug,
-      text: "Tools don't talk to each other.",
-      iconColor: "text-red-500",
-      bgColor: "bg-red-50"
-    },
-    {
-      icon: FaDatabase,
-      text: "Data exists but isn't useful.",
-      iconColor: "text-orange-500",
-      bgColor: "bg-orange-50"
-    },
-    {
-      icon: FaCogs,
-      text: "Processes are manual, slow, and expensive.",
-      iconColor: "text-yellow-500",
-      bgColor: "bg-yellow-50"
-    }
-  ];
-
   return (
     <section className="section-padding bg-gradient-to-b from-gray-50 to-white">
       <div className="container-custom">
-        {/* Section Header */}
-        <motion.div 
+        {/* Positioning / Problem */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12 sm:mb-16 lg:mb-20"
+          className="mb-12 sm:mb-16 lg:mb-20"
         >
-          <div className="inline-flex items-center px-4 py-2 bg-[#303661]/10 text-[#303661] uppercase text-xs sm:text-sm font-bold mb-4 sm:mb-6 rounded-sm">
-             Positioning
+          <div className="text-center mb-8 sm:mb-10">
+            <div className="inline-flex items-center px-4 py-2 bg-[#303661]/10 text-[#303661] uppercase text-xs sm:text-sm font-bold mb-4 sm:mb-6 rounded-sm">
+              Positioning / Problem
+            </div>
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#303661] mb-6 sm:mb-8 px-4 max-w-5xl mx-auto leading-tight">
+              Your Organization Doesn&apos;t Have a Tech Problem. It Has a Systems Problem
+            </h2>
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#303661] mb-8 sm:mb-10 px-4 max-w-5xl mx-auto leading-tight">
-            Most organizations don't have a tech problem. They have a systems problem.
-          </h2>
-        </motion.div>
 
-        {/* Problems Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
-          {problems.map((problem, index) => {
-            const IconComponent = problem.icon;
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
-              >
-                <div className={`w-12 h-12 sm:w-14 sm:h-14 ${problem.bgColor} rounded-xl flex items-center justify-center mb-4 sm:mb-6`}>
-                  <IconComponent className={`text-xl sm:text-2xl ${problem.iconColor}`} />
-                </div>
-                <p className="text-base sm:text-lg text-gray-700 font-medium leading-relaxed">
-                  {problem.text}
-                </p>
-              </motion.div>
-            );
-          })}
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center max-w-6xl mx-auto">
+            <div className="order-2 lg:order-1 text-left">
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-6">
+                You&apos;ve invested in tools. But when those tools don&apos;t talk to each other, your data doesn&apos;t drive decisions, and your team is buried in manual work, therefore, growth stalls.
+              </p>
+              <p className="text-base sm:text-lg font-semibold text-[#303661] mb-4">
+                Here&apos;s what we see in most organizations:
+              </p>
+              <ol className="list-decimal list-outside pl-5 sm:pl-6 space-y-3 sm:space-y-4 text-base sm:text-lg text-gray-700 leading-relaxed marker:font-semibold marker:text-[#303661]">
+                <li className="pl-1">Disconnected tools that create data silos and duplicate work</li>
+                <li className="pl-1">Unused data that could be driving smarter decisions</li>
+                <li className="pl-1">Manual processes that cost time, money, and competitive advantage</li>
+              </ol>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.55 }}
+              className="order-1 lg:order-2 relative rounded-2xl overflow-hidden shadow-xl border border-gray-100 aspect-[4/3] bg-gray-100"
+            >
+              <img
+                src={PROBLEM_SECTION_IMAGE}
+                alt="Digital systems and connected business tools"
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+              />
+            </motion.div>
+          </div>
+        </motion.div>
 
         {/* Solution Section */}
         <motion.div
@@ -111,31 +70,34 @@ const ServicesOverview = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="bg-gradient-to-r from-[#303661] to-[#1e2440] rounded-3xl p-8 sm:p-10 lg:p-12 text-white shadow-2xl"
+          className="w-full min-w-0 max-w-full overflow-hidden rounded-xl bg-gradient-to-r from-[#303661] to-[#1e2440] px-4 py-5 text-white shadow-lg sm:rounded-2xl sm:px-5 sm:py-6 md:px-7 md:py-6"
         >
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-center mb-6">
-              <div className="w-16 h-16 bg-[#e0ae00] rounded-2xl flex items-center justify-center">
-                <FaCheckCircle className="text-3xl text-white" />
-              </div>
+          <div className="mx-auto w-full min-w-0 max-w-2xl">
+            <div className="mb-3 flex justify-center sm:mb-4">
+              <img
+                src={SKYFALKE_SOLUTION_ICON}
+                alt="Skyfalke solution"
+                className="h-20 w-20 shrink-0 object-contain sm:h-24 sm:w-24 md:h-28 md:w-28"
+                loading="lazy"
+              />
             </div>
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8">
+            <h3 className="mb-2 text-center text-lg font-bold leading-snug sm:mb-3 sm:text-xl">
               The Skyfalke Solution
             </h3>
-            <p className="text-lg sm:text-xl md:text-2xl text-center text-gray-100 leading-relaxed font-light">
-              Skyfalke fixes this by designing and implementing <span className="font-semibold text-white">end-to-end digital systems</span> that actually support growth and efficiency.
+            <p className="mx-auto max-w-xl text-center text-sm font-light leading-relaxed text-gray-100/95 sm:max-w-2xl sm:text-[0.9375rem] md:text-base md:leading-relaxed">
+              We don&apos;t just implement softwares, we design complete digital systems built around how your organization actually works. From automation and AI to cloud infrastructure and digital marketing, we connect every layer so your business can grow without the friction.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 mt-6">
+            <div className="mt-3 flex w-full min-w-0 flex-col items-stretch justify-center gap-2 sm:mt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-2.5">
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[#e0ae00] text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
+                className="inline-flex flex-1 items-center justify-center rounded-md bg-[#e0ae00] px-4 py-2 text-sm font-semibold text-white shadow transition-all duration-300 hover:bg-blue-700 hover:shadow-md sm:flex-initial sm:px-5 sm:py-2.5"
               >
                 <span>Get Free Consultation</span>
-                <FaArrowRight className="ml-2" />
+                <FaArrowRight className="ml-1.5 shrink-0 text-xs" />
               </Link>
               <Link
                 href="/case-studies"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-gray-900 transition-all duration-300 text-sm sm:text-base"
+                className="inline-flex flex-1 items-center justify-center rounded-md border border-white px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-white hover:text-gray-900 sm:flex-initial sm:px-5 sm:py-2.5"
               >
                 <span>View Case Studies</span>
               </Link>

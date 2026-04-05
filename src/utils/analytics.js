@@ -542,7 +542,6 @@ export const initializeAnalyticsWithConsent = () => {
 // Test GA4 Connection
 export const testGA4Connection = () => {
   if (typeof window === 'undefined' || !window.gtag) {
-    console.warn('GA4 not available for testing');
     return false;
   }
 

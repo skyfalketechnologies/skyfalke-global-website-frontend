@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { apiPost } from '../../utils/api';
 import { 
   FaFacebook, 
@@ -169,11 +168,11 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
             {/* Company Info - Takes 2 columns on large screens */}
             <div className="lg:col-span-2">
-              <Link href="/" className="inline-flex items-center space-x-3 mb-6 group">
+              <Link href="/" className="inline-flex items-center space-x-3 mb-6">
                 <img
                   src="/images/logos/logo.svg"
                   alt="Skyfalke Logo"
-                  className="h-10 w-auto filter brightness-0 invert group-hover:scale-105 transition-transform duration-300"
+                  className="h-10 w-auto filter brightness-0 invert"
                 />
               </Link>
 
@@ -181,13 +180,12 @@ const Footer = () => {
               <div className="space-y-4">
                 <h4 className="text-lg font-semibold text-white mb-4">Get in Touch</h4>
                 {contactInfo.map((item, index) => (
-                  <motion.a
+                  <a
                     key={index}
                     href={item.href}
                     target={item.href.startsWith('http') ? '_blank' : '_self'}
                     rel={item.href.startsWith('http') ? 'noopener noreferrer' : ''}
-                    className="flex items-center space-x-3 text-gray-300 hover:text-white transition-all duration-300 group"
-                    whileHover={{ x: 5 }}
+                    className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors duration-300 group"
                   >
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center group-hover:bg-primary-500/30 transition-colors duration-300">
                       <item.icon className="text-primary-400 group-hover:text-primary-300" />
@@ -195,7 +193,7 @@ const Footer = () => {
                     <div>
                       <div className="font-medium">{item.text}</div>
                     </div>
-                  </motion.a>
+                  </a>
                 ))}
               </div>
             </div>
@@ -218,7 +216,7 @@ const Footer = () => {
                           href={link.href}
                           target={link.external ? '_blank' : '_self'}
                           rel={link.external ? 'noopener noreferrer' : ''}
-                          className="flex items-center justify-between text-gray-300 hover:text-white transition-all duration-300 group"
+                          className="flex items-center justify-between text-gray-300 hover:text-white transition-colors duration-300 group"
                         >
                           <div className="flex items-center space-x-3">
                             {section.useBullets ? (
@@ -226,7 +224,7 @@ const Footer = () => {
                             ) : link.icon && (
                               <link.icon className="text-primary-400 group-hover:text-primary-300 transition-colors duration-300" size={16} />
                             )}
-                            <span className="text-sm font-medium group-hover:translate-x-1 transition-transform duration-300">
+                            <span className="text-sm font-medium">
                               {link.name}
                             </span>
                           </div>
@@ -262,7 +260,7 @@ const Footer = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your email address"
-                        className="w-full px-6 py-4 bg-gray-800/50 backdrop-blur-sm border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
+                        className="w-full px-6 py-4 bg-gray-800/50 backdrop-blur-sm border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white placeholder-gray-400 transition-colors duration-300"
                         required
                         disabled={isSubmitting}
                       />
@@ -270,15 +268,13 @@ const Footer = () => {
                         <FaEnvelope className="text-gray-400" />
                       </div>
                     </div>
-                    <motion.button
+                    <button
                       type="submit"
-                      className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
+                      className={`px-8 py-4 rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center space-x-2 ${
                         submitStatus === 'success'
                           ? 'bg-green-600 text-white'
-                          : 'bg-primary-600 text-white hover:bg-primary-700 hover:shadow-2xl hover:scale-105'
+                          : 'bg-primary-600 text-white hover:bg-primary-700 hover:shadow-2xl'
                       }`}
-                      whileHover={{ scale: submitStatus === 'success' ? 1 : 1.05 }}
-                      whileTap={{ scale: 0.95 }}
                       disabled={isSubmitting || submitStatus === 'success'}
                     >
                       {isSubmitting ? (
@@ -294,39 +290,31 @@ const Footer = () => {
                       ) : (
                         <>
                           <span>Subscribe</span>
-                          <FaPaperPlane className="group-hover:translate-x-1 transition-transform duration-300" />
+                          <FaPaperPlane />
                         </>
                       )}
-                    </motion.button>
+                    </button>
                   </div>
                   
                   {/* Status Messages */}
                   {submitStatus === 'success' && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 flex items-center gap-3"
-                    >
+                    <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 flex items-center gap-3">
                       <FaCheckCircle className="text-green-400 text-lg" />
                       <div>
                         <h4 className="text-green-300 font-semibold">Successfully Subscribed!</h4>
                         <p className="text-green-200 text-sm">Thank you for subscribing to our newsletter.</p>
                       </div>
-                    </motion.div>
+                    </div>
                   )}
 
                   {submitStatus === 'error' && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-red-900/20 border border-red-500/30 rounded-lg p-3 flex items-center gap-3"
-                    >
+                    <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3 flex items-center gap-3">
                       <FaTimesCircle className="text-red-400 text-lg" />
                       <div>
                         <h4 className="text-red-300 font-semibold">Subscription Failed</h4>
                         <p className="text-red-200 text-sm">{errorMessage}</p>
                       </div>
-                    </motion.div>
+                    </div>
                   )}
                 </form>
               </div>
@@ -348,17 +336,15 @@ const Footer = () => {
               {/* Social Links */}
               <div className="flex items-center space-x-4">
                 {socialLinks.map((social) => (
-                  <motion.a
+                  <a
                     key={social.name}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`w-12 h-12 bg-gray-800/50 backdrop-blur-sm rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300 ${social.color}`}
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
+                    className={`w-12 h-12 bg-gray-800/50 backdrop-blur-sm rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-300 ${social.color}`}
                   >
                     <social.icon size={20} />
-                  </motion.a>
+                  </a>
                 ))}
               </div>
 

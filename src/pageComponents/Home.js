@@ -18,14 +18,7 @@ import ProductsParallaxSlider from '../components/Home/ProductsParallaxSlider';
 const Home = () => {
   return (
     <>
-      <SEOHead
-        pageType="home"
-        title="Skyfalke • Digital Growth & Automation Systems for Modern Organizations"
-        description="We help organizations simplify operations, automate workflows, and make better decisions by combining technology, AI, cloud, data, and digital marketing. End-to-end digital systems that support growth and efficiency."
-        keywords="digital systems, automation systems, business automation, digital transformation, workflow automation, end-to-end digital systems, systems integration, digital growth, business efficiency, SME digital solutions, startup technology, NGO digital tools, consulting firm automation, data integration, process automation, cloud systems, AI business solutions, digital marketing automation, business intelligence, technology consulting, digital operations, business systems design, organizational efficiency, digital tools integration"
-        canonical="https://skyfalke.com/"
-        ogTitle="Digital Growth & Automation Systems for Modern Organizations"
-      />
+      <SEOHead pageType="home" canonical="https://skyfalke.com/" />
 
       {/* Hero Section */}
       <HeroSlider />

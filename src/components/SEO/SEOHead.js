@@ -4,11 +4,16 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import SchemaMarkup from './SchemaMarkup';
 
+const HOME_OG_DESCRIPTION =
+  'We help forward-thinking organizations automate workflows, leverage AI, and build scalable digital systems that drive real growth.';
+const HOME_TWITTER_DESCRIPTION =
+  'AI, cloud, automation, and digital marketing — unified into one growth system for modern organizations.';
+
 const SEOHead = ({
-  title = "Skyfalke • Leading Digital Marketing & Technology Solutions Partner in Africa | Sustainable Cloud Hosting & AI Business Tools",
-  description = "Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics. Serving Africa & beyond with eco-friendly solutions.",
-  keywords = "digital marketing agency Africa, sustainable cloud hosting Kenya, AI business solutions, eco-friendly web hosting, renewable energy servers, digital transformation Africa, IT consultancy Kenya, creative services Africa, data analytics, business intelligence, SEO services, social media marketing, web development, mobile app development, cloud computing, cybersecurity, digital advertising, content marketing, brand design, UI UX design, performance optimization, marketing automation, lead generation, e-commerce solutions, digital strategy, technology consulting, startup solutions, enterprise IT support, green technology, carbon-neutral hosting, sustainable business solutions",
-  image = "/favicon-512x512.png",
+  title = "Skyfalke | Digital Growth & Automation Systems for Modern Organizations",
+  description = "Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter — combining AI, cloud, data, and digital marketing into one connected system.",
+  keywords = "business automation Kenya, digital transformation Africa, AI solutions for SMEs, cloud services Nairobi, workflow automation, digital marketing agency Kenya, enterprise backup, data systems",
+  image = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp",  
   url = "https://skyfalke.com",
   type = "website",
   pageType = "home",
@@ -18,10 +23,19 @@ const SEOHead = ({
   customSchemas = [],
   noIndex = false,
   canonical = null,
-  ogTitle = null
+  ogTitle = "Skyfalke | Digital Growth & Automation Systems",
+  ogDescription,
+  twitterDescription,
+  twitterTitle = null
 }) => {
   const fullUrl = canonical || `${url}${typeof window !== 'undefined' ? window.location.pathname : ''}`;
   const fullImageUrl = image && typeof image === 'string' && image.startsWith('http') ? image : `${url}${image || ''}`;
+  const resolvedOgTitle = ogTitle || title;
+  const resolvedTwitterTitle = twitterTitle || resolvedOgTitle;
+  const resolvedOgDescription =
+    ogDescription ?? (pageType === 'home' ? HOME_OG_DESCRIPTION : description);
+  const resolvedTwitterDescription =
+    twitterDescription ?? (pageType === 'home' ? HOME_TWITTER_DESCRIPTION : description);
 
   return (
     <>
@@ -43,14 +57,14 @@ const SEOHead = ({
         )}
         
         {/* Open Graph Meta Tags */}
-        <meta property="og:title" content={ogTitle || title} />
-        <meta property="og:description" content={description} />
+        <meta property="og:title" content={resolvedOgTitle} />
+        <meta property="og:description" content={resolvedOgDescription} />
         <meta property="og:type" content={type} />
         <meta property="og:url" content={fullUrl} />
         <meta property="og:image" content={fullImageUrl} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={description} />
+        <meta property="og:image:alt" content={resolvedOgDescription} />
         <meta property="og:site_name" content="Skyfalke" />
         <meta property="og:locale" content="en_US" />
         
@@ -68,10 +82,10 @@ const SEOHead = ({
         
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
+        <meta name="twitter:title" content={resolvedTwitterTitle} />
+        <meta name="twitter:description" content={resolvedTwitterDescription} />
         <meta name="twitter:image" content={fullImageUrl} />
-        <meta name="twitter:image:alt" content={description} />
+        <meta name="twitter:image:alt" content={resolvedTwitterDescription} />
         <meta name="twitter:site" content="@skyfalke" />
         <meta name="twitter:creator" content="@skyfalke" />
         
@@ -86,7 +100,7 @@ const SEOHead = ({
         <meta name="ICBM" content="0, 0" />
         
         {/* Verification Meta Tags */}
-        <meta name="google-site-verification" content="your-google-verification-code" />
+        <meta name="google-site-verification" content="T8MkAO4SIbD1tIYOfP4vQUg9wvKb_mZIdYHqQYi9n3E" />
         <meta name="msvalidate.01" content="your-bing-verification-code" />
         
         {/* Preconnect to external domains for performance */}

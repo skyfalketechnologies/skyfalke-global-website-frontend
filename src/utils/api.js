@@ -85,47 +85,13 @@ api.interceptors.response.use(
       // Don't redirect on SSL errors, let the calling component handle it
     }
     
-    // Handle Network Errors
+    // Network / no response: expected when API is offline locally — keep logs minimal (debug only)
     if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response) {
-      // Extract all available error information
-      const errorCode = error.code || 'ERR_NETWORK';
-      const errorMessage = error.message || 'Network request failed - API server may be unavailable';
-      const apiUrl = error.config?.baseURL || getApiBaseUrl();
       const endpoint = error.config?.url || 'Unknown';
       const method = error.config?.method?.toUpperCase() || 'GET';
-      const fullUrl = error.config ? `${error.config.baseURL || ''}${error.config.url || ''}` : 'Unknown';
-      
-      const errorDetails = {
-        type: 'Network Error',
-        code: errorCode,
-        message: errorMessage,
-        apiUrl: apiUrl,
-        endpoint: endpoint,
-        method: method,
-        fullUrl: fullUrl,
-        timestamp: new Date().toISOString(),
-        suggestion: 'Please ensure the API server is running and accessible',
-        // Include additional error properties if available
-        ...(error.name && { errorName: error.name }),
-        ...(error.stack && { stack: error.stack.split('\n').slice(0, 3).join('\n') })
-      };
-      
-      // Only log if in development to avoid console spam
-      // Use console.warn instead of console.error for network errors as they're often expected
-      // (e.g., when API server is not running during development)
-      if (process.env.NODE_ENV === 'development') {
-        // Log with explicit structure but use warn level (less alarming)
-        console.warn('Network Error (API may be unavailable):', {
-          endpoint: errorDetails.endpoint,
-          method: errorDetails.method,
-          suggestion: errorDetails.suggestion
-        });
-        // Skip logger.error for network errors since we already logged to console.warn
-        // This prevents duplicate/empty error logs
+      if (process.env.NODE_ENV === 'development' && typeof console !== 'undefined' && console.debug) {
+        console.debug('[API] Unreachable:', method, endpoint);
       }
-      
-      // Don't throw for network errors in production - let components handle gracefully
-      // This prevents the app from breaking when API is temporarily unavailable
     }
     
     // Handle 401 Unauthorized

@@ -190,24 +190,21 @@ Additional Message: ${formData.message || 'No additional message provided.'}`;
               {/* Text Content */}
               <div className="text-white max-w-4xl w-full text-left">
                 {/* Headline */}
-                <motion.h1
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
+                <h1
                   className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight sm:leading-tight"
                 >
-                  Digital Growth & Automation Systems for Modern Organizations
-                </motion.h1>
+                  Digital Growth & Automation Systems for Modern Organizations in Africa
+                </h1>
 
                 {/* Sub-headline */}
-                <motion.p
+                <p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.5 }}
                   className="text-base sm:text-lg md:text-xl text-gray-200 mb-6 sm:mb-8 md:mb-10 leading-relaxed max-w-2xl"
                 >
-                  We help businesses simplify operations, automate workflows, and make better decisions by combining technology, AI, cloud, data, and digital marketing.
-                </motion.p>
+                  Most businesses have the tools. Few have a system that ties it all together. Skyfalke designs and implements end-to-end digital systems; combining AI, cloud, automation, and performance marketing so your organization runs smarter, scales faster, and competes confidently.
+                </p>
 
                 {/* CTA Buttons */}
                 <motion.div

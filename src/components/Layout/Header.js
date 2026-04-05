@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaBars, 
   FaTimes, 
@@ -18,8 +17,6 @@ import {
   FaArrowRight
 } from 'react-icons/fa';
 import HireUsModal from '../HireUsModal';
-import useMobileDetection from '../../hooks/useMobileDetection';
-import { getAnimationProps, getTransitionProps } from '../../utils/animationUtils';
 
 
 const Header = () => {
@@ -27,7 +24,6 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showHireUsModal, setShowHireUsModal] = useState(false);
-  const { isMobile, shouldAnimate } = useMobileDetection();
 
   const pathname = usePathname();
 
@@ -176,35 +172,27 @@ const Header = () => {
   };
 
   return (
-    <motion.header 
-      {...getAnimationProps({
-        initial: { y: -100 },
-        animate: { y: 0 },
-        transition: { duration: 0.6, ease: "easeOut" }
-      }, shouldAnimate)}
-      className={`fixed w-full top-0 z-50 transition-all duration-500 ease-in-out ${
+    <header 
+      className={`fixed w-full top-0 z-50 ${
         isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg transform translate-y-0' 
-          : 'bg-transparent transform translate-y-0'
+          ? 'bg-white/95 backdrop-blur-md shadow-lg' 
+          : 'bg-transparent'
       }`}
     >
       <nav className="container-custom">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <motion.div
-              {...getAnimationProps({}, shouldAnimate)}
-              className="flex items-center"
-            >
+            <div className="flex items-center">
               <img
                 src="/images/logos/logo.svg"
                 alt="Skyfalke Logo"
-                className={`h-8 md:h-10 w-auto transition-all duration-500 ${
+                className={`h-8 md:h-10 w-auto ${
                   isScrolled ? 'filter brightness-0' : 'filter brightness-0 invert'
                 }`}
                 loading="eager"
               />
-            </motion.div>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -219,7 +207,7 @@ const Header = () => {
                   >
                     <Link
                       href={item.href}
-                      className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-bold transition-colors duration-200 ${
+                      className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-bold ${
                         isActivePage(item.href)
                           ? 'text-[#e0ae00]'
                           : isScrolled 
@@ -228,18 +216,13 @@ const Header = () => {
                       }`}
                     >
                       <span>{item.name}</span>
-                      <FaChevronDown className={`text-xs transition-transform duration-200 ${
+                      <FaChevronDown className={`text-xs ${
                         activeDropdown === item.name ? 'rotate-180' : ''
                       }`} />
                     </Link>
 
-                    <AnimatePresence>
                       {activeDropdown === item.name && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          transition={{ duration: 0.2, ease: "easeOut" }}
+                        <div
                           className="fixed top-20 left-0 w-full bg-white shadow-2xl border-t-2 border-primary-600 py-6 z-50"
                         >
                           <div className="container-custom">
@@ -248,13 +231,13 @@ const Header = () => {
                                 const IconComponent = data.icon;
                                 return (
                                   <div key={category} className="group">
-                                    <div className="p-4 rounded-lg hover:bg-gray-50 transition-all duration-200 group-hover:bg-gray-50">
+                                    <div className="p-4 rounded-lg hover:bg-gray-50 group-hover:bg-gray-50">
                                       <div className="flex items-center space-x-2 mb-3">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors duration-200">
+                                        <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200">
                                           <IconComponent className="w-4 h-4 text-primary-600" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                          <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary-600 transition-colors duration-200 leading-tight">
+                                          <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary-600 leading-tight">
                                             {category}
                                           </h3>
                                         </div>
@@ -270,7 +253,7 @@ const Header = () => {
                                                   href={subItem.href}
                                                   target={subItem.external ? '_blank' : '_self'}
                                                   rel={subItem.external ? 'noopener noreferrer' : ''}
-                                                  className="block py-1 px-2 rounded text-xs text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200"
+                                                  className="block py-1 px-2 rounded text-xs text-gray-700 hover:text-primary-600 hover:bg-primary-50"
                                                 >
                                                   {subItem.name}
                                                 </Link>
@@ -286,7 +269,7 @@ const Header = () => {
                                             <div className="mt-2">
                                               <Link
                                                 href={data.href}
-                                                className="inline-flex items-center text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors duration-200"
+                                                className="inline-flex items-center text-xs font-semibold text-primary-600 hover:text-primary-700"
                                               >
                                                 View all
                                                 <FaArrowRight className="w-2 h-2 ml-1" />
@@ -299,7 +282,7 @@ const Header = () => {
                                           <div className="mt-2">
                                             <Link
                                               href={data.href}
-                                              className="inline-flex items-center text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors duration-200"
+                                              className="inline-flex items-center text-xs font-semibold text-primary-600 hover:text-primary-700"
                                             >
                                               Learn more
                                               <FaArrowRight className="w-2 h-2 ml-1" />
@@ -313,14 +296,13 @@ const Header = () => {
                               })}
                             </div>
                           </div>
-                        </motion.div>
+                        </div>
                       )}
-                    </AnimatePresence>
                   </div>
                 ) : item.href ? (
                   <Link
                     href={item.href}
-                    className={`px-3 py-2 rounded-md text-sm font-bold transition-colors duration-200 ${
+                    className={`px-3 py-2 rounded-md text-sm font-bold ${
                       isActivePage(item.href)
                         ? 'text-[#e0ae00]'
                         : isScrolled 
@@ -343,10 +325,10 @@ const Header = () => {
           <div className="hidden lg:flex items-center space-x-4">
             <button
               onClick={() => setShowHireUsModal(true)}
-              className={`inline-flex items-center px-4 xl:px-6 py-2.5 text-sm font-semibold transition-all duration-300 ${
+              className={`inline-flex items-center px-4 xl:px-6 py-2.5 text-sm font-semibold ${
                 isScrolled
-                  ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-                  : 'bg-white text-primary-600 hover:bg-gray-50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                  ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg hover:shadow-xl'
+                  : 'bg-white text-primary-600 hover:bg-gray-50 shadow-lg hover:shadow-xl'
               }`}
             >
               Hire Us
@@ -357,7 +339,7 @@ const Header = () => {
           <div className="lg:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`p-2 rounded-lg transition-colors duration-200 ${
+              className={`p-2 rounded-lg ${
                 isScrolled 
                   ? 'text-slate-700 hover:text-[#303661]' 
                   : 'text-white hover:text-[#303661]'
@@ -370,29 +352,16 @@ const Header = () => {
         </div>
 
         {/* Mobile Navigation */}
-        <AnimatePresence>
           {isMenuOpen && (
             <>
               {/* Backdrop */}
-              <motion.div
-                {...getAnimationProps({
-                  initial: { opacity: 0 },
-                  animate: { opacity: 1 },
-                  exit: { opacity: 0 },
-                  transition: { duration: 0.2 }
-                }, shouldAnimate)}
+              <div
                 className="lg:hidden fixed inset-0 bg-black/50 z-40"
                 onClick={() => setIsMenuOpen(false)}
               />
               
               {/* Mobile Menu */}
-            <motion.div
-              {...getAnimationProps({
-                initial: { opacity: 0, x: '100%' },
-                animate: { opacity: 1, x: 0 },
-                exit: { opacity: 0, x: '100%' },
-                transition: { duration: 0.3, ease: "easeInOut" }
-              }, shouldAnimate)}
+            <div
               className="lg:hidden fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 overflow-hidden"
             >
               <div className="flex flex-col h-full">
@@ -401,7 +370,7 @@ const Header = () => {
                   <h2 className="text-xl font-bold text-slate-900">Menu</h2>
                   <button
                     onClick={() => setIsMenuOpen(false)}
-                    className="p-2 text-slate-600 hover:text-slate-900 transition-colors"
+                    className="p-2 text-slate-600 hover:text-slate-900"
                   >
                     <FaTimes size={20} />
                   </button>
@@ -414,7 +383,7 @@ const Header = () => {
                     {item.href ? (
                       <Link
                         href={item.href}
-                        className={`block px-4 py-4 rounded-xl text-base font-bold transition-all duration-200 ${
+                        className={`block px-4 py-4 rounded-xl text-base font-bold ${
                           isActivePage(item.href)
                             ? 'text-[#e0ae00] bg-[#e0ae00]/10 border border-[#e0ae00]/20'
                             : 'text-slate-700 hover:text-[#e0ae00] hover:bg-slate-50'
@@ -468,7 +437,7 @@ const Header = () => {
                                         href={subItem.href}
                                         target={subItem.external ? '_blank' : '_self'}
                                         rel={subItem.external ? 'noopener noreferrer' : ''}
-                                        className="block py-1 px-2 text-xs text-gray-700 hover:text-[#e0ae00] hover:bg-white rounded transition-all duration-200"
+                                        className="block py-1 px-2 text-xs text-gray-700 hover:text-[#e0ae00] hover:bg-white rounded"
                                         onClick={() => setIsMenuOpen(false)}
                                       >
                                         {subItem.name}
@@ -498,7 +467,7 @@ const Header = () => {
                         setShowHireUsModal(true);
                         setIsMenuOpen(false);
                       }}
-                      className="w-full bg-[#303661] text-white px-6 py-3 font-semibold hover:bg-[#e0ae00] transition-all duration-200 shadow-lg rounded-lg flex items-center justify-center space-x-2"
+                      className="w-full bg-[#303661] text-white px-6 py-3 font-semibold hover:bg-[#e0ae00] shadow-lg rounded-lg flex items-center justify-center space-x-2"
                     >
                       <span>Hire Us</span>
                       <FaArrowRight className="w-4 h-4" />
@@ -506,10 +475,9 @@ const Header = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
             </>
           )}
-        </AnimatePresence>
       </nav>
       
       {/* Hire Us Modal */}
@@ -517,7 +485,7 @@ const Header = () => {
         isOpen={showHireUsModal} 
         onClose={() => setShowHireUsModal(false)} 
       />
-    </motion.header>
+    </header>
   );
 };
 

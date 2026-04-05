@@ -116,8 +116,7 @@ const CTASection = () => {
             <motion.p
               className="text-base sm:text-lg lg:text-xl text-slate-300 mb-6 sm:mb-8 leading-relaxed max-w-2xl"
             >
-              Protect your organization's critical data with enterprise-grade backup and disaster recovery solutions. 
-              Ensure business continuity with automated, secure, and compliant data protection.
+              Protect your organization's most critical asset - its data. Skyfalke delivers enterprise-grade backup and disaster recovery solutions that keep your business running, no matter what.
             </motion.p>
 
             {/* Performance Metrics */}
@@ -130,8 +129,8 @@ const CTASection = () => {
             >
               {performanceMetrics.map((metric, index) => (
                 <div key={index} className="text-center">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-800/50 border border-slate-700 rounded-lg flex items-center justify-center mx-auto mb-2 sm:mb-3">
-                    <metric.icon className="text-[#e0ae00] text-sm sm:text-lg" />
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-slate-800/50 border border-slate-700 rounded-lg flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                    <metric.icon className="text-[#e0ae00] text-base sm:text-xl md:text-2xl" />
                   </div>
                   <div className="text-lg sm:text-xl font-bold text-white mb-1">{metric.number}</div>
                   <div className="text-xs text-slate-400 font-medium leading-tight">{metric.label}</div>
@@ -160,7 +159,7 @@ const CTASection = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-slate-600 text-white font-semibold rounded-lg hover:bg-slate-800/50 transition-all duration-300 backdrop-blur-sm text-sm sm:text-base"
               >
-                View Platform
+                Visit Platform
               </Link>
             </motion.div>
           </motion.div>
@@ -183,8 +182,8 @@ const CTASection = () => {
                 transition={shouldAnimate ? { duration: 0.6, delay: 0.1 * index } : { duration: 0 }}
                 className="flex items-start space-x-3 sm:space-x-4 p-4 sm:p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm hover:bg-slate-800/50 transition-all duration-300"
               >
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-slate-700/50 rounded-lg flex items-center justify-center flex-shrink-0 ${feature.color}`}>
-                  <feature.icon className="text-lg sm:text-xl" />
+                <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-slate-700/50 rounded-lg flex items-center justify-center flex-shrink-0 ${feature.color}`}>
+                  <feature.icon className="text-xl sm:text-2xl md:text-[1.75rem]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">{feature.title}</h3>
