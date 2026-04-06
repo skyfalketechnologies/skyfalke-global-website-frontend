@@ -11,7 +11,7 @@ const HOME_TWITTER_DESCRIPTION =
 
 const SEOHead = ({
   title = "Skyfalke | Digital Growth & Automation Systems for Modern Organizations",
-  description = "Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter — combining AI, cloud, data, and digital marketing into one connected system.",
+  description = "Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter - combining AI, cloud, data, and digital marketing into one connected system.",
   keywords = "business automation Kenya, digital transformation Africa, AI solutions for SMEs, cloud services Nairobi, workflow automation, digital marketing agency Kenya, enterprise backup, data systems",
   image = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp",
   url = "https://skyfalke.com",
