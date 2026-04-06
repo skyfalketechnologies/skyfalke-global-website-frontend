@@ -55,6 +55,7 @@ import {
   FaCalendarCheck
 } from 'react-icons/fa';
 import NotificationDropdown from './NotificationDropdown';
+import ServerStatusIndicator from './ServerStatusIndicator';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -426,6 +427,8 @@ const AdminLayout = ({ children }) => {
               >
                 {isDarkMode ? <FaSun className="h-5 w-5" /> : <FaMoon className="h-5 w-5" />}
               </button>
+
+              <ServerStatusIndicator />
 
               {/* Notifications */}
               <NotificationDropdown />
