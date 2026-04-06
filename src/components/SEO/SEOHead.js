@@ -64,7 +64,7 @@ const SEOHead = ({
         <meta property="og:image" content={fullImageUrl} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={resolvedOgDescription} />
+        <meta property="og:image:alt" content="digital growth and automation systems" />
         <meta property="og:site_name" content="Skyfalke" />
         <meta property="og:locale" content="en_US" />
         
@@ -85,7 +85,7 @@ const SEOHead = ({
         <meta name="twitter:title" content={resolvedTwitterTitle} />
         <meta name="twitter:description" content={resolvedTwitterDescription} />
         <meta name="twitter:image" content={fullImageUrl} />
-        <meta name="twitter:image:alt" content={resolvedTwitterDescription} />
+        <meta name="twitter:image:alt" content="digital growth and automation systems" />
         <meta name="twitter:site" content="@skyfalke" />
         <meta name="twitter:creator" content="@skyfalke" />
         
