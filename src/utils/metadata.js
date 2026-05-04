@@ -54,9 +54,13 @@ export function generateMetadata({
     safeImage && safeImage.startsWith('http')
       ? safeImage
       : `${BASE_URL}${safeImage}`;
-  const finalTitle = title || 'Skyfalke | Digital Growth & Automation Systems for Modern Organizations';
-  const finalDescription = description || 'Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter — combining AI, cloud, data, and digital marketing into one connected system.';
-  const finalKeywords = keywords || 'business automation Kenya, digital transformation Africa, AI solutions for SMEs, cloud services Nairobi, workflow automation, digital marketing agency Kenya, enterprise backup, data systems';
+  const finalTitle = title || 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset';
+  const finalDescription =
+    description ||
+    'Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.';
+  const finalKeywords =
+    keywords ||
+    'digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke';
 
   const metadata = {
     title: finalTitle,
@@ -238,20 +242,21 @@ export function generateJobMetadata(job) {
  */
 export const pageMetadata = {
   home: generateMetadata({
-    title: 'Skyfalke | Digital Growth & Automation Systems for Modern Organizations',
+    title: 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset',
     description:
-      'Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter — combining AI, cloud, data, and digital marketing into one connected system.',
+      'Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.',
     keywords:
-      'business automation Kenya, digital transformation Africa, AI solutions for SMEs, cloud services Nairobi, workflow automation, digital marketing agency Kenya, enterprise backup, data systems',
+      'digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke',
     url: `${BASE_URL}/`,
     canonical: `${BASE_URL}/`,
-    image: 'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp',
-    ogTitle: 'Skyfalke | Digital Growth & Automation Systems',
+    image:
+      'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
+    ogTitle: 'Skyfalke | High-Performing Digital Growth Systems',
     ogDescription:
-      'We help forward-thinking organizations automate workflows, leverage AI, and build scalable digital systems that drive real growth.',
-    twitterTitle: 'Skyfalke | Digital Growth & Automation Systems',
+      'Build online presence, acquire customers, and streamline operations with strategic technology — one partner, clear execution.',
+    twitterTitle: 'Skyfalke | High-Performing Digital Growth Systems',
     twitterDescription:
-      'AI, cloud, automation, and digital marketing — unified into one growth system for modern organizations.',
+      'Websites, marketing, automation, and AI — unified into one growth engine for serious businesses.',
   }),
 
   about: generateMetadata({

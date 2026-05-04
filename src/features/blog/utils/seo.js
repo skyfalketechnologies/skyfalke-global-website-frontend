@@ -43,7 +43,7 @@ export const getSEODescription = (post) => {
  */
 export const getSEOKeywords = (post) => {
   if (!post) {
-    return 'digital marketing, cloud solutions, green hosting, sustainable technology, Africa';
+    return 'digital marketing agency in Kenya, cloud experts in Kenya, Uganda and Tanzania, sustainable technology in Kenya,';
   }
   
   const dbKeywords = post.seo?.keywords || [];

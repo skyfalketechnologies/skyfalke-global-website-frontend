@@ -172,11 +172,9 @@ const Header = () => {
   };
 
   return (
-    <header 
-      className={`fixed w-full top-0 z-50 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg' 
-          : 'bg-transparent'
+    <header
+      className={`fixed w-full top-0 z-50 bg-primary-600 border-b border-primary-700/40 transition-shadow ${
+        isScrolled ? 'shadow-lg' : 'shadow-md'
       }`}
     >
       <nav className="container-custom">
@@ -187,9 +185,7 @@ const Header = () => {
               <img
                 src="/images/logos/logo.svg"
                 alt="Skyfalke Logo"
-                className={`h-8 md:h-10 w-auto ${
-                  isScrolled ? 'filter brightness-0' : 'filter brightness-0 invert'
-                }`}
+                className="h-8 md:h-10 w-auto filter brightness-0 invert"
                 loading="eager"
               />
             </div>
@@ -209,10 +205,8 @@ const Header = () => {
                       href={item.href}
                       className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-bold ${
                         isActivePage(item.href)
-                          ? 'text-[#e0ae00]'
-                          : isScrolled 
-                            ? 'text-gray-700 hover:text-[#e0ae00]' 
-                            : 'text-white hover:text-[#e0ae00]'
+                          ? 'text-secondary-400'
+                          : 'text-white/90 hover:text-secondary-400'
                       }`}
                     >
                       <span>{item.name}</span>
@@ -304,10 +298,8 @@ const Header = () => {
                     href={item.href}
                     className={`px-3 py-2 rounded-md text-sm font-bold ${
                       isActivePage(item.href)
-                        ? 'text-[#e0ae00]'
-                        : isScrolled 
-                          ? 'text-gray-700 hover:text-[#e0ae00]' 
-                          : 'text-white hover:text-[#e0ae00]'
+                        ? 'text-secondary-400'
+                        : 'text-white/90 hover:text-secondary-400'
                     }`}
                   >
                     {item.name}
@@ -325,11 +317,7 @@ const Header = () => {
           <div className="hidden lg:flex items-center space-x-4">
             <button
               onClick={() => setShowHireUsModal(true)}
-              className={`inline-flex items-center px-4 xl:px-6 py-2.5 text-sm font-semibold ${
-                isScrolled
-                  ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg hover:shadow-xl'
-                  : 'bg-white text-primary-600 hover:bg-gray-50 shadow-lg hover:shadow-xl'
-              }`}
+              className="inline-flex items-center px-4 xl:px-6 py-2.5 text-sm font-semibold bg-secondary-500 text-primary-900 hover:bg-secondary-600 shadow-md hover:shadow-lg transition-colors"
             >
               Hire Us
             </button>
@@ -339,11 +327,7 @@ const Header = () => {
           <div className="lg:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`p-2 rounded-lg ${
-                isScrolled 
-                  ? 'text-slate-700 hover:text-[#303661]' 
-                  : 'text-white hover:text-[#303661]'
-              }`}
+              className="p-2 rounded-lg text-white hover:text-secondary-400 transition-colors"
               aria-label="Toggle mobile menu"
             >
               {isMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}

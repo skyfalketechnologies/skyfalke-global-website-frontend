@@ -11,20 +11,19 @@ const globalJsonLd = getGlobalSchemaJsonLd(siteUrl);
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'),
   title: {
-    default: 'Skyfalke | Digital Growth & Automation Systems for Modern Organizations',
+    default: 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset',
     template: '%s | Skyfalke',
   },
   description:
-    'Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter — combining AI, cloud, data, and digital marketing into one connected system.',
+    'Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.',
   keywords: [
+    'digital growth partner',
     'business automation Kenya',
+    'SEO and digital ads',
+    'CRM workflows',
+    'AI roadmap',
     'digital transformation Africa',
-    'AI solutions for SMEs',
-    'cloud services Nairobi',
-    'workflow automation',
-    'digital marketing agency Kenya',
-    'enterprise backup',
-    'data systems',
+    'Skyfalke',
   ],
   authors: [{ name: 'Skyfalke' }],
   creator: 'Skyfalke',
@@ -45,24 +44,26 @@ export const metadata = {
     locale: 'en_US',
     url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
     siteName: 'Skyfalke',
-    title: 'Skyfalke | Digital Growth & Automation Systems',
+    title: 'Skyfalke | High-Performing Digital Growth Systems',
     description:
-      'We help forward-thinking organizations automate workflows, leverage AI, and build scalable digital systems that drive real growth.',
+      'Build online presence, acquire customers, and streamline operations with strategic technology — one partner, clear execution.',
     images: [
       {
-        url: 'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp',
+        url: 'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
         width: 1200,
         height: 630,
-        alt: 'Skyfalke — digital growth and automation systems',
+        alt: 'Skyfalke — digital growth partner for websites, marketing, automation, and AI strategy',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Skyfalke | Digital Growth & Automation Systems',
+    title: 'Skyfalke | High-Performing Digital Growth Systems',
     description:
-      'AI, cloud, automation, and digital marketing — unified into one growth system for modern organizations.',
-    images: ['https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp'],
+      'Websites, marketing, automation, and AI — unified into one growth engine for serious businesses.',
+    images: [
+      'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
+    ],
     site: '@skyfalke',
     creator: '@skyfalke',
   },

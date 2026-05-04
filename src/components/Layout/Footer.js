@@ -3,32 +3,29 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { apiPost } from '../../utils/api';
-import { 
-  FaFacebook, 
-  FaTwitter, 
-  FaLinkedin, 
+import {
+  FaFacebook,
+  FaTwitter,
+  FaLinkedin,
   FaInstagram,
+  FaYoutube,
+  FaTiktok,
+  FaGithub,
+  FaReddit,
   FaPhone,
   FaEnvelope,
   FaMapMarkerAlt,
-  FaCloud,
-  FaChartLine,
-  FaCogs,
-  FaArrowRight,
   FaPaperPlane,
   FaShieldAlt,
-  FaFileContract,
-  FaQuestionCircle,
-  FaBook,
   FaCheckCircle,
   FaTimesCircle,
-  FaSpinner
+  FaSpinner,
 } from 'react-icons/fa';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', null
+  const [submitStatus, setSubmitStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const currentYear = new Date().getFullYear();
 
@@ -37,14 +34,12 @@ const Footer = () => {
     setIsSubmitting(true);
     setSubmitStatus(null);
     setErrorMessage('');
-    
+
     try {
-      // Basic validation
       if (!email) {
         throw new Error('Email address is required');
       }
 
-      // Email validation
       const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
       if (!emailRegex.test(email)) {
         throw new Error('Please enter a valid email address');
@@ -52,13 +47,12 @@ const Footer = () => {
 
       const response = await apiPost('/api/subscriptions/subscribe', {
         email,
-        source: 'footer'
+        source: 'footer',
       });
 
       if (response.data.success) {
         setSubmitStatus('success');
         setEmail('');
-        // Reset success status after 5 seconds
         setTimeout(() => {
           setSubmitStatus(null);
         }, 5000);
@@ -66,8 +60,7 @@ const Footer = () => {
     } catch (error) {
       console.error('Subscription error:', error);
       setSubmitStatus('error');
-      
-      // Handle rate limiting specifically
+
       if (error.response?.status === 429) {
         setErrorMessage('Too many attempts. Please wait a few minutes before trying again.');
       } else if (error.message) {
@@ -75,12 +68,11 @@ const Footer = () => {
       } else if (error.response?.data?.message) {
         setErrorMessage(error.response.data.message);
       } else if (error.response?.data?.errors) {
-        const errorMessages = error.response.data.errors.map(err => err.message).join(', ');
+        const errorMessages = error.response.data.errors.map((err) => err.message).join(', ');
         setErrorMessage(errorMessages);
       } else {
         setErrorMessage('Something went wrong. Please try again.');
       }
-      // Reset error status after 5 seconds
       setTimeout(() => {
         setSubmitStatus(null);
         setErrorMessage('');
@@ -92,229 +84,198 @@ const Footer = () => {
 
   const footerSections = [
     {
-      title: 'Services',
-      useBullets: true,
-      links: [
-        { name: 'Digital Marketing', href: '/services#digital-marketing' },
-        { name: 'Cloud Solutions', href: 'https://skyfalke.co.ke', external: true },
-        { name: 'Business Tools', href: '/services#business-tools' },
-        { name: 'ICT Strategy', href: '/services/ict-strategy' },
-        { name: 'SEO Optimization', href: '/services#seo' },
-        { name: 'Technology Consulting', href: '/services#technology' }
-      ]
-    },
-    {
       title: 'Company',
       links: [
-        { name: 'About Us', href: '/about' },
-        { name: 'Shop', href: '/shop'},
-        { name: 'Contact', href: '/contact' },
-        { name: 'News & Insights', href: '/blog' },
-        { name: 'Careers', href: '/careers', badge: 'We\'re hiring!' }
-      ]
+        { name: 'About', href: '/about' },
+        { name: 'Services', href: '/services' },
+        { name: 'Careers', href: '/careers' },
+        { name: 'Shop', href: '/shop' },
+      ],
     },
     {
       title: 'Resources',
       links: [
-        { name: 'Support Center', href: '/support'},
-        { name: 'Skyfalke Academy', href: '/academy'},
-        { name: 'For Partners', href: '/partners'},
-        { name: 'Case Studies', href: '/case-studies'},
-        { name: 'Events', href: '/events'},
-      ]
-    }
+        { name: 'Blog', href: '/blog' },
+        { name: 'Insights', href: '/resources' },
+        { name: 'Case Studies', href: '/case-studies' },
+        { name: 'Support', href: '/support' },
+      ],
+    },
+    {
+      title: 'Connect',
+      links: [
+        { name: 'Contact', href: '/contact' },
+        { name: 'Schedule consultation', href: '/schedule-consultation' },
+        { name: 'Partners', href: '/partners' },
+        { name: 'Academy', href: '/academy' },
+      ],
+    },
   ];
 
   const socialLinks = [
-    { name: 'Facebook', icon: FaFacebook, href: 'https://facebook.com/skyfalke', color: 'hover:bg-blue-600' },
-    { name: 'Twitter', icon: FaTwitter, href: 'https://twitter.com/skyfalke', color: 'hover:bg-sky-500' },
-    { name: 'LinkedIn', icon: FaLinkedin, href: 'https://linkedin.com/company/skyfalke', color: 'hover:bg-blue-700' },
-    { name: 'Instagram', icon: FaInstagram, href: 'https://instagram.com/skyfalkeofficial', color: 'hover:bg-pink-600' }
+    { name: 'Facebook', icon: FaFacebook, href: 'https://facebook.com/skyfalke' },
+    { name: 'X', icon: FaTwitter, href: 'https://x.com/skyfalke' },
+    { name: 'LinkedIn', icon: FaLinkedin, href: 'https://linkedin.com/company/skyfalke' },
+    { name: 'Instagram', icon: FaInstagram, href: 'https://instagram.com/skyfalkeofficial' },
+    { name: 'YouTube', icon: FaYoutube, href: 'https://youtube.com/skyfalke' },
+    { name: 'TikTok', icon: FaTiktok, href: 'https://tiktok.com/@skyfalke' },
+    { name: 'GitHub', icon: FaGithub, href: 'https://github.com/skyfalketechnologies' },
+    // { name: 'Reddit', icon: FaReddit, href: 'https://www.reddit.com/user/skyfalke_limited' },
   ];
 
-  const contactInfo = [
+  const contactLines = [
     {
       icon: FaPhone,
       text: '+254 (0) 717 797 238',
       href: 'tel:+254717797238',
-      label: 'Call us'
     },
     {
       icon: FaEnvelope,
       text: 'info@skyfalke.com',
       href: 'mailto:info@skyfalke.com',
-      label: 'Email us'
     },
     {
       icon: FaMapMarkerAlt,
       text: 'Nairobi, Kenya',
       href: 'https://maps.google.com/?q=Nairobi,Kenya',
-      label: 'Visit us'
-    }
+      external: true,
+    },
   ];
 
   return (
-    <footer className="bg-gray-900 text-white relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-      </div>
+    <footer className="relative border-t border-white/10 bg-[#0c0f14] text-white">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e0ae00]/80 to-transparent" aria-hidden />
 
-      {/* Main Footer Content */}
       <div className="relative z-10">
-        <div className="container-custom pt-16 pb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
-            {/* Company Info - Takes 2 columns on large screens */}
-            <div className="lg:col-span-2">
-              <Link href="/" className="inline-flex items-center space-x-3 mb-6">
+        <div className="container-custom pt-14 pb-10">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10 xl:gap-14">
+            {/* Brand + contact */}
+            <div className="lg:col-span-4">
+              <Link href="/" className="inline-flex items-center gap-3">
                 <img
                   src="/images/logos/logo.svg"
-                  alt="Skyfalke Logo"
-                  className="h-10 w-auto filter brightness-0 invert"
+                  alt="Skyfalke — return to homepage"
+                  className="h-9 w-auto brightness-0 invert"
+                  width={160}
+                  height={36}
                 />
               </Link>
-
-              {/* Contact Info */}
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-white mb-4">Get in Touch</h4>
-                {contactInfo.map((item, index) => (
-                  <a
-                    key={index}
-                    href={item.href}
-                    target={item.href.startsWith('http') ? '_blank' : '_self'}
-                    rel={item.href.startsWith('http') ? 'noopener noreferrer' : ''}
-                    className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors duration-300 group"
-                  >
-                    <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center group-hover:bg-primary-500/30 transition-colors duration-300">
-                      <item.icon className="text-primary-400 group-hover:text-primary-300" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{item.text}</div>
-                    </div>
-                  </a>
+              <p className="mt-5 max-w-sm text-sm leading-relaxed text-zinc-400">
+                Technology and marketing partner for teams that want clarity, execution, and measurable growth.
+              </p>
+              <ul className="mt-8 space-y-3 border-t border-white/10 pt-8">
+                {contactLines.map((item) => (
+                  <li key={item.text}>
+                    <a
+                      href={item.href}
+                      target={item.external ? '_blank' : undefined}
+                      rel={item.external ? 'noopener noreferrer' : undefined}
+                      className="group inline-flex max-w-full items-start gap-3 text-sm text-zinc-300 transition-colors hover:text-white"
+                    >
+                      <item.icon
+                        className="mt-0.5 h-4 w-4 shrink-0 text-[#e0ae00]/90 transition-colors group-hover:text-[#e0ae00]"
+                        aria-hidden
+                      />
+                      <span className="break-words">{item.text}</span>
+                    </a>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            {/* Footer Sections */}
-            {footerSections.map((section, index) => (
-              <div key={section.title} className="lg:col-span-1">
-                <h3 className="text-lg font-bold mb-6 text-white relative">
-                  {section.title}
-                  <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-[#e0ae00]"></div>
-                </h3>
-                <ul className="space-y-4">
-                  {section.links.map((link) => {
-                    // Skip links without href
-                    if (!link.href) return null;
-                    
-                    return (
-                      <li key={link.name}>
-                        <Link
-                          href={link.href}
-                          target={link.external ? '_blank' : '_self'}
-                          rel={link.external ? 'noopener noreferrer' : ''}
-                          className="flex items-center justify-between text-gray-300 hover:text-white transition-colors duration-300 group"
-                        >
-                          <div className="flex items-center space-x-3">
-                            {section.useBullets ? (
-                              <div className="w-1.5 h-1.5 bg-primary-400 rounded-full flex-shrink-0 group-hover:bg-primary-300 transition-colors duration-300" />
-                            ) : link.icon && (
-                              <link.icon className="text-primary-400 group-hover:text-primary-300 transition-colors duration-300" size={16} />
-                            )}
-                            <span className="text-sm font-medium">
-                              {link.name}
-                            </span>
-                          </div>
-                          {link.badge && (
-                            <span className="text-xs bg-primary-600 text-white px-2 py-1 rounded-full font-semibold">
-                              {link.badge}
-                            </span>
-                          )}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
-          </div>
+            {/* Link columns */}
+            <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-5 lg:gap-8">
+              {footerSections.map((section) => (
+                <div key={section.title}>
+                  <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                    {section.title}
+                  </h2>
+                  <ul className="mt-5 space-y-3">
+                    {section.links.map((link) => {
+                      if (!link.href) return null;
+                      return (
+                        <li key={link.name}>
+                          <Link
+                            href={link.href}
+                            target={link.external ? '_blank' : undefined}
+                            rel={link.external ? 'noopener noreferrer' : undefined}
+                            className="text-sm text-zinc-300 transition-colors hover:text-white"
+                          >
+                            {link.name}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
 
-          {/* Newsletter Signup */}
-          <div className="mt-16 pt-8 border-t border-gray-700/50">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="text-2xl font-bold mb-3 text-white">Stay Ahead of the Curve</h3>
-                <p className="text-gray-300 text-lg">
-                  Get exclusive insights, industry trends, and expert tips delivered to your inbox.
+            {/* Newsletter */}
+            <div className="lg:col-span-3">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm">
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                  Newsletter
+                </h2>
+                <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+                  Short updates on strategy, technology, and how we work with clients.
                 </p>
-              </div>
-              <div>
-                <form onSubmit={handleSubscribe} className="space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1 relative">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email address"
-                        className="w-full px-6 py-4 bg-gray-800/50 backdrop-blur-sm border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white placeholder-gray-400 transition-colors duration-300"
-                        required
-                        disabled={isSubmitting}
-                      />
-                      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                        <FaEnvelope className="text-gray-400" />
-                      </div>
-                    </div>
+                <form onSubmit={handleSubscribe} className="mt-5 space-y-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                    <label htmlFor="footer-newsletter-email" className="sr-only">
+                      Email address
+                    </label>
+                    <input
+                      id="footer-newsletter-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Work email"
+                      className="min-h-[44px] flex-1 rounded-lg border border-white/10 bg-[#0c0f14]/80 px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:border-[#e0ae00]/50 focus:outline-none focus:ring-1 focus:ring-[#e0ae00]/40"
+                      required
+                      disabled={isSubmitting}
+                      autoComplete="email"
+                    />
                     <button
                       type="submit"
-                      className={`px-8 py-4 rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center space-x-2 ${
+                      className={`inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${
                         submitStatus === 'success'
-                          ? 'bg-green-600 text-white'
-                          : 'bg-primary-600 text-white hover:bg-primary-700 hover:shadow-2xl'
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-[#e0ae00] text-[#0c0f14] hover:bg-[#c99a00]'
                       }`}
                       disabled={isSubmitting || submitStatus === 'success'}
                     >
                       {isSubmitting ? (
                         <>
-                          <FaSpinner className="animate-spin" />
-                          <span>Subscribing...</span>
+                          <FaSpinner className="animate-spin" aria-hidden />
+                          <span>Sending</span>
                         </>
                       ) : submitStatus === 'success' ? (
                         <>
-                          <FaCheckCircle />
-                          <span>Subscribed!</span>
+                          <FaCheckCircle aria-hidden />
+                          <span>Done</span>
                         </>
                       ) : (
                         <>
                           <span>Subscribe</span>
-                          <FaPaperPlane />
+                          <FaPaperPlane className="opacity-90" size={14} aria-hidden />
                         </>
                       )}
                     </button>
                   </div>
-                  
-                  {/* Status Messages */}
+
                   {submitStatus === 'success' && (
-                    <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 flex items-center gap-3">
-                      <FaCheckCircle className="text-green-400 text-lg" />
-                      <div>
-                        <h4 className="text-green-300 font-semibold">Successfully Subscribed!</h4>
-                        <p className="text-green-200 text-sm">Thank you for subscribing to our newsletter.</p>
-                      </div>
-                    </div>
+                    <p className="flex items-start gap-2 text-xs text-emerald-400/95">
+                      <FaCheckCircle className="mt-0.5 shrink-0" aria-hidden />
+                      <span>Thank you! You are on the list.</span>
+                    </p>
                   )}
 
                   {submitStatus === 'error' && (
-                    <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3 flex items-center gap-3">
-                      <FaTimesCircle className="text-red-400 text-lg" />
-                      <div>
-                        <h4 className="text-red-300 font-semibold">Subscription Failed</h4>
-                        <p className="text-red-200 text-sm">{errorMessage}</p>
-                      </div>
-                    </div>
+                    <p className="flex items-start gap-2 text-xs text-red-300/95">
+                      <FaTimesCircle className="mt-0.5 shrink-0" aria-hidden />
+                      <span>{errorMessage}</span>
+                    </p>
                   )}
                 </form>
               </div>
@@ -322,47 +283,42 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Footer */}
-        <div className="border-t border-gray-700/50 bg-gray-900/50 backdrop-blur-sm">
-          <div className="container-custom py-8">
-            <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
-              {/* Copyright */}
-              <div className="text-gray-400 text-center lg:text-left">
-                <p className="mb-2">
-                  © {currentYear} <span className="font-semibold text-white">Skyfalke Limited</span>. All rights reserved.
-                </p>
-              </div>
+        {/* Bottom bar */}
+        <div className="border-t border-white/10 bg-black/20">
+          <div className="container-custom flex flex-col gap-6 py-6 md:flex-row md:items-center md:justify-between md:gap-8">
+            <p className="text-center text-xs text-zinc-500 md:text-left">
+              © {currentYear} Skyfalke Limited. All rights reserved.
+            </p>
 
-              {/* Social Links */}
-              <div className="flex items-center space-x-4">
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`w-12 h-12 bg-gray-800/50 backdrop-blur-sm rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-300 ${social.color}`}
-                  >
-                    <social.icon size={20} />
-                  </a>
-                ))}
-              </div>
+            <nav
+              aria-label="Legal"
+              className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 text-xs text-zinc-500 md:justify-end"
+            >
+              <Link href="/privacy" className="inline-flex items-center gap-1.5 px-2 py-1 text-zinc-400 transition-colors hover:text-white">
+                <FaShieldAlt className="opacity-70" size={12} aria-hidden />
+                Privacy
+              </Link>
+              <span className="text-zinc-700" aria-hidden>
+                ·
+              </span>
+              <Link href="/terms" className="px-2 py-1 text-zinc-400 transition-colors hover:text-white">
+                Terms
+              </Link>
+            </nav>
 
-              {/* Legal Links */}
-              <div className="flex items-center space-x-6 text-sm text-gray-400">
-                <Link 
-                  href="/privacy" 
-                  className="hover:text-white transition-colors duration-300 flex items-center space-x-1"
+            <div className="flex justify-center gap-2 md:justify-end">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.name}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:border-white/20 hover:text-white"
                 >
-                  <span>Privacy</span>
-                </Link>
-                <Link 
-                  href="/terms" 
-                  className="hover:text-white transition-colors duration-300 flex items-center space-x-1"
-                >
-                  <span>Terms</span>
-                </Link>
-              </div>
+                  <social.icon size={16} />
+                </a>
+              ))}
             </div>
           </div>
         </div>

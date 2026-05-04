@@ -45,8 +45,9 @@
   --error-color: #e53e3e;
   --text-primary: #2d3748;
   --text-secondary: #4a5568;
-  --background-light: #f7fafc;
-  --background-dark: #1a202c;
+  /* App surfaces: slight tint from brand #303661 */
+  --background-light: #f0f1f7;
+  --background-dark: #303661;
   
   /* Brand Colors */
   --dark-blue: #303661;
@@ -118,7 +119,7 @@ body {
   text-rendering: optimizeLegibility;
   line-height: 1.7;
   color: var(--text-primary);
-  background-color: #ffffff;
+  background-color: var(--background-light);
   overflow-x: hidden;
 }
 

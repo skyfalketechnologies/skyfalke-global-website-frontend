@@ -5,15 +5,15 @@ import { Helmet } from 'react-helmet-async';
 import SchemaMarkup from './SchemaMarkup';
 
 const HOME_OG_DESCRIPTION =
-  'We help forward-thinking organizations automate workflows, leverage AI, and build scalable digital systems that drive real growth.';
+  'Build online presence, acquire customers, and streamline operations with strategic technology — one partner, clear execution.';
 const HOME_TWITTER_DESCRIPTION =
-  'AI, cloud, automation, and digital marketing — unified into one growth system for modern organizations.';
+  'Websites, marketing, automation, and AI — unified into one growth engine for serious businesses.';
 
 const SEOHead = ({
-  title = "Skyfalke | Digital Growth & Automation Systems for Modern Organizations",
-  description = "Skyfalke helps businesses in Africa and beyond simplify operations, automate workflows, and scale smarter - combining AI, cloud, data, and digital marketing into one connected system.",
-  keywords = "business automation Kenya, digital transformation Africa, AI solutions for SMEs, cloud services Nairobi, workflow automation, digital marketing agency Kenya, enterprise backup, data systems",
-  image = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp",
+  title = "Skyfalke | Turn Your Business Into a High-Performing Digital Asset",
+  description = "Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.",
+  keywords = "digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke",
+  image = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good",
   url = "https://skyfalke.com",
   type = "website",
   pageType = "home",
@@ -23,7 +23,7 @@ const SEOHead = ({
   customSchemas = [],
   noIndex = false,
   canonical = null,
-  ogTitle = "Skyfalke | Digital Growth & Automation Systems",
+  ogTitle = "Skyfalke | High-Performing Digital Growth Systems",
   ogDescription,
   twitterDescription,
   twitterTitle = null
@@ -64,7 +64,7 @@ const SEOHead = ({
         <meta property="og:image" content={fullImageUrl} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="digital growth and automation systems" />
+        <meta property="og:image:alt" content="Skyfalke — digital growth partner for websites, marketing, automation, and AI strategy" />
         <meta property="og:site_name" content="Skyfalke" />
         <meta property="og:locale" content="en_US" />
         
@@ -85,7 +85,7 @@ const SEOHead = ({
         <meta name="twitter:title" content={resolvedTwitterTitle} />
         <meta name="twitter:description" content={resolvedTwitterDescription} />
         <meta name="twitter:image" content={fullImageUrl} />
-        <meta name="twitter:image:alt" content="digital growth and automation systems" />
+        <meta name="twitter:image:alt" content="Skyfalke — digital growth partner for websites, marketing, automation, and AI strategy" />
         <meta name="twitter:site" content="@skyfalke" />
         <meta name="twitter:creator" content="@skyfalke" />
         

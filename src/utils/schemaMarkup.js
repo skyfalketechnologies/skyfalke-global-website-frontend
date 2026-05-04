@@ -30,7 +30,7 @@ export function getGlobalSchemaJsonLd(siteUrl = SITE_URL) {
           height: 60,
         },
         description:
-          'Digital growth and automation systems for modern organizations — combining AI, cloud, data, and digital marketing.',
+          'Skyfalke helps growth-focused businesses strengthen digital presence, acquire customers, and scale with connected systems and AI-ready roadmaps.',
         address: {
           '@type': 'PostalAddress',
           addressCountry: 'KE',
@@ -53,7 +53,7 @@ export function getGlobalSchemaJsonLd(siteUrl = SITE_URL) {
         name: 'Skyfalke',
         url: base,
         description:
-          'Digital growth and automation systems for modern organizations — combining AI, cloud, data, and digital marketing.',
+          'Skyfalke helps growth-focused businesses strengthen digital presence, acquire customers, and scale with connected systems and AI-ready roadmaps.',
         publisher: { '@id': `${base}/#organization` },
         inLanguage: 'en-US',
         potentialAction: {
@@ -582,10 +582,10 @@ export const getDefaultSchemas = (pageType, data = {}) => {
     case 'home':
       additionalSchemas = [
         generateWebPageSchema({
-          name: 'Skyfalke | Digital Growth & Automation Systems for Modern Organizations',
+          name: 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset',
           url: `${SITE_URL}/`,
           description:
-            'Skyfalke helps businesses simplify operations, automate workflows, and scale smarter with AI, cloud, data, and digital marketing.',
+            'Growth-focused digital partner for online presence, acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue.',
         }),
       ];
       break;
