@@ -291,7 +291,7 @@ const Footer = () => {
             </p>
 
             <nav
-              aria-label="Legal"
+              aria-label="Policies and sitemap"
               className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 text-xs text-zinc-500 md:justify-end"
             >
               <Link href="/privacy" className="inline-flex items-center gap-1.5 px-2 py-1 text-zinc-400 transition-colors hover:text-white">
@@ -303,6 +303,12 @@ const Footer = () => {
               </span>
               <Link href="/terms" className="px-2 py-1 text-zinc-400 transition-colors hover:text-white">
                 Terms
+              </Link>
+              <span className="text-zinc-700" aria-hidden>
+                ·
+              </span>
+              <Link href="/site-map" className="px-2 py-1 text-zinc-400 transition-colors hover:text-white">
+                Sitemap
               </Link>
             </nav>
 
