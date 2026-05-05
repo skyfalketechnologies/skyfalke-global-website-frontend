@@ -32,27 +32,36 @@ const SitemapManager = () => {
       setLoading(true);
       setError(null);
       
-      // Fetch sitemap and robots.txt with text response type (not JSON)
+      // Fetch sitemap and robots.txt from Next.js routes (not backend API base URL)
       // Add cache-busting parameter if skipCache is true
       const cacheBuster = skipCache ? `?t=${Date.now()}` : '';
       const [sitemapResponse, robotsResponse] = await Promise.all([
-        api.get(`/api/sitemap.xml${cacheBuster}`, { 
-          responseType: 'text',
-          headers: skipCache ? { 'Cache-Control': 'no-cache' } : {}
+        fetch(`/sitemap.xml${cacheBuster}`, {
+          cache: skipCache ? 'no-store' : 'default',
+          headers: skipCache ? { 'Cache-Control': 'no-cache' } : undefined,
         }),
-        api.get(`/robots.txt${cacheBuster}`, { 
-          responseType: 'text',
-          headers: skipCache ? { 'Cache-Control': 'no-cache' } : {}
-        })
+        fetch(`/robots.txt${cacheBuster}`, {
+          cache: skipCache ? 'no-store' : 'default',
+          headers: skipCache ? { 'Cache-Control': 'no-cache' } : undefined,
+        }),
       ]);
-      
-      setSitemapData(sitemapResponse.data);
-      setRobotsData(robotsResponse.data);
+
+      if (!sitemapResponse.ok || !robotsResponse.ok) {
+        throw new Error('Failed to fetch sitemap or robots content');
+      }
+
+      const [sitemapText, robotsText] = await Promise.all([
+        sitemapResponse.text(),
+        robotsResponse.text(),
+      ]);
+
+      setSitemapData(sitemapText);
+      setRobotsData(robotsText);
       
       // Only parse stats from XML if this is a normal fetch (not after generation)
       // When skipCache is true, we already have correct stats from the generate response
       if (!skipCache) {
-        const xmlData = sitemapResponse.data;
+        const xmlData = sitemapText;
         if (xmlData) {
           // More accurate regex patterns that exclude the base /careers route
           const blogMatches = xmlData.match(/<loc>[^<]*\/blog\/[^<]+<\/loc>/g) || [];
@@ -74,7 +83,7 @@ const SitemapManager = () => {
       }
       
       // Get last modified from headers
-      const lastModified = sitemapResponse.headers['last-modified'];
+      const lastModified = sitemapResponse.headers.get('last-modified');
       if (lastModified) {
         setLastGenerated(new Date(lastModified));
       }
