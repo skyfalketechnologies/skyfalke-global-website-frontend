@@ -1,9 +1,6 @@
-import { Inter } from 'next/font/google';
 import './globals.css';
 import Providers from './providers';
 import { getGlobalSchemaJsonLd } from '@/utils/schemaMarkup';
-
-const inter = Inter({ subsets: ['latin'] });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 const globalJsonLd = getGlobalSchemaJsonLd(siteUrl);
@@ -88,7 +85,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className="font-sans">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

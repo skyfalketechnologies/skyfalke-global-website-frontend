@@ -45,14 +45,18 @@ export const getSEOKeywords = (post) => {
   if (!post) {
     return 'digital marketing agency in Kenya, cloud experts in Kenya, Uganda and Tanzania, sustainable technology in Kenya,';
   }
-  
-  const dbKeywords = post.seo?.keywords || [];
-  const tagKeywords = post.tags || [];
-  const categoryKeywords = post.category ? [post.category] : [];
-  const allKeywords = [...new Set([...dbKeywords, ...tagKeywords, ...categoryKeywords])];
-  
-  return allKeywords.length > 0 
-    ? allKeywords.join(', ') 
+
+  const seoKeywordsRaw = post.seo?.keywords;
+  const dbKeywords = Array.isArray(seoKeywordsRaw)
+    ? seoKeywordsRaw
+    : typeof seoKeywordsRaw === 'string'
+      ? seoKeywordsRaw.split(',').map((k) => k.trim()).filter(Boolean)
+      : [];
+  const focusKeyword = post.seo?.focusKeyword ? [String(post.seo.focusKeyword).trim()] : [];
+  const allKeywords = [...new Set([...dbKeywords, ...focusKeyword].filter(Boolean))];
+
+  return allKeywords.length > 0
+    ? allKeywords.join(', ')
     : 'digital marketing, cloud solutions, green hosting, sustainable technology';
 };
 

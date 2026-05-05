@@ -561,7 +561,7 @@ const Partners = () => {
                  Start Partnership Discussion
                  <FaArrowRight className="text-sm" />
                </motion.button>
-               <Link href="/case-studies">
+               <Link href="/how-we-work/case-studies">
                  <motion.button
                    whileHover={{ scale: 1.05 }}
                    whileTap={{ scale: 0.95 }}

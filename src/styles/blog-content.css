@@ -2,7 +2,7 @@
 
 /* Typography Enhancements */
 .prose {
-  font-family: 'Nexa', 'Inter', sans-serif;
+  font-family: 'Nexa', sans-serif;
   line-height: 1.8;
   color: #374151;
 }
@@ -317,6 +317,21 @@
   max-width: 100% !important;
   margin: 0 auto;
   display: block;
+}
+
+/* Embedded YouTube videos from TipTap */
+#blog-content div[data-youtube-video] {
+  margin: 2rem 0;
+}
+
+#blog-content .blog-embed-youtube {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border: 0;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
 }
 
 /* Table Styling */

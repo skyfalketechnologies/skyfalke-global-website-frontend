@@ -232,7 +232,7 @@ const ICTStrategy = () => {
                 <span>Request Consultation</span>
                 <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
-              <Link href="/case-studies"
+              <Link href="/how-we-work/case-studies"
                 className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-primary-900 transition-all duration-300 text-sm sm:text-base"
               >
                 View Success Stories
@@ -507,7 +507,7 @@ const ICTStrategy = () => {
                 <span>Book a Strategy Session</span>
                 <FaArrowRight className="ml-2 sm:ml-3 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
-              <Link href="/case-studies"
+              <Link href="/how-we-work/case-studies"
                 className="inline-flex items-center justify-center px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-primary-900 transition-all duration-300 text-sm sm:text-base"
               >
                 <span>View Case Studies</span>

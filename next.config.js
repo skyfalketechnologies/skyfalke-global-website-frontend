@@ -11,6 +11,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'apis.mwangikinyanjuiadvocates.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
   },

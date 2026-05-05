@@ -13,6 +13,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
 import Gapcursor from '@tiptap/extension-gapcursor';
 import Placeholder from '@tiptap/extension-placeholder';
+import Youtube from '@tiptap/extension-youtube';
 import { BlogImage } from './blogEditor/BlogImageExtension';
 import BlogEditorToolbar from './blogEditor/BlogEditorToolbar';
 import { apiPost, apiPut, apiGet } from '../../utils/api';
@@ -101,6 +102,14 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
       Gapcursor,
       Placeholder.configure({
         placeholder: 'Write your article here. Use the toolbar for headings, lists, quotes, tables, and images.',
+      }),
+      Youtube.configure({
+        controls: true,
+        nocookie: true,
+        modestBranding: true,
+        HTMLAttributes: {
+          class: 'blog-embed-youtube',
+        },
       }),
       Underline,
       Strike,
@@ -347,6 +356,17 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
       .ProseMirror .tableWrapper {
         overflow-x: auto;
         margin: 1rem 0;
+      }
+      .ProseMirror .blog-embed-youtube {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        height: auto;
+        border: 0;
+        border-radius: 0.75rem;
+        margin: 1.25rem 0;
+      }
+      .ProseMirror div[data-youtube-video] {
+        margin: 1.25rem 0;
       }
       .ProseMirror.resize-cursor {
         cursor: col-resize;
@@ -910,7 +930,7 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
                    <div className="mt-2 flex items-center justify-between">
                      <div className="flex-1">
                        <p className="text-xs text-gray-500">
-                         Tip: Use the toolbar for structure (headings, lists, quotes, tables). Insert images with the image button—add alt text and optional captions; click an image to edit alignment, alt, or caption.
+                         Tip: Use the toolbar for structure (headings, lists, quotes, tables). Insert images with alt text/captions and embed YouTube videos directly from the toolbar.
                        </p>
                        {errors.content && (
                          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.content.message}</p>

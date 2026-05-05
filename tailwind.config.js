@@ -10,8 +10,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['Nexa', 'Inter', 'sans-serif'],
-        'serif': ['Playfair Display', 'serif'],
+        'sans': ['Nexa', 'sans-serif'],
+        'serif': ['Nexa-Heavy', 'Nexa', 'sans-serif'],
         'nexa': ['Nexa', 'sans-serif'],
         'nexa-light': ['Nexa-ExtraLight', 'Nexa', 'sans-serif'],
         'nexa-heavy': ['Nexa-Heavy', 'Nexa', 'sans-serif'],

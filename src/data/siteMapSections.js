@@ -3,11 +3,24 @@
  * Kept in sync with primary nav / services where possible.
  */
 
+import { ABOUT_PAGES } from './aboutPages';
+import { CAPABILITY_PAGES } from './capabilityPages';
+import { HOW_WE_WORK_PAGES } from './howWeWorkPages';
+import { INDUSTRY_PAGES } from './industryPages';
+import { SUSTAINABILITY_PAGES } from './sustainabilityPages';
+import { TECH_AI_PAGES } from './techAiPages';
+
+const toLinks = (pages, basePath) =>
+  Object.values(pages).map((page) => ({
+    name: page.title,
+    href: `${basePath}/${page.slug}`,
+  }));
+
 export const siteMapPrimary = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
   { name: 'Services overview', href: '/services' },
-  { name: 'Case studies', href: '/case-studies' },
+  { name: 'Case studies', href: '/how-we-work/case-studies' },
   { name: 'Blog', href: '/blog' },
   { name: 'Shop', href: '/shop' },
   { name: 'Contact', href: '/contact' },
@@ -97,4 +110,37 @@ export const siteMapCompany = [
 export const siteMapLegal = [
   { name: 'Privacy policy', href: '/privacy' },
   { name: 'Terms of use', href: '/terms' },
+];
+
+export const siteMapTopicCollections = [
+  {
+    title: 'About Us',
+    href: '/about-us',
+    links: toLinks(ABOUT_PAGES, '/about-us'),
+  },
+  {
+    title: 'Capabilities',
+    href: '/capabilities',
+    links: toLinks(CAPABILITY_PAGES, '/capabilities'),
+  },
+  {
+    title: 'How We Work',
+    href: '/how-we-work',
+    links: toLinks(HOW_WE_WORK_PAGES, '/how-we-work'),
+  },
+  {
+    title: 'Sustainability',
+    href: '/sustainability',
+    links: toLinks(SUSTAINABILITY_PAGES, '/sustainability'),
+  },
+  {
+    title: 'Tech & AI',
+    href: '/tech-ai',
+    links: toLinks(TECH_AI_PAGES, '/tech-ai'),
+  },
+  {
+    title: 'Industries',
+    href: '/industries',
+    links: toLinks(INDUSTRY_PAGES, '/industries'),
+  },
 ];

@@ -28,29 +28,9 @@ const FontLoader = () => {
       });
     };
 
-    // Load Google Fonts with display=swap
-    const loadGoogleFonts = () => {
-      const link = document.createElement('link');
-      link.rel = 'preconnect';
-      link.href = 'https://fonts.googleapis.com';
-      document.head.appendChild(link);
-
-      const link2 = document.createElement('link');
-      link2.rel = 'preconnect';
-      link2.href = 'https://fonts.gstatic.com';
-      link2.crossOrigin = 'anonymous';
-      document.head.appendChild(link2);
-
-      const fontLink = document.createElement('link');
-      fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700&display=swap';
-      fontLink.rel = 'stylesheet';
-      document.head.appendChild(fontLink);
-    };
-
     preloadFonts();
-    loadGoogleFonts();
 
-    // Add font-display: swap to existing font faces
+    // Ensure the locally hosted brand fonts use swap behavior.
     const style = document.createElement('style');
     style.textContent = `
       @font-face {

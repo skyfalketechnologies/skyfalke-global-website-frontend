@@ -13,6 +13,7 @@ import {
   FaCode,
   FaLink,
   FaImage,
+  FaYoutube,
   FaTable,
   FaAlignLeft,
   FaAlignCenter,
@@ -72,6 +73,8 @@ export default function BlogEditorToolbar({
   const [insertAlt, setInsertAlt] = useState('');
   const [insertCaption, setInsertCaption] = useState('');
   const [insertAlign, setInsertAlign] = useState('center');
+  const [youtubeModalOpen, setYoutubeModalOpen] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState('');
 
   const [bubbleAlt, setBubbleAlt] = useState('');
   const [bubbleCaption, setBubbleCaption] = useState('');
@@ -106,6 +109,32 @@ export default function BlogEditorToolbar({
     setInsertAlt('');
     setInsertCaption('');
     setInsertAlign('center');
+  };
+
+  const closeYoutubeModal = () => {
+    setYoutubeModalOpen(false);
+    setYoutubeUrl('');
+  };
+
+  const commitYoutubeInsert = () => {
+    if (!editor) return;
+    const url = youtubeUrl.trim();
+    if (!url) {
+      alert('Please paste a YouTube URL.');
+      return;
+    }
+
+    const inserted = editor.chain().focus().setYoutubeVideo({
+      src: url,
+      width: 960,
+      height: 540,
+    }).run();
+
+    if (!inserted) {
+      alert('Invalid YouTube URL. Please use a full YouTube link.');
+      return;
+    }
+    closeYoutubeModal();
   };
 
   const commitImageInsert = async () => {
@@ -282,6 +311,45 @@ export default function BlogEditorToolbar({
         </div>
       )}
 
+      {youtubeModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Embed YouTube video</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Paste a YouTube URL (youtube.com or youtu.be) to embed it in your article.
+            </p>
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">YouTube URL *</label>
+                <input
+                  type="url"
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={closeYoutubeModal}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={commitYoutubeInsert}
+                  className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+                >
+                  Embed video
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-2 border-b border-gray-200 bg-gradient-to-b from-gray-50 to-white p-3 dark:border-gray-600 dark:from-gray-800 dark:to-gray-800/95">
         <div className="flex flex-wrap items-center gap-2">
           <ToolbarGroup label="Style">
@@ -413,6 +481,12 @@ export default function BlogEditorToolbar({
               onClick={() => setImageModalOpen(true)}
             >
               <FaImage className="h-3.5 w-3.5" />
+            </ToolbarButton>
+            <ToolbarButton
+              title="Embed YouTube video"
+              onClick={() => setYoutubeModalOpen(true)}
+            >
+              <FaYoutube className="h-3.5 w-3.5" />
             </ToolbarButton>
           </ToolbarGroup>
 

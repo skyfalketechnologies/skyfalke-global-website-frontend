@@ -7,6 +7,7 @@ import {
   siteMapResources,
   siteMapCompany,
   siteMapLegal,
+  siteMapTopicCollections,
 } from '@/data/siteMapSections';
 
 function LinkList({ links, className = '' }) {
@@ -78,6 +79,24 @@ export default function SiteMap() {
                 ) : (
                   <p className="mt-3 text-sm text-gray-500">Overview and engagement on the category page.</p>
                 )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section aria-labelledby="sitemap-topics" className="mt-14">
+          <h2 id="sitemap-topics" className="text-lg font-bold text-gray-900">
+            Topic hubs
+          </h2>
+          <div className="mt-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+            {siteMapTopicCollections.map((collection) => (
+              <div key={collection.title} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h3 className="text-base font-semibold text-gray-900">
+                  <Link href={collection.href} className="hover:text-primary-600">
+                    {collection.title}
+                  </Link>
+                </h3>
+                <LinkList links={collection.links} className="mt-4 text-sm" />
               </div>
             ))}
           </div>

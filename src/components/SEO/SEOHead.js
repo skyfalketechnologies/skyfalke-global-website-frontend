@@ -7,11 +7,11 @@ import SchemaMarkup from './SchemaMarkup';
 const HOME_OG_DESCRIPTION =
   'Build online presence, acquire customers, and streamline operations with strategic technology — one partner, clear execution.';
 const HOME_TWITTER_DESCRIPTION =
-  'Websites, marketing, automation, and AI — unified into one growth engine for serious businesses.';
+  'Websites, marketing, automation, and AI - unified into one growth engine for serious businesses.';
 
 const SEOHead = ({
   title = "Skyfalke | Turn Your Business Into a High-Performing Digital Asset",
-  description = "Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.",
+  description = "Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps - one strategy to scale revenue without fragmented vendors.",
   keywords = "digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke",
   image = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good",
   url = "https://skyfalke.com",
@@ -64,7 +64,7 @@ const SEOHead = ({
         <meta property="og:image" content={fullImageUrl} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="Skyfalke — digital growth partner for websites, marketing, automation, and AI strategy" />
+        <meta property="og:image:alt" content="Skyfalke - digital growth partner for websites, marketing, automation, and AI strategy" />
         <meta property="og:site_name" content="Skyfalke" />
         <meta property="og:locale" content="en_US" />
         
@@ -104,8 +104,6 @@ const SEOHead = ({
         <meta name="msvalidate.01" content="your-bing-verification-code" />
         
         {/* Preconnect to external domains for performance */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.google-analytics.com" />
         
         {/* Enhanced Favicon and Icons */}

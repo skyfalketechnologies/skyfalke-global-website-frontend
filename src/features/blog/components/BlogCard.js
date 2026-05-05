@@ -15,15 +15,24 @@ const BlogCard = ({ post, featured = false }) => {
   const cardClasses = featured
     ? 'bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300'
     : 'bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300';
+  const imageWrapperClasses = featured
+    ? 'block relative overflow-hidden bg-slate-100 p-2 sm:p-3'
+    : 'block relative overflow-hidden';
+  const imageClasses = featured
+    ? 'w-full h-auto max-h-[30rem] object-contain'
+    : 'w-full h-48 object-cover';
+  const imageHoverClasses = featured
+    ? 'transition-opacity duration-300 hover:opacity-95'
+    : 'hover:scale-105 transition-transform duration-300';
 
   return (
     <article className={cardClasses} itemScope itemType="https://schema.org/BlogPosting">
       {post.featuredImage?.url && (
-        <Link href={`/blog/${post.slug}`} className="block relative overflow-hidden">
+        <Link href={`/blog/${post.slug}`} className={imageWrapperClasses}>
           <img
             src={post.featuredImage.url}
             alt={post.title}
-            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+            className={`${imageClasses} ${imageHoverClasses}`}
             loading="lazy"
             itemProp="image"
           />

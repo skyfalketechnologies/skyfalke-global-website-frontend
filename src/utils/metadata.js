@@ -139,10 +139,19 @@ export function generateBlogMetadata(blog) {
     ? (blog.featuredImage.url.startsWith('http') ? blog.featuredImage.url : `${BASE_URL}${blog.featuredImage.url}`)
     : DEFAULT_IMAGE;
 
+  const seoKeywordsRaw = blog.seo?.keywords;
+  const seoKeywords = Array.isArray(seoKeywordsRaw)
+    ? seoKeywordsRaw
+    : typeof seoKeywordsRaw === 'string'
+      ? seoKeywordsRaw.split(',').map((k) => k.trim()).filter(Boolean)
+      : [];
+  const focusKeyword = blog.seo?.focusKeyword ? [String(blog.seo.focusKeyword).trim()] : [];
+  const keywordSet = [...new Set([...seoKeywords, ...focusKeyword].filter(Boolean))];
+
   return generateMetadata({
     title: `${blog.title}`,
     description: blog.excerpt || blog.description || `Read ${blog.title} on Skyfalke blog`,
-    keywords: blog.tags?.join(', ') || blog.category || '',
+    keywords: keywordSet.join(', '),
     image: blogImage,
     url: blogUrl,
     type: 'article',
@@ -150,11 +159,11 @@ export function generateBlogMetadata(blog) {
     publishedTime: blog.publishedAt ? new Date(blog.publishedAt).toISOString() : undefined,
     modifiedTime: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
     category: blog.category,
-    tags: blog.tags || [],
+    tags: keywordSet,
     canonical: blogUrl,
     articleAuthor: blog.author?.name || 'Skyfalke Team',
     articleSection: blog.category,
-    articleTags: blog.tags || [],
+    articleTags: keywordSet,
   });
 }
 

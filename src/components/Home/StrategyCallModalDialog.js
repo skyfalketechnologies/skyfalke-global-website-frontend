@@ -51,13 +51,13 @@ const budgetRanges = [
 const INTENT_COPY = {
   strategy: {
     title: 'Book a Free Strategy Call',
-    subtitle: 'Tell us about your goals — we’ll follow up with a clear next step.',
-    subject: 'Free Strategy Call Request',
+    subtitle: 'Tell us about your goals',
+    subject: 'Strategy Call Request',
   },
   audit: {
     title: 'Free Business Growth Audit',
-    subtitle: 'Request your audit — we’ll outline priorities and opportunities.',
-    subject: 'Free Business Growth Audit Request',
+    subtitle: 'Request your audit',
+    subject: 'Business Growth Audit Request',
   },
 };
 

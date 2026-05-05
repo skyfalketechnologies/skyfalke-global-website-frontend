@@ -5,14 +5,14 @@ import { apiGet } from '../../../utils/api';
  * Custom hook for fetching and managing blog list
  * Handles pagination, filtering, and search
  */
-export const useBlogList = (initialFilters = {}) => {
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+export const useBlogList = (initialFilters = {}, initialData = null) => {
+  const [blogs, setBlogs] = useState(initialData?.blogs || []);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    total: 0
+    currentPage: initialData?.currentPage || 1,
+    totalPages: initialData?.totalPages || 1,
+    total: initialData?.total || 0
   });
   const [filters, setFilters] = useState({
     category: '',
@@ -73,8 +73,9 @@ export const useBlogList = (initialFilters = {}) => {
   }, [pagination.currentPage, filters.category, filters.search, filters.limit]);
 
   useEffect(() => {
+    if (initialData) return;
     fetchBlogs();
-  }, [fetchBlogs]);
+  }, [fetchBlogs, initialData]);
 
   const updateFilters = useCallback((newFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters }));

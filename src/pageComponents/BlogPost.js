@@ -195,7 +195,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
       {/* Structured Data */}
       <BlogPostSchema post={blog} />
 
-      <main className="bg-gray-50 min-h-screen relative">
+      <main className="min-h-screen bg-[#F8FAFC] pt-20 md:pt-24">
         {/* Social Share Buttons */}
         <SocialShare url={currentUrl} title={blog?.title || ''} />
 
@@ -207,55 +207,56 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
             is GPU-composited and has no performance penalty.
             ──────────────────────────────────────────────────────────────────── */}
         <header
-          className="relative py-12 sm:py-16 md:py-24 pt-20 sm:pt-24 md:pt-32 overflow-hidden blog-hero-bg"
+          className="relative overflow-hidden border-b border-slate-200/80 bg-[#0B1220] py-12 sm:py-16 md:py-20"
           style={{
             backgroundImage: blog?.featuredImage?.url
               ? `url(${blog.featuredImage.url})`
-              : 'linear-gradient(to bottom right, #303661, #4a5a7a)',
+              : 'linear-gradient(to bottom right, #0B1220, #1e293b)',
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
             backgroundAttachment: 'scroll', // FIX 4: was 'fixed'
-            minHeight: '400px'
+            minHeight: '360px'
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-dark-blue/90 via-primary-800/90 to-dark-blue/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#020617]/94 via-[#0B1220]/92 to-[#020617]/94"></div>
+          <div className="absolute inset-0 bg-black/35"></div>
 
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <div className="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
             <div className="flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-6">
               {blog?.category && (
-                <span className="px-3 py-1 sm:px-4 sm:py-1.5 text-sm font-medium capitalize text-yellow bg-yellow/10 rounded-full">
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-white">
                   {blog.category}
                 </span>
               )}
               {blog?.publishedAt && (
                 <time
-                  className="text-sm text-gray-300"
+                  className="text-sm text-white/85 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]"
                   dateTime={blog.publishedAt}
                 >
                   {formatBlogDate(blog.publishedAt)}
                 </time>
               )}
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 tracking-tight px-4 leading-snug lg:leading-tight font-nexa-heavy">
+            <h1 className="px-2 text-3xl font-nexa-heavy leading-[1.14] tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.65)] sm:text-4xl md:text-5xl lg:text-[3.3rem]">
               {blog?.title}
             </h1>
-            <div className="mt-6 sm:mt-8 flex justify-center">
-              <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-yellow via-white to-yellow rounded-full"></div>
+            <div className="mt-6 flex justify-center sm:mt-8">
+              <div className="h-1 w-20 rounded-full bg-white/55 sm:w-24"></div>
             </div>
           </div>
         </header>
 
         {/* Article Content */}
-        <article className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-20">
-          <div className="flex gap-8">
+        <article className="mx-auto w-full max-w-[1380px] px-4 py-10 sm:px-6 sm:py-14 md:py-16 lg:px-8">
+          <div className="flex gap-8 lg:gap-10">
             {/* Table of Contents Sidebar */}
             {hasContent && <TableOfContents content={contentWithIds} />}
 
             {/* Main Content */}
-            <div className="flex-1 bg-white rounded-xl overflow-hidden">
+            <div className="flex-1 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
               {/* Breadcrumbs */}
-              <div className="p-6 sm:p-8 md:p-12 lg:p-10">
+              <div className="border-b border-slate-100 px-6 py-6 sm:px-8 lg:px-10">
                 <Breadcrumbs items={[{ name: blog?.title || 'Blog Post', href: `/blog/${blog?.slug || ''}` }]} />
               </div>
 
@@ -271,17 +272,17 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
                 </div>
               )}
 
-              <div className="p-6 sm:p-8 md:p-12 lg:p-10">
+              <div className="px-6 py-8 sm:px-8 md:py-10 lg:px-10">
                 {/* Post Meta Information */}
-                <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 border-b border-gray-100 pb-6">
+                <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-slate-100 pb-6 text-sm text-slate-500">
                   {blog?.readingTime && (
-                    <div className="flex items-center gap-2">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">
                       <FaClock className="w-4 h-4" />
                       <span>{blog.readingTime}</span>
                     </div>
                   )}
                   {blog?.author?.name && (
-                    <div className="flex items-center gap-2">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">
                       <FaUser className="w-4 h-4" />
                       <span>By {blog.author.name}</span>
                     </div>
@@ -326,7 +327,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
                       prose-table:w-full prose-table:border-collapse prose-table:my-8
                       prose-th:border prose-th:border-gray-200 prose-th:bg-dark-blue prose-th:text-white prose-th:px-4 prose-th:py-3 prose-th:text-left
                       prose-td:border prose-td:border-gray-200 prose-td:px-4 prose-td:py-3 prose-td:align-top
-                      prose-code:text-yellow prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+                      prose-code:text-primary-700 prose-code:bg-slate-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
                       prose-pre:bg-gray-900 prose-pre:text-white prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
                       prose-hr:my-8 prose-hr:border-gray-200"
                     id="blog-content"
@@ -336,7 +337,17 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
                 )}
 
                 {/* Author Section */}
-                {blog?.author?.name && <BlogAuthor author={blog.author.name} />}
+                {blog?.author?.name && (
+                  <BlogAuthor
+                    author={{
+                      name: blog.authorProfile?.name || blog.author?.authorProfile?.name || blog.author.name,
+                      role: blog.authorProfile?.role || blog.author?.authorProfile?.role || '',
+                      bio: blog.authorProfile?.bio || blog.author?.authorProfile?.bio || '',
+                      avatar: blog.authorProfile?.avatar || blog.author?.authorProfile?.avatar || blog.author?.avatar || '',
+                      linkedin: blog.authorProfile?.linkedin || blog.author?.authorProfile?.linkedin || ''
+                    }}
+                  />
+                )}
 
                 {/* Tags */}
                 {blog?.tags && blog.tags.length > 0 && (
@@ -373,9 +384,10 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
           </div>
 
           {/* Newsletter Section */}
-          <div className="bg-gradient-to-r from-dark-blue to-dark-blue rounded-xl p-8 mt-12 md:p-12 text-center text-white mb-8">
-            <h3 className="text-3xl font-bold mb-4">Stay Updated</h3>
-            <p className="text-gray-300 mb-8 text-lg max-w-2xl mx-auto">
+          <div className="mt-12 mb-8 rounded-2xl border border-slate-200/80 bg-white p-8 text-center shadow-sm md:p-12">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary-600">Newsletter</p>
+            <h3 className="mt-3 text-3xl font-nexa-heavy tracking-tight text-[#0B1220]">Stay Updated</h3>
+            <p className="mx-auto mt-4 mb-8 max-w-2xl text-lg text-slate-600">
               Subscribe to our newsletter and never miss the latest insights from Skyfalke.
             </p>
             <form
@@ -390,7 +402,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
                   setSubscribeForm((prev) => ({ ...prev, name: e.target.value }))
                 }
                 required
-                className="flex-1 px-6 py-3 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow"
+                className="flex-1 rounded-full border border-slate-300 px-6 py-3 text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
               />
               <input
                 type="email"
@@ -400,18 +412,18 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
                   setSubscribeForm((prev) => ({ ...prev, email: e.target.value }))
                 }
                 required
-                className="flex-1 px-6 py-3 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow"
+                className="flex-1 rounded-full border border-slate-300 px-6 py-3 text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
               />
               <button
                 type="submit"
                 disabled={subscribeStatus.loading}
-                className={`bg-yellow text-dark-blue px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${
-                  subscribeStatus.loading ? 'opacity-75 cursor-not-allowed' : 'hover:bg-yellow/90'
+                className={`whitespace-nowrap rounded-full bg-[#0B1220] px-8 py-3 font-semibold text-white transition-all duration-300 ${
+                  subscribeStatus.loading ? 'cursor-not-allowed opacity-75' : 'hover:bg-primary-800'
                 }`}
               >
                 {subscribeStatus.loading ? (
                   <span className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-dark-blue mr-2"></div>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                     Subscribing...
                   </span>
                 ) : (
@@ -423,7 +435,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
             {subscribeStatus.message && (
               <div
                 className={`mt-4 text-sm font-medium ${
-                  subscribeStatus.error ? 'text-red-300' : 'text-green-300'
+                  subscribeStatus.error ? 'text-red-600' : 'text-emerald-600'
                 }`}
               >
                 {subscribeStatus.message}
@@ -435,7 +447,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
           <div className="mt-8 sm:mt-12 flex justify-center">
             <Link
               href="/blog"
-              className="inline-flex items-center bg-gradient-to-r from-yellow to-yellow text-dark-blue px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-semibold hover:from-secondary-600 hover:to-secondary-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center rounded-full bg-[#0B1220] px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-800 sm:px-8 sm:py-4 sm:text-base"
             >
               <FaArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               Back to Blog

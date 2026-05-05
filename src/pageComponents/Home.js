@@ -2,7 +2,6 @@
 
 import React from 'react';
 import SEOHead from '../components/SEO/SEOHead';
-import { StrategyCallModalProvider } from '@/contexts/StrategyCallModalContext';
 
 import HeroSlider from '../components/Home/HeroSlider';
 import HomeProblemSection from '../components/Home/HomeProblemSection';
@@ -25,7 +24,7 @@ const HOME_TWITTER_DESC = 'Websites, marketing, automation, and AI - unified int
 
 const Home = () => {
   return (
-    <StrategyCallModalProvider>
+    <>
       <SEOHead
         pageType="home"
         canonical="https://skyfalke.com/"
@@ -50,7 +49,7 @@ const Home = () => {
       <CreativeVideoSection />
       <HomeLeadMagnet />
       <CTASection />
-    </StrategyCallModalProvider>
+    </>
   );
 };
 

@@ -97,7 +97,7 @@ const Footer = () => {
       links: [
         { name: 'Blog', href: '/blog' },
         { name: 'Insights', href: '/resources' },
-        { name: 'Case Studies', href: '/case-studies' },
+        { name: 'Case Studies', href: '/how-we-work/case-studies' },
         { name: 'Support', href: '/support' },
       ],
     },

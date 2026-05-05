@@ -96,7 +96,7 @@ const ServicesOverview = () => {
                 <FaArrowRight className="ml-1.5 shrink-0 text-xs" />
               </Link>
               <Link
-                href="/case-studies"
+                href="/how-we-work/case-studies"
                 className="inline-flex flex-1 items-center justify-center rounded-md border border-white px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-white hover:text-gray-900 sm:flex-initial sm:px-5 sm:py-2.5"
               >
                 <span>View Case Studies</span>

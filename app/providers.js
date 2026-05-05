@@ -12,6 +12,7 @@ import FontLoader from '@/components/FontLoader';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import ChristmasDecorations from '@/components/Christmas/ChristmasDecorations';
 import SkyfalkeChatbot from '@/components/SkyfalkeChatbot';
+import { StrategyCallModalProvider } from '@/contexts/StrategyCallModalContext';
 
 /** Floating assistant chat — off until we turn it back on. */
 const ENABLE_SKYFALKE_CHAT_WIDGET = false;
@@ -24,15 +25,17 @@ export default function Providers({ children }) {
           <ThemeProvider>
             <CartProvider>
               <NotificationProvider>
-                <div className="App min-h-screen bg-primary-50">
-                  <FontLoader />
-                  <PerformanceMonitor />
-                  <ChristmasDecorations />
-                  {children}
-                  <CookieBanner />
-                  {ENABLE_SKYFALKE_CHAT_WIDGET ? <SkyfalkeChatbot /> : null}
-                  <GlobalMetaManager />
-                </div>
+                <StrategyCallModalProvider>
+                  <div className="App min-h-screen bg-primary-50">
+                    <FontLoader />
+                    <PerformanceMonitor />
+                    <ChristmasDecorations />
+                    {children}
+                    <CookieBanner />
+                    {ENABLE_SKYFALKE_CHAT_WIDGET ? <SkyfalkeChatbot /> : null}
+                    <GlobalMetaManager />
+                  </div>
+                </StrategyCallModalProvider>
               </NotificationProvider>
             </CartProvider>
           </ThemeProvider>
