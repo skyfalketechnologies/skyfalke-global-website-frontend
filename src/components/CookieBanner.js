@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaCookieBite, FaTimes, FaCheck, FaInfoCircle } from 'react-icons/fa';
+import { FaCookieBite, FaCheck, FaInfoCircle } from 'react-icons/fa';
 import { initializeAnalyticsWithConsent } from '../utils/analytics';
 
 const CookieBanner = () => {
@@ -67,25 +67,29 @@ const CookieBanner = () => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: 100 }}
+        initial={{ opacity: 0, y: 32 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 100 }}
-                 className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900 to-slate-800 border-t-4 border-[#e0ae00] shadow-2xl"
+        exit={{ opacity: 0, y: 32 }}
+        className="fixed inset-x-0 bottom-0 z-50 p-2 pb-3 sm:p-6"
       >
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <div className="mx-auto max-h-[86vh] max-w-6xl overflow-y-auto overflow-x-hidden rounded-xl border border-secondary-500/45 bg-primary-900 shadow-[0_30px_80px_-35px_rgba(2,6,23,0.95)] backdrop-blur sm:rounded-2xl">
+          <div className="h-[1px] w-full bg-secondary-500/80" />
+          <div className="flex flex-col gap-5 p-4 sm:gap-6 sm:p-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
             {/* Main Content */}
             <div className="flex-1">
-              <div className="flex items-start gap-4">
-                                 <div className="w-12 h-12 bg-gradient-to-br from-[#e0ae00] to-[#f4c430] rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <FaCookieBite className="text-white text-lg" />
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-secondary-500/40 bg-secondary-500/10 text-secondary-300">
+                  <FaCookieBite className="text-base" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-white mb-3">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary-400/90">
+                    Privacy & data transparency
+                  </p>
+                  <h3 className="mb-2 text-base font-semibold tracking-[0.01em] text-white sm:text-xl">
                     Cookie Preferences
                   </h3>
-                  <p className="text-slate-300 text-base leading-relaxed mb-4">
-                    We use cookies and similar technologies to provide, protect, and improve our services. 
+                  <p className="mb-4 max-w-3xl text-sm leading-5 text-slate-300 sm:leading-6 sm:text-[15px]">
+                    We use cookies and similar technologies to provide, protect, and improve our services.
                     Your privacy is important to us, and we respect your choices.
                   </p>
                   
@@ -95,39 +99,39 @@ const CookieBanner = () => {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="mt-6 p-6 bg-slate-800/50 rounded-xl border border-slate-700"
+                      className="mt-4 rounded-xl border border-white/10 bg-primary-900/35 p-4 sm:mt-5 sm:p-5"
                     >
-                      <h4 className="font-semibold text-white mb-4 text-lg">Cookie Categories:</h4>
+                      <h4 className="mb-4 text-base font-semibold text-white">Cookie categories</h4>
                       <div className="space-y-4">
                         <div className="flex items-start gap-3">
-                                                     <div className="w-6 h-6 bg-[#e0ae00] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <FaCheck className="text-white text-xs" />
+                          <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-secondary-500">
+                            <FaCheck className="text-xs text-white" />
                           </div>
                           <div>
-                            <span className="font-semibold text-white text-sm">Essential Cookies</span>
-                            <p className="text-slate-400 text-sm mt-1">
+                            <span className="text-sm font-semibold text-white">Essential Cookies</span>
+                            <p className="mt-1 text-sm text-slate-300">
                               Required for the website to function properly. These cannot be disabled.
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <FaInfoCircle className="text-white text-xs" />
+                          <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary-500">
+                            <FaInfoCircle className="text-xs text-white" />
                           </div>
                           <div>
-                            <span className="font-semibold text-white text-sm">Analytics Cookies</span>
-                            <p className="text-slate-400 text-sm mt-1">
+                            <span className="text-sm font-semibold text-white">Analytics Cookies</span>
+                            <p className="mt-1 text-sm text-slate-300">
                               Help us understand how visitors interact with our website by collecting and reporting information anonymously.
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <FaInfoCircle className="text-white text-xs" />
+                          <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary-500">
+                            <FaInfoCircle className="text-xs text-white" />
                           </div>
                           <div>
-                            <span className="font-semibold text-white text-sm">Marketing Cookies</span>
-                            <p className="text-slate-400 text-sm mt-1">
+                            <span className="text-sm font-semibold text-white">Marketing Cookies</span>
+                            <p className="mt-1 text-sm text-slate-300">
                               Used to track visitors across websites to display relevant and engaging advertisements.
                             </p>
                           </div>
@@ -136,17 +140,17 @@ const CookieBanner = () => {
                     </motion.div>
                   )}
                   
-                  <div className="flex items-center gap-6 mt-4">
+                  <div className="mt-4 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-5">
                     <button
                       onClick={() => setShowDetails(!showDetails)}
-                      className="text-sm text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-2 transition-colors"
+                      className="flex items-center gap-2 text-sm font-medium text-secondary-300 transition-colors hover:text-secondary-200"
                     >
                       <FaInfoCircle className="text-xs" />
-                      {showDetails ? 'Hide Details' : 'Learn More'}
+                      {showDetails ? 'Hide details' : 'Manage preferences'}
                     </button>
                     <a 
                       href="/privacy" 
-                      className="text-sm text-slate-400 hover:text-white transition-colors"
+                      className="text-sm font-medium text-slate-400 transition-colors hover:text-secondary-200"
                     >
                       Privacy Policy
                     </a>
@@ -156,22 +160,22 @@ const CookieBanner = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+            <div className="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:flex lg:w-auto lg:min-w-[220px] lg:flex-col">
               <button
                 onClick={handleDecline}
-                className="px-6 py-3 text-sm font-semibold text-slate-300 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg transition-all duration-200 hover:shadow-lg"
+                className="min-h-[44px] w-full rounded-lg border border-slate-500/70 bg-slate-800/40 px-4 py-2.5 text-sm font-semibold text-slate-200 transition-all duration-200 hover:border-slate-300 hover:bg-slate-700/45"
               >
                 Decline All
               </button>
               <button
                 onClick={handleAcceptEssential}
-                className="px-6 py-3 text-sm font-semibold text-slate-800 bg-slate-200 hover:bg-white border border-slate-300 rounded-lg transition-all duration-200 hover:shadow-lg"
+                className="min-h-[44px] w-full rounded-lg border border-secondary-500/50 bg-secondary-500/10 px-4 py-2.5 text-sm font-semibold text-secondary-300 transition-all duration-200 hover:bg-secondary-500/20"
               >
                 Essential Only
               </button>
               <button
                 onClick={handleAcceptAll}
-                                 className="px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#e0ae00] to-[#f4c430] hover:from-[#f4c430] hover:to-[#e0ae00] rounded-lg transition-all duration-200 hover:shadow-lg shadow-md"
+                className="order-first min-h-[46px] w-full rounded-lg bg-secondary-500 px-4 py-2.5 text-sm font-semibold text-[#0c0f14] shadow-[0_8px_22px_-8px_rgba(224,174,0,0.65)] transition-all duration-200 hover:bg-secondary-400 sm:order-none"
               >
                 Accept All
               </button>

@@ -82,7 +82,11 @@ export const usePublicBlog = () => {
         trackView(blogData._id).catch(console.error);
       }
     } catch (err) {
-      console.error('[usePublicBlog] Error fetching blog:', err);
+      if (process.env.NODE_ENV === 'development') {
+        const status = err?.response?.status;
+        const errorLabel = status ? `HTTP ${status}` : (err?.code || 'NETWORK');
+        console.warn(`[usePublicBlog] Error fetching blog (${errorLabel})`);
+      }
       setError(getBlogFetchErrorMessage(err));
       setCurrentBlog(null);
     } finally {

@@ -62,6 +62,19 @@ const canRetryOnSameOrigin = (url, config = {}) => {
   if (typeof window === 'undefined') return false;
   if (!url?.startsWith('/api/')) return false;
   if (config.__skipSameOriginRetry) return false;
+
+  // In local development when the API base URL points to localhost,
+  // retrying through same-origin usually hits the same dead backend via proxy
+  // and turns a network error into a noisy 500.
+  const baseUrl = api.defaults.baseURL || '';
+  const isLocalApiBase =
+    baseUrl.includes('localhost:5000') ||
+    baseUrl.includes('127.0.0.1:5000');
+
+  if (process.env.NODE_ENV === 'development' && isLocalApiBase) {
+    return false;
+  }
+
   return true;
 };
 
