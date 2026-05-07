@@ -18,6 +18,22 @@ export const usePublicBlog = () => {
   const [relatedPostsLoading, setRelatedPostsLoading] = useState(false);
   const hasFetchedRef = useRef(false);
 
+  const getBlogFetchErrorMessage = (err) => {
+    const status = err?.response?.status;
+    if (status === 404) return 'Blog not found';
+
+    const isNetworkFailure =
+      err?.code === 'ERR_NETWORK' ||
+      err?.message?.includes('Network Error') ||
+      !err?.response;
+
+    if (isNetworkFailure) {
+      return 'Network error. Please check your connection and try again.';
+    }
+
+    return 'Failed to load blog post';
+  };
+
   /**
    * Fetch blog by slug
    */
@@ -67,7 +83,7 @@ export const usePublicBlog = () => {
       }
     } catch (err) {
       console.error('[usePublicBlog] Error fetching blog:', err);
-      setError(err.response?.status === 404 ? 'Blog not found' : 'Failed to load blog post');
+      setError(getBlogFetchErrorMessage(err));
       setCurrentBlog(null);
     } finally {
       setLoading(false);

@@ -153,11 +153,28 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
   // exists — exactly the pattern that leads to Google seeing "No blog" or
   // treating the URL as a soft 404.
   if (!blog && !loading && !hasServerBlog) {
+    const isNotFoundError = error === 'Blog not found';
+    const pageTitle = isNotFoundError ? 'Blog Post Not Found' : 'Unable to Load Blog Post';
+    const pageMessage = isNotFoundError
+      ? "The blog post you're looking for doesn't exist."
+      : error || 'Something went wrong while loading this blog post. Please try again.';
+
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Blog Post Not Found</h1>
-          <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{pageTitle}</h1>
+          <p className="text-gray-600 mb-6">{pageMessage}</p>
+          {!isNotFoundError && (
+            <button
+              onClick={() => {
+                if (slug) fetchBlogBySlug(slug);
+              }}
+              className="inline-flex items-center gap-2 bg-[#0B1220] text-white px-6 py-3 rounded-lg hover:bg-primary-800 transition-colors mb-4"
+            >
+              Try Again
+            </button>
+          )}
+          {!isNotFoundError && <br />}
           <Link
             href="/blog"
             className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors"

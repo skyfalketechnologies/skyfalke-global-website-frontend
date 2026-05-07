@@ -50,6 +50,43 @@ const api = axios.create({
   },
 });
 
+const isNetworkError = (error) => {
+  return (
+    error?.code === 'ERR_NETWORK' ||
+    error?.message?.includes('Network Error') ||
+    !error?.response
+  );
+};
+
+const canRetryOnSameOrigin = (url, config = {}) => {
+  if (typeof window === 'undefined') return false;
+  if (!url?.startsWith('/api/')) return false;
+  if (config.__skipSameOriginRetry) return false;
+  return true;
+};
+
+const requestSameOrigin = async (url, method = 'get', data = null, config = {}) => {
+  const retryConfig = {
+    ...config,
+    __skipSameOriginRetry: true,
+  };
+
+  switch (method.toLowerCase()) {
+    case 'get':
+      return axios.get(url, retryConfig);
+    case 'post':
+      return axios.post(url, data, retryConfig);
+    case 'put':
+      return axios.put(url, data, retryConfig);
+    case 'patch':
+      return axios.patch(url, data, retryConfig);
+    case 'delete':
+      return axios.delete(url, retryConfig);
+    default:
+      throw new Error(`Unsupported HTTP method: ${method}`);
+  }
+};
+
 // Note: Axios adapter override removed - console logging is already suppressed in index.js
 
 // Request interceptor to add auth token
@@ -191,6 +228,19 @@ const throttledRequest = async (url, method = 'get', data = null, config = {}) =
   } catch (error) {
     // Remove from queue on error to allow retry
     requestQueue.delete(requestKey);
+
+    // If direct API host fails, retry once on same-origin /api endpoint.
+    // This allows Next.js rewrites to proxy requests and avoids CORS/cert issues.
+    if (isNetworkError(error) && canRetryOnSameOrigin(url, config)) {
+      try {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[API] Network error on base URL, retrying via same-origin:', url);
+        }
+        return await requestSameOrigin(url, method, data, config);
+      } catch (retryError) {
+        throw retryError;
+      }
+    }
     
     // For network errors, the interceptor has already logged them appropriately
     // Just re-throw to let components handle gracefully
