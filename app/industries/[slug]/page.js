@@ -18,6 +18,7 @@ export async function generateMetadata({ params }) {
   }
   return genMeta({
     title: `${industry.title} Solutions`,
+    titleAbsolute: true,
     description: industry.metaDescription,
     keywords: `${industry.title}, industry solutions, digital transformation, Skyfalke`,
     url: `${BASE}/industries/${slug}`,

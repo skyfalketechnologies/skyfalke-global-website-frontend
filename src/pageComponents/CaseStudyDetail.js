@@ -167,7 +167,7 @@ const CaseStudyDetail = ({ slug: propSlug, initialServerData }) => {
 
   const metaTitle =
     caseStudy.seo?.metaTitle ||
-    `${caseStudy.title} - Case Study | Skyfalke`;
+    `${caseStudy.title} - Case Study`;
 
   const rawDescription =
     caseStudy.seo?.metaDescription ||

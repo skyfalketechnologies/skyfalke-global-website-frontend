@@ -3,6 +3,8 @@ import Link from 'next/link';
 import PageLayout from '../components/PageLayout';
 import { generateMetadata as genMeta } from '@/utils/metadata';
 import { getAllSustainabilityPages } from '@/data/sustainabilityPages';
+import { SUSTAINABILITY_INDEX } from '@/data/indexPageCopy';
+import { MarketingIndexBody } from '@/components/marketing/MarketingIndexBody';
 import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -34,11 +36,18 @@ export default function SustainabilityPage() {
             <h1 className="mt-4 max-w-3xl text-4xl font-nexa-heavy tracking-tight text-[#0B1220] sm:text-5xl">
               Sustainability integrated into strategy and execution
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
-              We help organizations build responsible, resilient, and future-ready operations by aligning sustainability goals to practical delivery.
-            </p>
+            <div className="mt-6 max-w-3xl space-y-5 text-lg leading-relaxed text-slate-600">
+              <p>
+                We help organizations build responsible, resilient, and future-ready operations by aligning sustainability goals to practical delivery.
+              </p>
+              <p>
+                Read how environmental stewardship, responsible technology, and sustainable operations connect — and how we embed them into roadmaps, architectures, and day-to-day runbooks.
+              </p>
+            </div>
           </div>
         </header>
+
+        <MarketingIndexBody sections={SUSTAINABILITY_INDEX.sections} />
 
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
@@ -71,6 +80,8 @@ export default function SustainabilityPage() {
             ))}
           </ul>
         </div>
+
+        <MarketingIndexBody cta={SUSTAINABILITY_INDEX.cta} />
       </div>
     </PageLayout>
   );

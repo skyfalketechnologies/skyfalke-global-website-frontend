@@ -1,6 +1,8 @@
 import { generateMetadata as genMeta } from '@/utils/metadata';
 import PageLayout from '../components/PageLayout';
 import ResourcesClient from './ResourcesClient';
+import ServerPageIntro from '@/components/marketing/ServerPageIntro';
+import { RESOURCES_PAGE_INTRO } from '@/data/serverPageIntros';
 
 export const metadata = genMeta({
   title: 'Resources | Skyfalke - Digital Marketing & Technology Resources',
@@ -11,6 +13,7 @@ export const metadata = genMeta({
 export default function ResourcesPage() {
   return (
     <PageLayout>
+      <ServerPageIntro {...RESOURCES_PAGE_INTRO} />
       <ResourcesClient />
     </PageLayout>
   );

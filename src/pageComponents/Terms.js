@@ -126,14 +126,17 @@ const Terms = () => {
               >
                 Terms of Service
               </motion.h1>
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-xl text-gray-300"
+                className="text-xl text-gray-300 max-w-2xl mx-auto space-y-4"
               >
-                Legal terms and conditions governing the use of Skyfalke's services
-              </motion.p>
+                <p>Legal terms and conditions governing the use of Skyfalke&apos;s website, digital services, cloud offerings, academy programs, and consulting engagements.</p>
+                <p className="text-lg text-gray-400">
+                  Please read these terms carefully before purchasing or subscribing. Specific project or enterprise agreements may include additional statements of work that prevail where they conflict with this general policy.
+                </p>
+              </motion.div>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

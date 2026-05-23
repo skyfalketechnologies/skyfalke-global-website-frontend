@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import { generateMetadata as genMeta } from '@/utils/metadata';
 import PageLayout from '../components/PageLayout';
 import ScheduleConsultation from '@/pageComponents/ScheduleConsultation';
+import ServerPageIntro from '@/components/marketing/ServerPageIntro';
+import { SCHEDULE_CONSULTATION_INTRO } from '@/data/serverPageIntros';
 
 export const metadata = genMeta({
   title: 'Schedule a Consultation | Skyfalke - Free Business Consultation',
@@ -13,6 +15,7 @@ export const metadata = genMeta({
 export default function ScheduleConsultationPage() {
   return (
     <PageLayout>
+      <ServerPageIntro {...SCHEDULE_CONSULTATION_INTRO} />
       <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>

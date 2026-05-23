@@ -76,7 +76,7 @@ const CourseDetail = () => {
       <SEOHead
         pageType="course"
         data={course}
-        title={`${course.title} - Skyfalke Academy`}
+        title={course.title}
         description={course.shortDescription}
         keywords={`${course.category}, ${course.level}, online course, ${course.title}, Skyfalke Academy`}
         canonical={`https://skyfalke.com/academy/courses/${course.slug}`}

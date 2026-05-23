@@ -198,9 +198,12 @@ const Shop = () => {
               <h1 className="text-4xl md:text-6xl font-bold mb-4">
                 Skyfalke Shop
               </h1>
-              <p className="text-xl md:text-2xl mb-8 text-primary-100">
-                Premium Merchandise, Accessories & Tech Products
-              </p>
+              <div className="text-xl md:text-2xl mb-8 text-primary-100 max-w-3xl mx-auto space-y-4">
+                <p>Premium merchandise, accessories, and tech products from Skyfalke.</p>
+                <p className="text-lg text-primary-100/90">
+                  Shop branded apparel, office essentials, and selected digital bundles. Secure checkout, transparent shipping options, and straightforward returns — ideal for teams, events, and community partners.
+                </p>
+              </div>
               <div className="flex flex-wrap justify-center gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <FaTruck className="text-primary-200" />

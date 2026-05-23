@@ -191,22 +191,22 @@ const ScheduleConsultation = () => {
     {
       icon: FaUser,
       title: "Expert Consultation",
-      description: "Get personalized advice from our industry experts"
+      description: "Speak with practitioners who work on live strategy, platform, and growth programs — not generic account handoffs."
     },
     {
       icon: FaClock,
       title: "Flexible Scheduling",
-      description: "Choose a time that works best for your schedule"
+      description: "Choose a time that works across time zones. We confirm by email and send a calendar invite with video link details."
     },
     {
       icon: FaComments,
       title: "Free Assessment",
-      description: "Receive a comprehensive evaluation of your needs"
+      description: "Receive a structured review of your goals, current stack, and realistic options — including quick wins and longer-term investments."
     },
     {
       icon: FaCheckCircle,
       title: "No Obligation",
-      description: "Free consultation with no commitment required"
+      description: "The session is complimentary. You decide whether to proceed with a proposal, pilot, or internal follow-up on your own."
     }
   ];
 
@@ -283,9 +283,12 @@ const ScheduleConsultation = () => {
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
               Schedule a Consultation
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl mb-8 text-primary-100 leading-relaxed">
-              Get expert advice and discover how we can help transform your business
-            </p>
+            <div className="text-lg sm:text-xl md:text-2xl mb-8 text-primary-100 leading-relaxed max-w-3xl mx-auto space-y-4">
+              <p>Get expert advice and discover how we can help transform your business.</p>
+              <p className="text-base sm:text-lg text-primary-100/90">
+                Consultations are free, confidential, and focused on your priorities — growth, platforms, automation, or AI. We will ask about goals, constraints, and timeline, then suggest practical next steps whether or not we work together.
+              </p>
+            </div>
             {formData.service && (
               <div className="inline-block bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 mb-4">
                 <p className="text-lg">
@@ -311,7 +314,7 @@ const ScheduleConsultation = () => {
               Why Schedule a Consultation?
             </h2>
             <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Get personalized insights and expert guidance to help your business grow and succeed.
+              Get personalized insights and expert guidance on digital growth, cloud and data platforms, automation, and AI — tailored to your industry, team size, and timeline.
             </p>
           </motion.div>
 

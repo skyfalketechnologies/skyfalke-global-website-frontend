@@ -219,7 +219,7 @@ const JobDetail = ({ id: propId, initialServerData }) => {
   return (
     <>
       <Helmet>
-        <title>{job.title} - Careers | Skyfalke</title>
+        <title>{job.title} - Careers</title>
         <meta name="description" content={job.description ? job.description.substring(0, 160) : 'Job description'} />
       </Helmet>
 

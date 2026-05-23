@@ -1,6 +1,8 @@
 import { generateMetadata as genMeta } from '@/utils/metadata';
 import PageLayout from '../components/PageLayout';
 import CaseStudiesClient from './CaseStudiesClient';
+import ServerPageIntro from '@/components/marketing/ServerPageIntro';
+import { CASE_STUDIES_PAGE_INTRO } from '@/data/serverPageIntros';
 
 export const metadata = genMeta({
   title: 'Case Studies | Skyfalke - Success Stories & Client Projects',
@@ -12,6 +14,7 @@ export default function CaseStudiesPage() {
   return (
     <PageLayout>
       <CaseStudiesClient />
+      <ServerPageIntro {...CASE_STUDIES_PAGE_INTRO} />
     </PageLayout>
   );
 }

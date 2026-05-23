@@ -197,9 +197,12 @@ const Events = () => {
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Technology Events
             </h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-              Join our community of innovators, developers, and tech professionals at cutting-edge events, conferences, and workshops
-            </p>
+            <div className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto space-y-4">
+              <p>Join our community of innovators, developers, and tech professionals at cutting-edge events, conferences, and workshops.</p>
+              <p className="text-lg text-white/85">
+                Skyfalke hosts and participates in webinars, meetups, and training sessions on digital growth, cloud, AI, and operations. Register for upcoming sessions or browse past topics below.
+              </p>
+            </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.button
                 onClick={() => {
@@ -229,6 +232,18 @@ const Events = () => {
       </section>
 
       {/* Events Section */}
+      <section className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-12 max-w-3xl">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Upcoming sessions and community events</h2>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Filter by category, format, or date to find webinars, workshops, and networking events relevant to your role. Registration links open in a new step when seats are limited.
+          </p>
+          <p className="text-gray-700 leading-relaxed">
+            Interested in co-hosting or speaking? Contact us through the partners page or mention it when you schedule a consultation — we welcome collaborations that educate and connect practitioners.
+          </p>
+        </div>
+      </section>
+
       <section id="events-section" className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           {/* Filters */}

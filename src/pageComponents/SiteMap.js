@@ -34,16 +34,24 @@ export default function SiteMap() {
         <header className="mb-12 border-b border-gray-200 pb-10">
           <p className="text-sm font-semibold uppercase tracking-wider text-primary-600">Navigation</p>
           <h1 className="mt-2 text-3xl font-bold text-gray-900 md:text-4xl">Sitemap</h1>
-          <p className="mt-4 max-w-2xl text-lg text-gray-600">
-            Browse all main sections of the Skyfalke site. For search engines, use the{' '}
-            <a
-              href="/sitemap.xml"
-              className="font-medium text-primary-600 underline-offset-2 hover:underline"
-            >
-              XML sitemap
-            </a>
-            .
-          </p>
+          <div className="mt-4 max-w-3xl space-y-4 text-lg text-gray-600">
+            <p>
+              Browse all main sections of the Skyfalke site — capabilities, industries, how we work, sustainability, Tech &amp; AI, academy programs, and client resources.
+            </p>
+            <p>
+              This page is designed for visitors who want a single view of our structure. If you are looking for a specific service, start with Capabilities or Industries; for delivery approach, see How We Work; for training, visit Academy.
+            </p>
+            <p>
+              For search engines, use the{' '}
+              <a
+                href="/sitemap.xml"
+                className="font-medium text-primary-600 underline-offset-2 hover:underline"
+              >
+                XML sitemap
+              </a>{' '}
+              which lists canonical URLs and update frequency for indexing.
+            </p>
+          </div>
         </header>
 
         <div className="grid gap-12 md:grid-cols-2">

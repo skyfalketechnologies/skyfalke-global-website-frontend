@@ -107,14 +107,17 @@ const Privacy = () => {
               >
                 Privacy Policy
               </motion.h1>
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-xl text-gray-300"
+                className="text-xl text-gray-300 max-w-2xl mx-auto space-y-4"
               >
-                Your privacy is important to us. This policy explains how we collect, use, and protect your information.
-              </motion.p>
+                <p>Your privacy is important to us. This policy explains how we collect, use, and protect your information when you use skyfalke.com, our academy, client portals, and related services.</p>
+                <p className="text-lg text-gray-400">
+                  We process data to deliver services, improve our website, and communicate with you about projects or marketing (where permitted). You can exercise access, correction, or deletion rights as described below.
+                </p>
+              </motion.div>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

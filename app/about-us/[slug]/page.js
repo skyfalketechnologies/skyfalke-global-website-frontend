@@ -17,6 +17,7 @@ export async function generateMetadata({ params }) {
 
   return genMeta({
     title: page.title,
+    titleAbsolute: true,
     description: page.metaDescription,
     keywords: `${page.title}, Skyfalke values, culture, responsibility, sustainability`,
     url: `${BASE}/about-us/${slug}`,

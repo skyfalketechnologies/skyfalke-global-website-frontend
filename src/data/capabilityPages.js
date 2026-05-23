@@ -1,3 +1,5 @@
+import { getMarketingExpansion } from './marketingExpansions';
+
 const u = (photoPath, w = 2000) =>
   `https://images.unsplash.com/${photoPath}?auto=format&fit=crop&w=${w}&q=80`;
 
@@ -111,6 +113,10 @@ export const CAPABILITY_PAGES = {
 
 export const CAPABILITY_SLUGS = Object.keys(CAPABILITY_PAGES);
 
-export const getCapabilityPage = (slug) => CAPABILITY_PAGES[slug] || null;
+export const getCapabilityPage = (slug) => {
+  const page = CAPABILITY_PAGES[slug];
+  if (!page) return null;
+  return { ...page, ...getMarketingExpansion('capability', slug) };
+};
 
 export const getAllCapabilityPages = () => CAPABILITY_SLUGS.map((slug) => CAPABILITY_PAGES[slug]);

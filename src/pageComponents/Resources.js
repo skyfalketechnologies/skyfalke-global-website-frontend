@@ -255,14 +255,17 @@ const Resources = () => {
               >
                 Free Resources & Tools
               </motion.h1>
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-xl md:text-2xl text-blue-100 mb-8"
+                className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto space-y-4"
               >
-                Expert-created templates, guides, and tools to help your business grow online
-              </motion.p>
+                <p>Expert-created templates, guides, and tools to help your business grow online.</p>
+                <p className="text-lg text-blue-100/90">
+                  Download checklists, campaign frameworks, analytics starters, and strategy briefs — free for marketing, operations, and technology leaders. New resources are added as we publish insights on the blog.
+                </p>
+              </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

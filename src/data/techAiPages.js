@@ -1,3 +1,5 @@
+import { getMarketingExpansion } from './marketingExpansions';
+
 const u = (photoPath, w = 2000) =>
   `https://images.unsplash.com/${photoPath}?auto=format&fit=crop&w=${w}&q=80`;
 
@@ -53,5 +55,9 @@ export const TECH_AI_PAGES = {
 };
 
 export const TECH_AI_SLUGS = Object.keys(TECH_AI_PAGES);
-export const getTechAiPage = (slug) => TECH_AI_PAGES[slug] || null;
+export const getTechAiPage = (slug) => {
+  const page = TECH_AI_PAGES[slug];
+  if (!page) return null;
+  return { ...page, ...getMarketingExpansion('techAi', slug) };
+};
 export const getAllTechAiPages = () => TECH_AI_SLUGS.map((slug) => TECH_AI_PAGES[slug]);

@@ -1,3 +1,5 @@
+import { getMarketingExpansion } from './marketingExpansions';
+
 const u = (photoPath, w = 2000) =>
   `https://images.unsplash.com/${photoPath}?auto=format&fit=crop&w=${w}&q=80`;
 
@@ -68,5 +70,9 @@ export const HOW_WE_WORK_PAGES = {
 };
 
 export const HOW_WE_WORK_SLUGS = Object.keys(HOW_WE_WORK_PAGES);
-export const getHowWeWorkPage = (slug) => HOW_WE_WORK_PAGES[slug] || null;
+export const getHowWeWorkPage = (slug) => {
+  const page = HOW_WE_WORK_PAGES[slug];
+  if (!page) return null;
+  return { ...page, ...getMarketingExpansion('howWeWork', slug) };
+};
 export const getAllHowWeWorkPages = () => HOW_WE_WORK_SLUGS.map((slug) => HOW_WE_WORK_PAGES[slug]);

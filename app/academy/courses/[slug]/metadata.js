@@ -12,7 +12,8 @@ export async function generateMetadata({ params }) {
     
     if (!slug) {
       return genMeta({
-        title: 'Course | Skyfalke Academy',
+        title: 'Course',
+        titleAbsolute: true,
         description: 'View course details at Skyfalke Academy',
       });
     }
@@ -23,13 +24,15 @@ export async function generateMetadata({ params }) {
 
     if (!courseData) {
       return genMeta({
-        title: 'Course | Skyfalke Academy',
+        title: 'Course',
+        titleAbsolute: true,
         description: 'View course details at Skyfalke Academy',
       });
     }
 
     return genMeta({
-      title: `${courseData.title} | Skyfalke Academy`,
+      title: courseData.title,
+      titleAbsolute: true,
       description: courseData.description || courseData.excerpt || `Learn ${courseData.title} at Skyfalke Academy`,
       keywords: courseData.tags?.join(', ') || courseData.category || '',
       url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/academy/courses/${slug}`,

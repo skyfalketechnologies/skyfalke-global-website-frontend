@@ -78,9 +78,17 @@ const Blog = ({ initialData = null }) => {
             <h1 className="mt-3 max-w-4xl text-4xl font-nexa-heavy tracking-tight text-[#0B1220] sm:text-5xl md:text-[3.25rem]">
               Perspectives on growth, technology, and execution
             </h1>
-            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-slate-600">
-              Analysis and practical guidance on digital growth, cloud modernization, AI strategy, and business transformation.
-            </p>
+            <div className="mt-5 max-w-3xl space-y-5 text-lg leading-relaxed text-slate-600">
+              <p>
+                Analysis and practical guidance on digital growth, cloud modernization, AI strategy, and business transformation.
+              </p>
+              <p>
+                Our articles are written for leaders and practitioners who need clear recommendations — not hype. Expect frameworks you can apply, lessons from delivery, and honest trade-offs when technology choices matter.
+              </p>
+              <p>
+                Browse by category or search for topics such as SEO, automation, CRM, data platforms, and sustainable operations. New posts are added regularly as we learn from client work and market shifts.
+              </p>
+            </div>
           </div>
         </header>
 

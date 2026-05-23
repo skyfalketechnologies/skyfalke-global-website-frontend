@@ -28,6 +28,7 @@ export async function generateMetadata({ params }) {
 
   return genMeta({
     title: `Read Case Study: ${caseStudy.title}`,
+    titleAbsolute: true,
     description: caseStudy.summary || `Explore how ${caseStudy.client?.name || 'our client'} achieved measurable results.`,
     keywords: Array.isArray(caseStudy.tags) ? caseStudy.tags.join(', ') : 'case study, outcomes, transformation',
     url: `${BASE}/how-we-work/case-studies/${slug}`,

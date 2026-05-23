@@ -1,9 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { HiOutlineArrowRight, HiOutlineArrowUpRight } from 'react-icons/hi2';
+import { getAllCapabilityPages } from '@/data/capabilityPages';
+import { OverviewSection, PracticesSection, RelatedLinksSection } from '@/components/marketing/ContentExpansionSections';
 
 export default function CapabilityDetail({ capability }) {
-  const { title, headline, lede, heroImage, spotlightImage, stats, pillars, gallery } = capability;
+  const { slug, title, headline, lede, heroImage, spotlightImage, stats, pillars, gallery, overview = [], practices = [] } = capability;
+  const related = getAllCapabilityPages().filter((p) => p.slug !== slug);
 
   return (
     <div className="bg-white text-slate-900">
@@ -30,6 +33,8 @@ export default function CapabilityDetail({ capability }) {
         </div>
       </section>
 
+      <OverviewSection title={`Why ${title} matters for your organization`} overview={overview} />
+
       <section className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-14 lg:px-8">
         <div className="relative aspect-[16/10] overflow-hidden rounded-sm bg-slate-100 shadow-xl">
           <Image src={spotlightImage.src} alt={spotlightImage.alt} fill className="object-cover" sizes="(min-width: 1024px) 700px, 100vw" />
@@ -38,14 +43,16 @@ export default function CapabilityDetail({ capability }) {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary-600">What we deliver</p>
           <h2 className="mt-4 text-3xl font-nexa-heavy tracking-tight text-[#0B1220] sm:text-[2.15rem]">Core pillars for {title}</h2>
           <ul className="mt-8 space-y-4">
-            {pillars.map((p) => (
-              <li key={p} className="border-l-2 border-primary-500/80 pl-5 text-base leading-relaxed text-slate-700">
-                {p}
+            {pillars.map((pillar) => (
+              <li key={pillar} className="border-l-2 border-primary-500/80 pl-5 text-base leading-relaxed text-slate-700">
+                {pillar}
               </li>
             ))}
           </ul>
         </div>
       </section>
+
+      <PracticesSection practices={practices} />
 
       <section className="border-y border-slate-200/90 bg-white py-6">
         <div className="mx-auto grid max-w-6xl gap-3 px-4 sm:grid-cols-3 sm:px-6 lg:gap-4 lg:px-8">
@@ -56,6 +63,8 @@ export default function CapabilityDetail({ capability }) {
           ))}
         </div>
       </section>
+
+      <RelatedLinksSection title="Other capabilities" links={related} basePath="/capabilities" />
 
       <section className="bg-[#0B1220] py-16 text-white lg:py-20">
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">

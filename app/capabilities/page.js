@@ -3,6 +3,8 @@ import Link from 'next/link';
 import PageLayout from '../components/PageLayout';
 import { generateMetadata as genMeta } from '@/utils/metadata';
 import { getAllCapabilityPages } from '@/data/capabilityPages';
+import { CAPABILITIES_INDEX } from '@/data/indexPageCopy';
+import { MarketingIndexBody } from '@/components/marketing/MarketingIndexBody';
 import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -34,11 +36,18 @@ export default function CapabilitiesPage() {
             <h1 className="mt-4 max-w-3xl text-4xl font-nexa-heavy tracking-tight text-[#0B1220] sm:text-5xl">
               Execution capabilities built for measurable outcomes
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
-              We combine strategic thinking with delivery discipline to help teams turn priorities into sustained performance.
-            </p>
+            <div className="mt-6 max-w-3xl space-y-5 text-lg leading-relaxed text-slate-600">
+              <p>
+                We combine strategic thinking with delivery discipline to help teams turn priorities into sustained performance.
+              </p>
+              <p>
+                Explore integrated capabilities across AI, digital, data and technology, marketing and sales, and managed services — each designed to connect strategy to execution with clear metrics.
+              </p>
+            </div>
           </div>
         </header>
+
+        <MarketingIndexBody sections={CAPABILITIES_INDEX.sections} />
 
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
@@ -71,6 +80,8 @@ export default function CapabilitiesPage() {
             ))}
           </ul>
         </div>
+
+        <MarketingIndexBody cta={CAPABILITIES_INDEX.cta} />
       </div>
     </PageLayout>
   );

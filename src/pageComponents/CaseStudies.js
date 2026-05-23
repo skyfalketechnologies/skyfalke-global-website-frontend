@@ -160,9 +160,12 @@ const CaseStudies = () => {
               <h1 className="text-4xl md:text-6xl font-bold mb-4">
                 Case Studies
               </h1>
-              <p className="text-xl md:text-2xl mb-8 text-primary-100">
-                Real Results, Real Success Stories
-              </p>
+              <div className="text-xl md:text-2xl mb-8 text-primary-100 max-w-3xl mx-auto space-y-4">
+                <p>Real results from real engagements — digital growth, platform modernization, and operational transformation.</p>
+                <p className="text-lg text-primary-100/90">
+                  Each case study outlines the challenge, approach, and measurable outcomes. Filter by industry or service to find stories closest to your context.
+                </p>
+              </div>
               <div className="flex flex-wrap justify-center gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <FaChartLine className="text-primary-200" />
@@ -180,6 +183,18 @@ const CaseStudies = () => {
             </motion.div>
           </div>
         </div>
+
+        <section className="bg-white border-b border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+          <div className="container mx-auto px-4 py-12 max-w-3xl">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">What you will find here</h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+              We document baselines, key decisions, and post-launch impact so prospects and clients can see how we work under real constraints — budget, legacy systems, regulation, and adoption risk.
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Looking for our delivery model? Visit <a href="/how-we-work/case-studies" className="text-primary-600 hover:underline font-medium">How We Work — Case Studies</a> for the framework behind these stories.
+            </p>
+          </div>
+        </section>
 
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">

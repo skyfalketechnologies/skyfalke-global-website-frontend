@@ -3,6 +3,8 @@ import Link from 'next/link';
 import PageLayout from '../components/PageLayout';
 import { generateMetadata as genMeta } from '@/utils/metadata';
 import { getAllTechAiPages } from '@/data/techAiPages';
+import { TECH_AI_INDEX } from '@/data/indexPageCopy';
+import { MarketingIndexBody } from '@/components/marketing/MarketingIndexBody';
 import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -34,11 +36,18 @@ export default function TechAiPage() {
             <h1 className="mt-4 max-w-3xl text-4xl font-nexa-heavy tracking-tight text-[#0B1220] sm:text-5xl">
               Technology and AI capabilities for decisive execution
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
-              We help organizations modernize systems, govern risk, and accelerate measurable outcomes through pragmatic technology strategy.
-            </p>
+            <div className="mt-6 max-w-3xl space-y-5 text-lg leading-relaxed text-slate-600">
+              <p>
+                We help organizations modernize systems, govern risk, and accelerate measurable outcomes through pragmatic technology strategy.
+              </p>
+              <p>
+                Dive into AI strategy, data platforms, and cloud modernization — each with clear pillars, delivery practices, and paths to production-scale value.
+              </p>
+            </div>
           </div>
         </header>
+
+        <MarketingIndexBody sections={TECH_AI_INDEX.sections} />
 
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
@@ -71,6 +80,8 @@ export default function TechAiPage() {
             ))}
           </ul>
         </div>
+
+        <MarketingIndexBody cta={TECH_AI_INDEX.cta} />
       </div>
     </PageLayout>
   );

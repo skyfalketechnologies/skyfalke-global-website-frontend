@@ -16,6 +16,15 @@ const isBlockedImage = (url) => {
   return BLOCKED_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix));
 };
 
+/** Remove trailing brand suffixes so dynamic titles are not doubled with layout template. */
+export function stripTitleBrandSuffix(title) {
+  if (!title || typeof title !== 'string') return title;
+  return title
+    .replace(/\s*\|\s*Skyfalke(?:\s+[\w\s&]+)?\s*$/i, '')
+    .replace(/\s*-\s*Skyfalke\s*$/i, '')
+    .trim();
+}
+
 /**
  * Generate metadata object for Next.js pages
  */
@@ -40,7 +49,9 @@ export function generateMetadata({
   twitterImage,
   articleAuthor,
   articleSection,
-  articleTags = []
+  articleTags = [],
+  /** When true, skips root layout `title.template` (use for dynamic / CMS pages). */
+  titleAbsolute = false,
 }) {
   const fullUrl = canonical || url || BASE_URL;
 
@@ -54,7 +65,9 @@ export function generateMetadata({
     safeImage && safeImage.startsWith('http')
       ? safeImage
       : `${BASE_URL}${safeImage}`;
-  const finalTitle = title || 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset';
+  const finalTitle = titleAbsolute
+    ? stripTitleBrandSuffix(title) || title || 'Skyfalke'
+    : title || 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset';
   const finalDescription =
     description ||
     'Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.';
@@ -63,7 +76,7 @@ export function generateMetadata({
     'digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke';
 
   const metadata = {
-    title: finalTitle,
+    title: titleAbsolute ? { absolute: finalTitle } : finalTitle,
     description: finalDescription,
     keywords: finalKeywords,
     authors: [{ name: author }],
@@ -149,7 +162,8 @@ export function generateBlogMetadata(blog) {
   const keywordSet = [...new Set([...seoKeywords, ...focusKeyword].filter(Boolean))];
 
   return generateMetadata({
-    title: `${blog.title}`,
+    title: blog.title,
+    titleAbsolute: true,
     description: blog.excerpt || blog.description || `Read ${blog.title} on Skyfalke blog`,
     keywords: keywordSet.join(', '),
     image: blogImage,
@@ -184,7 +198,8 @@ export function generateProductMetadata(product) {
     : DEFAULT_IMAGE;
 
   return generateMetadata({
-    title: `${product.name} | Skyfalke Shop`,
+    title: product.name,
+    titleAbsolute: true,
     description: product.description || product.shortDescription || `Buy ${product.name} from Skyfalke`,
     keywords: product.tags?.join(', ') || product.category || '',
     image: productImage,
@@ -213,7 +228,8 @@ export function generateCaseStudyMetadata(caseStudy) {
     : DEFAULT_IMAGE;
 
   return generateMetadata({
-    title: `${caseStudy.title} | Skyfalke Case Study`,
+    title: caseStudy.title,
+    titleAbsolute: true,
     description: caseStudy.excerpt || caseStudy.description || `View ${caseStudy.title} case study`,
     keywords: caseStudy.tags?.join(', ') || caseStudy.category || '',
     image: caseStudyImage,
@@ -237,7 +253,8 @@ export function generateJobMetadata(job) {
   const jobUrl = `${BASE_URL}/careers/${job._id}`;
 
   return generateMetadata({
-    title: `${job.title} | Careers at Skyfalke`,
+    title: job.title,
+    titleAbsolute: true,
     description: job.description || `Apply for ${job.title} position at Skyfalke`,
     keywords: job.tags?.join(', ') || job.category || '',
     url: jobUrl,

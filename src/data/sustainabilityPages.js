@@ -1,3 +1,5 @@
+import { getMarketingExpansion } from './marketingExpansions';
+
 const u = (photoPath, w = 2000) =>
   `https://images.unsplash.com/${photoPath}?auto=format&fit=crop&w=${w}&q=80`;
 
@@ -53,5 +55,9 @@ export const SUSTAINABILITY_PAGES = {
 };
 
 export const SUSTAINABILITY_SLUGS = Object.keys(SUSTAINABILITY_PAGES);
-export const getSustainabilityPage = (slug) => SUSTAINABILITY_PAGES[slug] || null;
+export const getSustainabilityPage = (slug) => {
+  const page = SUSTAINABILITY_PAGES[slug];
+  if (!page) return null;
+  return { ...page, ...getMarketingExpansion('sustainability', slug) };
+};
 export const getAllSustainabilityPages = () => SUSTAINABILITY_SLUGS.map((slug) => SUSTAINABILITY_PAGES[slug]);

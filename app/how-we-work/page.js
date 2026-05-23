@@ -3,6 +3,8 @@ import Link from 'next/link';
 import PageLayout from '../components/PageLayout';
 import { generateMetadata as genMeta } from '@/utils/metadata';
 import { getAllHowWeWorkPages } from '@/data/howWeWorkPages';
+import { HOW_WE_WORK_INDEX } from '@/data/indexPageCopy';
+import { MarketingIndexBody } from '@/components/marketing/MarketingIndexBody';
 import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -34,11 +36,18 @@ export default function HowWeWorkPage() {
             <h1 className="mt-4 max-w-3xl text-4xl font-nexa-heavy tracking-tight text-[#0B1220] sm:text-5xl">
               A practical delivery model from strategy to sustained value
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
-              We combine deep diagnostic thinking with execution discipline so initiatives deliver measurable outcomes, not slideware.
-            </p>
+            <div className="mt-6 max-w-3xl space-y-5 text-lg leading-relaxed text-slate-600">
+              <p>
+                We combine deep diagnostic thinking with execution discipline so initiatives deliver measurable outcomes, not slideware.
+              </p>
+              <p>
+                Learn how we design solutions, document evidence through case studies, and move programs from idea to impact with structured governance and adoption.
+              </p>
+            </div>
           </div>
         </header>
+
+        <MarketingIndexBody sections={HOW_WE_WORK_INDEX.sections} />
 
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
@@ -71,6 +80,8 @@ export default function HowWeWorkPage() {
             ))}
           </ul>
         </div>
+
+        <MarketingIndexBody cta={HOW_WE_WORK_INDEX.cta} />
       </div>
     </PageLayout>
   );

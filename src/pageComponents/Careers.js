@@ -137,9 +137,14 @@ const Careers = () => {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-5xl font-bold mb-6">Join Our Team</h1>
-            <p className="text-xl mb-8 text-primary-100">
-              Be part of a dynamic team that's shaping the future of digital marketing and technology in Africa
-            </p>
+            <div className="text-xl mb-8 text-primary-100 max-w-3xl mx-auto space-y-4">
+              <p>
+                Be part of a dynamic team that is shaping the future of digital marketing and technology in Africa and beyond.
+              </p>
+              <p className="text-lg text-primary-100/90">
+                We hire people who combine craft with curiosity — consultants, engineers, designers, and operators who care about client outcomes. Roles span delivery, growth, cloud, data, and academy programs.
+              </p>
+            </div>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               <div className="flex items-center">
                 <FaUsers className="mr-2" />
@@ -157,6 +162,18 @@ const Careers = () => {
                 </motion.div>
           </div>
         </section>
+
+      <section className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-12 max-w-3xl">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Working at Skyfalke</h2>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Our culture emphasizes merit, inclusion, and shared ownership of results. You will work on varied engagements — from growth programs to platform modernization — with coaching and clear expectations.
+          </p>
+          <p className="text-gray-700 leading-relaxed">
+            Benefits include flexible collaboration, learning budgets where relevant, and exposure to senior clients across sectors. Use the filters below to find open roles by category, location, or remote options.
+          </p>
+        </div>
+      </section>
 
             {/* Search and Filters */}
       <section className="py-12 bg-gray-50">
