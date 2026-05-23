@@ -492,9 +492,9 @@ const ScheduleConsultation = () => {
                         {service}
                       </option>
                     ))}
-                    {/* Allow custom service from URL if not in list */}
-                    {serviceFromUrl && !services.includes(serviceFromUrl) && (
-                      <option value={serviceFromUrl}>{serviceFromUrl}</option>
+                    {/* Allow custom service from URL if not in list (set via ServiceQueryPrefill) */}
+                    {formData.service && !services.includes(formData.service) && (
+                      <option value={formData.service}>{formData.service}</option>
                     )}
                   </select>
                 </div>
