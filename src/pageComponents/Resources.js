@@ -30,15 +30,101 @@ import {
   FaShoppingCart
 } from 'react-icons/fa';
 import SEOHead from '../components/SEO/SEOHead';
-import LoadingSpinner from '../components/LoadingSpinner';
+
+// Sample resources data — in production, this would come from an API
+const SAMPLE_RESOURCES = [
+  {
+    id: 1,
+    title: 'Complete Digital Marketing Strategy Template',
+    description: 'A comprehensive template to plan and execute your digital marketing campaigns across all channels.',
+    category: 'Digital Marketing',
+    type: 'Templates',
+    fileType: 'pdf',
+    downloadCount: 1250,
+    rating: 4.8,
+    tags: ['strategy', 'planning', 'marketing', 'template'],
+    url: '/resources/digital-marketing-strategy-template.pdf',
+    image: '/images/resources/marketing-strategy.jpg',
+    featured: true
+  },
+  {
+    id: 2,
+    title: 'Website Speed Optimization Checklist',
+    description: 'A detailed checklist to improve your website loading speed and performance.',
+    category: 'SEO & Analytics',
+    type: 'Checklists',
+    fileType: 'pdf',
+    downloadCount: 890,
+    rating: 4.6,
+    tags: ['performance', 'speed', 'optimization', 'checklist'],
+    url: '/resources/website-speed-checklist.pdf',
+    image: '/images/resources/speed-optimization.jpg',
+    featured: true
+  },
+  {
+    id: 3,
+    title: 'Social Media Content Calendar Template',
+    description: 'Plan and organize your social media content with this comprehensive calendar template.',
+    category: 'Social Media',
+    type: 'Templates',
+    fileType: 'excel',
+    downloadCount: 2100,
+    rating: 4.9,
+    tags: ['social media', 'content', 'calendar', 'planning'],
+    url: '/resources/social-media-calendar.xlsx',
+    image: '/images/resources/social-calendar.jpg',
+    featured: false
+  },
+  {
+    id: 4,
+    title: 'E-commerce Conversion Rate Optimization Guide',
+    description: 'Learn proven strategies to increase your e-commerce conversion rates and boost sales.',
+    category: 'E-commerce',
+    type: 'Guides',
+    fileType: 'pdf',
+    downloadCount: 1560,
+    rating: 4.7,
+    tags: ['ecommerce', 'conversion', 'optimization', 'sales'],
+    url: '/resources/ecommerce-cro-guide.pdf',
+    image: '/images/resources/ecommerce-guide.jpg',
+    featured: true
+  },
+  {
+    id: 5,
+    title: 'Cloud Migration Planning Tool',
+    description: 'Interactive tool to help you plan and execute your cloud migration strategy.',
+    category: 'Cloud Computing',
+    type: 'Tools',
+    fileType: 'web',
+    downloadCount: 450,
+    rating: 4.5,
+    tags: ['cloud', 'migration', 'planning', 'tool'],
+    url: '/tools/cloud-migration-planner',
+    image: '/images/resources/cloud-migration.jpg',
+    featured: false
+  },
+  {
+    id: 6,
+    title: 'Data Analytics Dashboard Templates',
+    description: 'Ready-to-use dashboard templates for Google Analytics, social media, and business metrics.',
+    category: 'Data Analytics',
+    type: 'Templates',
+    fileType: 'excel',
+    downloadCount: 980,
+    rating: 4.4,
+    tags: ['analytics', 'dashboard', 'metrics', 'reporting'],
+    url: '/resources/analytics-dashboard-templates.xlsx',
+    image: '/images/resources/analytics-dashboard.jpg',
+    featured: false
+  }
+];
 
 const Resources = () => {
-  const [resources, setResources] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [resources] = useState(SAMPLE_RESOURCES);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
-  const [filteredResources, setFilteredResources] = useState([]);
+  const [filteredResources, setFilteredResources] = useState(SAMPLE_RESOURCES);
 
   const categories = [
     'All',
@@ -65,102 +151,6 @@ const Resources = () => {
     'Infographics',
     'Code Snippets'
   ];
-
-  // Sample resources data - in production, this would come from an API
-  const sampleResources = [
-    {
-      id: 1,
-      title: 'Complete Digital Marketing Strategy Template',
-      description: 'A comprehensive template to plan and execute your digital marketing campaigns across all channels.',
-      category: 'Digital Marketing',
-      type: 'Templates',
-      fileType: 'pdf',
-      downloadCount: 1250,
-      rating: 4.8,
-      tags: ['strategy', 'planning', 'marketing', 'template'],
-      url: '/resources/digital-marketing-strategy-template.pdf',
-      image: '/images/resources/marketing-strategy.jpg',
-      featured: true
-    },
-    {
-      id: 2,
-      title: 'Website Speed Optimization Checklist',
-      description: 'A detailed checklist to improve your website loading speed and performance.',
-      category: 'SEO & Analytics',
-      type: 'Checklists',
-      fileType: 'pdf',
-      downloadCount: 890,
-      rating: 4.6,
-      tags: ['performance', 'speed', 'optimization', 'checklist'],
-      url: '/resources/website-speed-checklist.pdf',
-      image: '/images/resources/speed-optimization.jpg',
-      featured: true
-    },
-    {
-      id: 3,
-      title: 'Social Media Content Calendar Template',
-      description: 'Plan and organize your social media content with this comprehensive calendar template.',
-      category: 'Social Media',
-      type: 'Templates',
-      fileType: 'excel',
-      downloadCount: 2100,
-      rating: 4.9,
-      tags: ['social media', 'content', 'calendar', 'planning'],
-      url: '/resources/social-media-calendar.xlsx',
-      image: '/images/resources/social-calendar.jpg',
-      featured: false
-    },
-    {
-      id: 4,
-      title: 'E-commerce Conversion Rate Optimization Guide',
-      description: 'Learn proven strategies to increase your e-commerce conversion rates and boost sales.',
-      category: 'E-commerce',
-      type: 'Guides',
-      fileType: 'pdf',
-      downloadCount: 1560,
-      rating: 4.7,
-      tags: ['ecommerce', 'conversion', 'optimization', 'sales'],
-      url: '/resources/ecommerce-cro-guide.pdf',
-      image: '/images/resources/ecommerce-guide.jpg',
-      featured: true
-    },
-    {
-      id: 5,
-      title: 'Cloud Migration Planning Tool',
-      description: 'Interactive tool to help you plan and execute your cloud migration strategy.',
-      category: 'Cloud Computing',
-      type: 'Tools',
-      fileType: 'web',
-      downloadCount: 450,
-      rating: 4.5,
-      tags: ['cloud', 'migration', 'planning', 'tool'],
-      url: '/tools/cloud-migration-planner',
-      image: '/images/resources/cloud-migration.jpg',
-      featured: false
-    },
-    {
-      id: 6,
-      title: 'Data Analytics Dashboard Templates',
-      description: 'Ready-to-use dashboard templates for Google Analytics, social media, and business metrics.',
-      category: 'Data Analytics',
-      type: 'Templates',
-      fileType: 'excel',
-      downloadCount: 980,
-      rating: 4.4,
-      tags: ['analytics', 'dashboard', 'metrics', 'reporting'],
-      url: '/resources/analytics-dashboard-templates.xlsx',
-      image: '/images/resources/analytics-dashboard.jpg',
-      featured: false
-    }
-  ];
-
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setResources(sampleResources);
-      setLoading(false);
-    }, 1000);
-  }, []);
 
   useEffect(() => {
     filterResources();
@@ -228,10 +218,6 @@ const Resources = () => {
     console.log('Shared:', resource.title);
   };
 
-  if (loading) {
-    return <LoadingSpinner text="Loading resources..." />;
-  }
-
   return (
     <>
       <SEOHead
@@ -247,14 +233,14 @@ const Resources = () => {
         <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 text-white py-20">
           <div className="container-custom">
             <div className="max-w-4xl mx-auto text-center">
-              <motion.h1
+              <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 className="text-4xl md:text-5xl font-bold mb-6"
               >
                 Free Resources & Tools
-              </motion.h1>
+              </motion.h2>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

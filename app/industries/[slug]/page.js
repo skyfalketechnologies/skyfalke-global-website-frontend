@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import PageLayout from '../../components/PageLayout';
 import IndustryDetail from '@/pageComponents/IndustryDetail';
-import { generateMetadata as genMeta } from '@/utils/metadata';
+import { buildSectionSeoTitle, generateMetadata as genMeta } from '@/utils/metadata';
 import { getIndustryPage, INDUSTRY_SLUGS } from '@/data/industryPages';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -17,7 +17,11 @@ export async function generateMetadata({ params }) {
     return genMeta({ title: 'Industry', noIndex: true });
   }
   return genMeta({
-    title: `${industry.title} Solutions`,
+    title: buildSectionSeoTitle(
+      `${industry.title} Solutions`,
+      'Industries',
+      industry.seoTitle
+    ),
     titleAbsolute: true,
     description: industry.metaDescription,
     keywords: `${industry.title}, industry solutions, digital transformation, Skyfalke`,

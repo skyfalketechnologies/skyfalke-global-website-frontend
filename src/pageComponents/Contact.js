@@ -146,6 +146,7 @@ const Contact = () => {
   return (
     <>
       <SEOHead
+        skipBaseMeta
         pageType="contact"
         title="Contact Skyfalke - Get In Touch"
         description="Get in touch with Skyfalke for sustainable cloud solutions and digital marketing services. Free consultation available."

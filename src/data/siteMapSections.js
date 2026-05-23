@@ -98,6 +98,7 @@ export const siteMapResources = [
   { name: 'Resources & insights', href: '/resources' },
   { name: 'Support', href: '/support' },
   { name: 'Academy', href: '/academy' },
+  { name: 'Academy enrollment', href: '/academy/join' },
   { name: 'Events', href: '/events' },
 ];
 

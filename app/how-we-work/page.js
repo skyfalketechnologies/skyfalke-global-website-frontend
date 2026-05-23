@@ -10,7 +10,7 @@ import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 
 export const metadata = genMeta({
-  title: 'How We Work',
+  title: 'How We Work | Delivery from Strategy to Impact',
   description:
     'Understand our delivery model: solutions design, evidence through case studies, and disciplined execution from idea to impact.',
   keywords: 'how we work, delivery model, solutions, case studies, idea to impact, Skyfalke',

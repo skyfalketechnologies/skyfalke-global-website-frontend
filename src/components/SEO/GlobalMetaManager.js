@@ -3,12 +3,27 @@
 import React, { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
+const NOINDEX_PATH_PREFIXES = [
+  '/system',
+  '/admin',
+  '/admin-panel',
+  '/administrator',
+  '/login',
+  '/dashboard',
+  '/portal',
+  '/checkout',
+];
+
 const GlobalMetaManager = () => {
   const pathname = usePathname();
 
   useEffect(() => {
     // Only run on client side
     if (typeof window === 'undefined') return;
+
+    const shouldNoIndex = NOINDEX_PATH_PREFIXES.some((prefix) =>
+      pathname === prefix || pathname.startsWith(`${prefix}/`)
+    );
 
     // Function to update meta tags immediately
     const updateMetaTag = (name, content, property = false) => {
@@ -42,6 +57,9 @@ const GlobalMetaManager = () => {
 
     // Update og:url immediately
     updateMetaTag('og:url', currentUrl, true);
+
+    // Keep robots aligned with App Router metadata after client navigations
+    updateMetaTag('robots', shouldNoIndex ? 'noindex, nofollow' : 'index, follow');
 
   }, [pathname]);
 

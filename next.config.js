@@ -25,6 +25,11 @@ const nextConfig = {
         destination: '/about-us',
         permanent: true,
       },
+      {
+        source: '/about/',
+        destination: '/about-us',
+        permanent: true,
+      },
     ];
   },
   // Proxy API requests to backend

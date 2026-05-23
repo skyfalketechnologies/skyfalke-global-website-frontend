@@ -22,6 +22,8 @@ const SEOHead = ({
   faqs = [],
   customSchemas = [],
   noIndex = false,
+  /** When true, skips title/description/canonical/OG/robots — use with App Router `export const metadata`. */
+  skipBaseMeta = false,
   canonical = null,
   ogTitle = "Skyfalke | High-Performing Digital Growth Systems",
   ogDescription,
@@ -40,55 +42,57 @@ const SEOHead = ({
   return (
     <>
       <Helmet>
-        {/* Basic Meta Tags */}
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <meta name="keywords" content={keywords} />
-        <meta name="author" content="Skyfalke" />
-        
-        {/* Canonical URL */}
-        <link rel="canonical" href={fullUrl} />
-        
-        {/* Robots Meta */}
-        {noIndex ? (
-          <meta name="robots" content="noindex, nofollow" />
-        ) : (
-          <meta name="robots" content="index, follow" />
-        )}
-        
-        {/* Open Graph Meta Tags */}
-        <meta property="og:title" content={resolvedOgTitle} />
-        <meta property="og:description" content={resolvedOgDescription} />
-        <meta property="og:type" content={type} />
-        <meta property="og:url" content={fullUrl} />
-        <meta property="og:image" content={fullImageUrl} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="Skyfalke - digital growth partner for websites, marketing, automation, and AI strategy" />
-        <meta property="og:site_name" content="Skyfalke" />
-        <meta property="og:locale" content="en_US" />
-        
-        {/* Additional Open Graph tags for articles */}
-        {type === 'article' && (
+        {!skipBaseMeta ? (
           <>
-            <meta property="article:published_time" content={data.publishedAt} />
-            <meta property="article:author" content={data.author?.name || 'Skyfalke Team'} />
-            <meta property="article:section" content={data.category} />
-            {data.tags && data.tags.map((tag, index) => (
-              <meta key={index} property="article:tag" content={tag} />
-            ))}
+            {/* Basic Meta Tags */}
+            <title>{title}</title>
+            <meta name="description" content={description} />
+            <meta name="keywords" content={keywords} />
+            <meta name="author" content="Skyfalke" />
+
+            {/* Canonical URL */}
+            <link rel="canonical" href={fullUrl} />
+
+            {/* Only emit robots when blocking — public pages use Next.js `metadata.robots` */}
+            {noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}
+
+            {/* Open Graph Meta Tags */}
+            <meta property="og:title" content={resolvedOgTitle} />
+            <meta property="og:description" content={resolvedOgDescription} />
+            <meta property="og:type" content={type} />
+            <meta property="og:url" content={fullUrl} />
+            <meta property="og:image" content={fullImageUrl} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content="Skyfalke - digital growth partner for websites, marketing, automation, and AI strategy" />
+            <meta property="og:site_name" content="Skyfalke" />
+            <meta property="og:locale" content="en_US" />
+
+            {/* Additional Open Graph tags for articles */}
+            {type === 'article' && (
+              <>
+                <meta property="article:published_time" content={data.publishedAt} />
+                <meta property="article:author" content={data.author?.name || 'Skyfalke Team'} />
+                <meta property="article:section" content={data.category} />
+                {data.tags && data.tags.map((tag, index) => (
+                  <meta key={index} property="article:tag" content={tag} />
+                ))}
+              </>
+            )}
+
+            {/* Twitter Card Meta Tags */}
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={resolvedTwitterTitle} />
+            <meta name="twitter:description" content={resolvedTwitterDescription} />
+            <meta name="twitter:image" content={fullImageUrl} />
+            <meta name="twitter:image:alt" content="Skyfalke — digital growth partner for websites, marketing, automation, and AI strategy" />
+            <meta name="twitter:site" content="@skyfalke" />
+            <meta name="twitter:creator" content="@skyfalke" />
           </>
-        )}
-        
-        {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={resolvedTwitterTitle} />
-        <meta name="twitter:description" content={resolvedTwitterDescription} />
-        <meta name="twitter:image" content={fullImageUrl} />
-        <meta name="twitter:image:alt" content="Skyfalke — digital growth partner for websites, marketing, automation, and AI strategy" />
-        <meta name="twitter:site" content="@skyfalke" />
-        <meta name="twitter:creator" content="@skyfalke" />
-        
+        ) : noIndex ? (
+          <meta name="robots" content="noindex, nofollow" />
+        ) : null}
+
         {/* Additional Meta Tags */}
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="format-detection" content="telephone=no" />

@@ -10,7 +10,7 @@ import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 
 export const metadata = genMeta({
-  title: 'Industries',
+  title: 'Industries | Sector Digital Transformation',
   description:
     'Sector-specific digital transformation: agriculture, financial services, health care, logistics, retail, public sector, and more—delivered with enterprise rigor.',
   keywords:

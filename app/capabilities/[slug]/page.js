@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import PageLayout from '../../components/PageLayout';
 import CapabilityDetail from '@/pageComponents/CapabilityDetail';
-import { generateMetadata as genMeta } from '@/utils/metadata';
+import { buildSectionSeoTitle, generateMetadata as genMeta } from '@/utils/metadata';
 import { CAPABILITY_SLUGS, getCapabilityPage } from '@/data/capabilityPages';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }) {
   if (!capability) return genMeta({ title: 'Capability', noIndex: true });
 
   return genMeta({
-    title: capability.title,
+    title: buildSectionSeoTitle(capability.title, 'Capabilities', capability.seoTitle),
     titleAbsolute: true,
     description: capability.metaDescription,
     keywords: `${capability.title}, business capabilities, technology consulting, Skyfalke`,

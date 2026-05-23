@@ -10,7 +10,7 @@ import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 
 export const metadata = genMeta({
-  title: 'Capabilities',
+  title: 'Capabilities | AI, Digital, Data & Growth',
   description:
     'Integrated capabilities across AI, digital transformation, data and technology, marketing and sales, and managed services.',
   keywords: 'capabilities, AI, digital, data technology, marketing sales, managed services, Skyfalke',

@@ -18,7 +18,7 @@ import {
   formatBlogDate,
   getReadingTime
 } from '../features/blog/utils/formatters';
-import { injectHeadingIds } from '../features/blog/utils/content';
+import { injectHeadingIds, normalizeBlogHtmlLinks } from '../features/blog/utils/content';
 import { 
   getSEOTitle,
   getSEODescription,
@@ -116,7 +116,10 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
     blog.content !== '<p></p>';
 
   // Inject IDs into headings so TOC links and scroll spy work (same HTML for TOC + render)
-  const contentWithIds = hasContent ? injectHeadingIds(blog.content) : '';
+  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
+  const contentWithIds = hasContent
+    ? injectHeadingIds(normalizeBlogHtmlLinks(blog.content, siteOrigin))
+    : '';
 
   // ─── FIX 2 ───────────────────────────────────────────────────────────────────
   // Loading state — REMOVED noindex/nofollow.

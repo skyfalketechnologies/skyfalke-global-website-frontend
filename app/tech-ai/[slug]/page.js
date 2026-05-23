@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import PageLayout from '../../components/PageLayout';
 import TechAiDetail from '@/pageComponents/TechAiDetail';
-import { generateMetadata as genMeta } from '@/utils/metadata';
+import { buildSectionSeoTitle, generateMetadata as genMeta } from '@/utils/metadata';
 import { TECH_AI_SLUGS, getTechAiPage } from '@/data/techAiPages';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }) {
   if (!page) return genMeta({ title: 'Tech & AI', noIndex: true });
 
   return genMeta({
-    title: page.title,
+    title: buildSectionSeoTitle(page.title, 'Tech & AI', page.seoTitle),
     titleAbsolute: true,
     description: page.metaDescription,
     keywords: `${page.title}, tech consulting, AI strategy, cloud modernization, Skyfalke`,

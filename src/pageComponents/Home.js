@@ -26,6 +26,7 @@ const Home = () => {
   return (
     <>
       <SEOHead
+        skipBaseMeta
         pageType="home"
         canonical="https://skyfalke.com/"
         title={HOME_TITLE}

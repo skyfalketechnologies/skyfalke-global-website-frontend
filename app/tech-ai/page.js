@@ -10,7 +10,7 @@ import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 
 export const metadata = genMeta({
-  title: 'Tech & AI',
+  title: 'Tech & AI | Strategy, Data & Cloud Services',
   description:
     'Explore our Tech & AI capabilities: AI strategy, data platforms, and cloud modernization for sustainable business performance.',
   keywords: 'tech and ai, AI strategy, data platforms, cloud modernization, Skyfalke',

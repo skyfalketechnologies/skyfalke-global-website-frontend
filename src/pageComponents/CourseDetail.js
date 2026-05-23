@@ -297,9 +297,12 @@ const CourseDetail = () => {
                   </div>
 
                   <div className="mt-8 pt-6 border-t border-gray-200">
-                    <button className="w-full px-6 py-4 bg-[#e0ae00] hover:bg-[#d4a000] text-[#303661] font-bold text-lg rounded-lg transition-all duration-300 transform hover:scale-105">
+                    <Link
+                      href={`/academy/join?course=${encodeURIComponent(course.slug)}`}
+                      className="block w-full text-center px-6 py-4 bg-[#e0ae00] hover:bg-[#d4a000] text-[#303661] font-bold text-lg rounded-lg transition-all duration-300 transform hover:scale-105"
+                    >
                       Enroll Now - ${course.price}
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>

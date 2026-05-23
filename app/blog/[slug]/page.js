@@ -12,6 +12,12 @@ export default async function BlogPostPage({ params }) {
   const resolvedParams = await params;
   const slug = resolvedParams?.slug;
 
+  // Reject invalid slugs (e.g. pasted emails like sales@skyfalke.com) — avoids soft 404s in Search Console
+  const validSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+  if (!slug || !validSlugPattern.test(slug)) {
+    notFound();
+  }
+
   let initialServerData = null;
 
   if (slug) {

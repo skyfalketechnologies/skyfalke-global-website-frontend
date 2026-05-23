@@ -16,13 +16,117 @@ const isBlockedImage = (url) => {
   return BLOCKED_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix));
 };
 
-/** Remove trailing brand suffixes so dynamic titles are not doubled with layout template. */
+const SEO_TITLE_MIN = 30;
+const SEO_TITLE_MAX = 60;
+const BRAND = 'Skyfalke';
+/** Max length for `title` before root layout adds ` | Skyfalke`. */
+export const TEMPLATE_TITLE_MAX = SEO_TITLE_MAX - ` | ${BRAND}`.length;
+
+/**
+ * Pick the first title pattern within the recommended 30–60 character range.
+ */
+function pickSeoTitle(candidates) {
+  const inRange = candidates.filter(
+    (t) => t && t.length >= SEO_TITLE_MIN && t.length <= SEO_TITLE_MAX
+  );
+  if (inRange.length) return inRange[0];
+  const underMax = candidates.filter((t) => t && t.length <= SEO_TITLE_MAX);
+  if (underMax.length) {
+    return underMax.reduce((a, b) => (a.length >= b.length ? a : b));
+  }
+  const first = candidates.find(Boolean) || BRAND;
+  if (first.length <= SEO_TITLE_MAX) return first;
+  const trimmed = first.slice(0, SEO_TITLE_MAX);
+  return trimmed.replace(/\s+\S*$/, '').trim() || trimmed;
+}
+
+/**
+ * Absolute document title for marketing section detail pages (slug routes).
+ */
+export function buildSectionSeoTitle(primary, section, seoTitle) {
+  if (seoTitle && seoTitle.length >= SEO_TITLE_MIN && seoTitle.length <= SEO_TITLE_MAX) {
+    return seoTitle;
+  }
+  return pickSeoTitle([
+    seoTitle,
+    `${primary} | ${section} | ${BRAND}`,
+    `${primary} — ${section} at ${BRAND}`,
+    `${primary} | ${BRAND} ${section}`,
+    `${section}: ${primary} | ${BRAND}`,
+    `${primary}: ${section} Solutions | ${BRAND}`,
+  ]);
+}
+
+/**
+ * Absolute document title for shop product pages.
+ */
+export function buildProductSeoTitle(productName, metaTitle) {
+  if (metaTitle && metaTitle.length >= SEO_TITLE_MIN && metaTitle.length <= SEO_TITLE_MAX) {
+    return metaTitle;
+  }
+  return pickSeoTitle([
+    metaTitle,
+    `${productName} | Buy from Skyfalke Shop`,
+    `${productName} — Skyfalke Shop`,
+    `${productName} | Hardware & Digital Products | ${BRAND}`,
+  ]);
+}
+
+/** Remove embedded or trailing Skyfalke branding (layout template adds brand). */
 export function stripTitleBrandSuffix(title) {
   if (!title || typeof title !== 'string') return title;
   return title
+    .replace(/\s*\|\s*Skyfalke\s*-\s*/gi, ' | ')
     .replace(/\s*\|\s*Skyfalke(?:\s+[\w\s&]+)?\s*$/i, '')
     .replace(/\s*-\s*Skyfalke\s*$/i, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+\|\s*$/g, '')
     .trim();
+}
+
+/** Trim titles used with the root `title.template` so final length stays ≤ 60. */
+export function fitTemplateTitle(title) {
+  const base = stripTitleBrandSuffix(title);
+  if (!base) return title;
+  if (base.length <= TEMPLATE_TITLE_MAX) return base;
+  const trimmed = base.slice(0, TEMPLATE_TITLE_MAX);
+  return trimmed.replace(/\s+\S*$/, '').replace(/\s*[|,&]\s*$/, '').trim() || trimmed;
+}
+
+/** Clamp absolute document titles to the recommended 30–60 character range. */
+export function clampSeoTitle(title) {
+  const base = stripTitleBrandSuffix(title);
+  if (!base) return BRAND;
+  if (base.length >= SEO_TITLE_MIN && base.length <= SEO_TITLE_MAX) return base;
+  if (base.length > SEO_TITLE_MAX) {
+    const trimmed = base.slice(0, SEO_TITLE_MAX).replace(/\s+\S*$/, '').trim();
+    return trimmed.length >= SEO_TITLE_MIN ? trimmed : base.slice(0, SEO_TITLE_MAX);
+  }
+  return pickSeoTitle([base, `${base} | ${BRAND}`]);
+}
+
+/**
+ * Absolute document title for case study detail pages.
+ */
+export function buildCaseStudySeoTitle(caseStudyTitle, metaTitle) {
+  const cleanedMeta = metaTitle ? stripTitleBrandSuffix(metaTitle) : null;
+  if (
+    cleanedMeta &&
+    cleanedMeta.length >= SEO_TITLE_MIN &&
+    cleanedMeta.length <= SEO_TITLE_MAX
+  ) {
+    return cleanedMeta;
+  }
+  const truncated =
+    caseStudyTitle.length > 28
+      ? `${caseStudyTitle.slice(0, 28).replace(/\s+\S*$/, '')}…`
+      : caseStudyTitle;
+  return pickSeoTitle([
+    cleanedMeta,
+    `${truncated} | Case Study | ${BRAND}`,
+    `Case Study | ${truncated} | ${BRAND}`,
+    `${caseStudyTitle} | ${BRAND}`,
+  ]);
 }
 
 /**
@@ -65,9 +169,13 @@ export function generateMetadata({
     safeImage && safeImage.startsWith('http')
       ? safeImage
       : `${BASE_URL}${safeImage}`;
+  const defaultTitle = 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset';
   const finalTitle = titleAbsolute
-    ? stripTitleBrandSuffix(title) || title || 'Skyfalke'
-    : title || 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset';
+    ? clampSeoTitle(title || BRAND)
+    : fitTemplateTitle(title) ||
+      stripTitleBrandSuffix(title) ||
+      title ||
+      defaultTitle;
   const finalDescription =
     description ||
     'Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.';
@@ -198,7 +306,7 @@ export function generateProductMetadata(product) {
     : DEFAULT_IMAGE;
 
   return generateMetadata({
-    title: product.name,
+    title: buildProductSeoTitle(product.name, product.seo?.metaTitle),
     titleAbsolute: true,
     description: product.description || product.shortDescription || `Buy ${product.name} from Skyfalke`,
     keywords: product.tags?.join(', ') || product.category || '',
@@ -228,7 +336,7 @@ export function generateCaseStudyMetadata(caseStudy) {
     : DEFAULT_IMAGE;
 
   return generateMetadata({
-    title: caseStudy.title,
+    title: buildCaseStudySeoTitle(caseStudy.title, caseStudy.seo?.metaTitle),
     titleAbsolute: true,
     description: caseStudy.excerpt || caseStudy.description || `View ${caseStudy.title} case study`,
     keywords: caseStudy.tags?.join(', ') || caseStudy.category || '',
@@ -286,13 +394,13 @@ export const pageMetadata = {
   }),
 
   about: generateMetadata({
-    title: 'About Us',
+    title: 'About Us | Mission, Values & Responsibility',
     description: 'Learn about Skyfalke, a leading digital marketing and technology solutions partner in Africa. We provide sustainable cloud hosting, AI-powered business tools, and innovative digital solutions.',
     url: `${BASE_URL}/about-us`,
   }),
 
   services: generateMetadata({
-    title: 'Digital Marketing, Cloud Hosting & Technology Solutions | Skyfalke',
+    title: 'Digital Marketing & Technology Solutions',
     description: 'Explore Skyfalke\'s comprehensive range of digital marketing services, sustainable cloud hosting solutions, AI-powered business tools, and technology consulting services.',
     url: `${BASE_URL}/services`,
   }),
@@ -310,13 +418,13 @@ export const pageMetadata = {
   }),
 
   shop: generateMetadata({
-    title: 'Digital Products & Services | Skyfalke',
+    title: 'Digital Products & Services',
     description: 'Browse Skyfalke\'s digital products and services. Find the perfect solution for your business needs.',
     url: `${BASE_URL}/shop`,
   }),
 
   careers: generateMetadata({
-    title: 'Careers | Skyfalke',
+    title: 'Careers | Join Our Digital Transformation Team',
     description: 'Join Skyfalke and be part of a team that\'s transforming businesses across Africa with innovative digital solutions.',
     url: `${BASE_URL}/careers`,
   }),

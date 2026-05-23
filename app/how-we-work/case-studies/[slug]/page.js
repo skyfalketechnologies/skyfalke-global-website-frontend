@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import PageLayout from '../../../components/PageLayout';
 import CaseStudyDetailClient from '../../../case-studies/[slug]/CaseStudyDetailClient';
-import { generateMetadata as genMeta } from '@/utils/metadata';
+import { buildCaseStudySeoTitle, generateMetadata as genMeta } from '@/utils/metadata';
 import { getCaseStudyBySlug, serverFetch } from '@/utils/serverApi';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -26,8 +26,10 @@ export async function generateMetadata({ params }) {
     return genMeta({ title: 'Read Case Study', noIndex: true });
   }
 
+  const seoTitle = buildCaseStudySeoTitle(caseStudy.title, caseStudy.seo?.metaTitle);
+
   return genMeta({
-    title: `Read Case Study: ${caseStudy.title}`,
+    title: seoTitle,
     titleAbsolute: true,
     description: caseStudy.summary || `Explore how ${caseStudy.client?.name || 'our client'} achieved measurable results.`,
     keywords: Array.isArray(caseStudy.tags) ? caseStudy.tags.join(', ') : 'case study, outcomes, transformation',
@@ -36,9 +38,9 @@ export async function generateMetadata({ params }) {
     image:
       caseStudy.images?.find((img) => img?.isPrimary)?.url ||
       caseStudy.images?.[0]?.url,
-    ogTitle: `${caseStudy.title} | Read Case Study`,
+    ogTitle: seoTitle,
     ogDescription: caseStudy.summary || 'Challenge, solution, and measurable business outcomes.',
-    twitterTitle: `Read Case Study: ${caseStudy.title}`,
+    twitterTitle: seoTitle,
     twitterDescription: caseStudy.summary || 'Challenge, solution, and measurable business outcomes.',
     type: 'article',
     category: 'Case Studies',

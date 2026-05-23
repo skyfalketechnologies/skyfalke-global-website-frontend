@@ -13,7 +13,7 @@ export const metadata = genMeta({
 export default function ResourcesPage() {
   return (
     <PageLayout>
-      <ServerPageIntro {...RESOURCES_PAGE_INTRO} />
+      <ServerPageIntro {...RESOURCES_PAGE_INTRO} titleAs="h1" />
       <ResourcesClient />
     </PageLayout>
   );

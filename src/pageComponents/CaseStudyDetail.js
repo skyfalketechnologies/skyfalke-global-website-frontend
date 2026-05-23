@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiGet } from '../utils/api';
+import { buildCaseStudySeoTitle } from '../utils/metadata';
 import {
   FaArrowLeft,
   FaIndustry,
@@ -165,9 +166,10 @@ const CaseStudyDetail = ({ slug: propSlug, initialServerData }) => {
   const baseUrl = process.env.REACT_APP_SITE_URL || 'https://skyfalke.com';
   const canonicalUrl = `${baseUrl}/case-studies/${slug}`;
 
-  const metaTitle =
-    caseStudy.seo?.metaTitle ||
-    `${caseStudy.title} - Case Study`;
+  const metaTitle = buildCaseStudySeoTitle(
+    caseStudy.title,
+    caseStudy.seo?.metaTitle
+  );
 
   const rawDescription =
     caseStudy.seo?.metaDescription ||

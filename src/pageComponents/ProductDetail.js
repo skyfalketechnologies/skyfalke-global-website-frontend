@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiGet } from '../utils/api';
+import { buildProductSeoTitle } from '../utils/metadata';
 import { useCart } from '../contexts/CartContext';
 import { useAnalytics } from '../hooks/useAnalytics';
 import OptimizedImage from '../components/OptimizedImage';
@@ -270,9 +271,7 @@ const ProductDetail = ({ slug: propSlug, initialServerData }) => {
   const baseUrl = process.env.REACT_APP_SITE_URL || 'https://skyfalke.com';
   const canonicalUrl = `${baseUrl}/shop/product/${slug}`;
 
-  const metaTitle =
-    product.seo?.metaTitle ||
-    `${product.name} - Skyfalke Shop`;
+  const metaTitle = buildProductSeoTitle(product.name, product.seo?.metaTitle);
 
   const rawDescription =
     product.seo?.metaDescription ||

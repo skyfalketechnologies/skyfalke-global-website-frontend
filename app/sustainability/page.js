@@ -10,7 +10,7 @@ import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 
 export const metadata = genMeta({
-  title: 'Sustainability',
+  title: 'Sustainability | Stewardship & Responsible Tech',
   description:
     'Explore our sustainability approach across environmental stewardship, responsible technology, and sustainable operations.',
   keywords: 'sustainability, environmental stewardship, responsible technology, sustainable operations, Skyfalke',

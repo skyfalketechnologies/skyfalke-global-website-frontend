@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import PageLayout from '../../components/PageLayout';
 import AboutDetail from '@/pageComponents/AboutDetail';
-import { generateMetadata as genMeta } from '@/utils/metadata';
+import { buildSectionSeoTitle, generateMetadata as genMeta } from '@/utils/metadata';
 import { ABOUT_SLUGS, getAboutPage } from '@/data/aboutPages';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }) {
   if (!page) return genMeta({ title: 'About Us', noIndex: true });
 
   return genMeta({
-    title: page.title,
+    title: buildSectionSeoTitle(page.title, 'About', page.seoTitle),
     titleAbsolute: true,
     description: page.metaDescription,
     keywords: `${page.title}, Skyfalke values, culture, responsibility, sustainability`,

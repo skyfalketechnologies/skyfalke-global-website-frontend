@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -19,9 +19,24 @@ import {
   FaSpinner
 } from 'react-icons/fa';
 
+/** Reads ?service= from URL without suspending the parent page (keeps H1 in initial HTML). */
+function ServiceQueryPrefill({ onService }) {
+  const searchParams = useSearchParams();
+  const serviceFromUrl = searchParams?.get('service')
+    ? decodeURIComponent(searchParams.get('service'))
+    : '';
+
+  useEffect(() => {
+    if (serviceFromUrl) {
+      onService(serviceFromUrl);
+    }
+  }, [serviceFromUrl, onService]);
+
+  return null;
+}
+
 const ScheduleConsultation = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { trackContactFormSubmission, trackLeadGeneration } = useAnalytics();
   const [formData, setFormData] = useState({
     firstName: '',
@@ -39,18 +54,9 @@ const ScheduleConsultation = () => {
   const [error, setError] = useState('');
   const [submittedData, setSubmittedData] = useState(null);
 
-  // Get service from URL params or default
-  const serviceFromUrl = searchParams?.get('service') ? decodeURIComponent(searchParams.get('service')) : '';
-
-  // Initialize service from URL params
-  useEffect(() => {
-    if (serviceFromUrl) {
-      setFormData(prev => ({
-        ...prev,
-        service: serviceFromUrl
-      }));
-    }
-  }, [serviceFromUrl]);
+  const applyServiceFromUrl = useCallback((service) => {
+    setFormData((prev) => ({ ...prev, service }));
+  }, []);
 
   const services = [
     'Data & Analytics',
@@ -223,9 +229,9 @@ const ScheduleConsultation = () => {
               <div className="text-6xl text-secondary-500 mb-6">
                 <FaCheckCircle />
               </div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
                 Consultation Scheduled!
-              </h1>
+              </h2>
               <p className="text-lg sm:text-xl md:text-2xl mb-8 text-primary-100 leading-relaxed">
                 Thank you for scheduling a consultation with us. We'll be in touch within 24 hours to confirm your appointment.
               </p>
@@ -271,7 +277,11 @@ const ScheduleConsultation = () => {
 
   return (
     <>
-      {/* Hero Section */}
+      <Suspense fallback={null}>
+        <ServiceQueryPrefill onService={applyServiceFromUrl} />
+      </Suspense>
+
+      {/* Hero Section — primary H1 is server-rendered in ServerPageIntro */}
       <section className="section-padding bg-gradient-to-br from-primary-500 to-primary-800 text-white pt-32 pb-16">
         <div className="container-custom">
           <motion.div
@@ -280,9 +290,9 @@ const ScheduleConsultation = () => {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
               Schedule a Consultation
-            </h1>
+            </h2>
             <div className="text-lg sm:text-xl md:text-2xl mb-8 text-primary-100 leading-relaxed max-w-3xl mx-auto space-y-4">
               <p>Get expert advice and discover how we can help transform your business.</p>
               <p className="text-base sm:text-lg text-primary-100/90">

@@ -57,6 +57,7 @@ const Blog = ({ initialData = null }) => {
   return (
     <>
       <SEOHead
+        skipBaseMeta
         pageType="blog-index"
         title="Blog | Skyfalke - Digital Marketing & Technology Insights"
         description="Read the latest insights on digital marketing, cloud solutions, sustainable technology, and business growth strategies from Skyfalke."

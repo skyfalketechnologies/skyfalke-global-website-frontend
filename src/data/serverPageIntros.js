@@ -10,6 +10,16 @@ export const BLOG_PAGE_INTRO = {
   ],
 };
 
+export const ACADEMY_JOIN_INTRO = {
+  eyebrow: 'Skyfalke Academy',
+  title: 'Enroll in a Course',
+  paragraphs: [
+    'Ready to build future-ready digital skills? Submit your enrollment request below and our academy team will confirm your place, share payment options, and onboarding details within one business day.',
+    'You can enroll in a specific course or request guidance if you are still choosing. For organizational cohorts or custom training, mention your team size in the message field.',
+    'Questions before enrolling? Email academy@skyfalke.com or call +254 717 797 238. You can also browse all courses to compare programs, duration, and certification options.',
+  ],
+};
+
 export const COURSES_PAGE_INTRO = {
   eyebrow: 'Academy',
   title: 'Professional training built for application',
@@ -22,7 +32,7 @@ export const COURSES_PAGE_INTRO = {
 
 export const RESOURCES_PAGE_INTRO = {
   eyebrow: 'Resource library',
-  title: 'Free templates, guides, and tools',
+  title: 'Free Resources & Tools',
   paragraphs: [
     'Download expert-created resources to accelerate marketing, operations, and technology initiatives. Materials include campaign briefs, analytics starters, SEO checklists, web and content strategy templates, and workshop agendas used on Skyfalke client engagements.',
     'Resources are free for personal and internal business use unless otherwise noted. We update the library as we publish new frameworks on the blog and complete relevant projects — check back regularly or follow our newsletter for announcements.',
@@ -53,7 +63,7 @@ export const CASE_STUDIES_PAGE_INTRO = {
 
 export const SCHEDULE_CONSULTATION_INTRO = {
   eyebrow: 'Consultation',
-  title: 'What to expect from your session',
+  title: 'Schedule a Consultation',
   paragraphs: [
     'A Skyfalke consultation is a structured conversation about your goals, constraints, and current systems — not a generic sales pitch. We typically cover where you are today, what success looks like in the next 6–12 months, and which capabilities (growth, platforms, data, AI, or operations) are most relevant.',
     'Sessions are complimentary for qualified businesses and usually run 30–45 minutes by video or phone. You may invite technical or commercial colleagues. Afterward, you receive a concise summary of recommended next steps, whether or not we propose a formal engagement.',

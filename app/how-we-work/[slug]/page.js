@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import PageLayout from '../../components/PageLayout';
 import HowWeWorkDetail from '@/pageComponents/HowWeWorkDetail';
 import HowWeWorkCaseStudiesPage from '@/pageComponents/HowWeWorkCaseStudiesPage';
-import { generateMetadata as genMeta } from '@/utils/metadata';
+import { buildSectionSeoTitle, generateMetadata as genMeta } from '@/utils/metadata';
 import { HOW_WE_WORK_SLUGS, getHowWeWorkPage } from '@/data/howWeWorkPages';
 import { getCaseStudiesList } from '@/utils/serverApi';
 
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }) {
   if (!page) return genMeta({ title: 'How We Work', noIndex: true });
 
   return genMeta({
-    title: page.title,
+    title: buildSectionSeoTitle(page.title, 'How We Work', page.seoTitle),
     titleAbsolute: true,
     description: page.metaDescription,
     keywords: `${page.title}, delivery model, operating model, consulting, Skyfalke`,

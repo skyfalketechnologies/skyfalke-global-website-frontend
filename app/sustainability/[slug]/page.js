@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import PageLayout from '../../components/PageLayout';
 import SustainabilityDetail from '@/pageComponents/SustainabilityDetail';
-import { generateMetadata as genMeta } from '@/utils/metadata';
+import { buildSectionSeoTitle, generateMetadata as genMeta } from '@/utils/metadata';
 import { SUSTAINABILITY_SLUGS, getSustainabilityPage } from '@/data/sustainabilityPages';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }) {
   if (!page) return genMeta({ title: 'Sustainability', noIndex: true });
 
   return genMeta({
-    title: page.title,
+    title: buildSectionSeoTitle(page.title, 'Sustainability', page.seoTitle),
     titleAbsolute: true,
     description: page.metaDescription,
     keywords: `${page.title}, sustainability consulting, environmental strategy, Skyfalke`,

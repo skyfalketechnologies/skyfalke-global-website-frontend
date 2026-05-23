@@ -8,7 +8,7 @@ import { HiOutlineArrowUpRight } from 'react-icons/hi2';
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 
 export const metadata = genMeta({
-  title: 'About Us',
+  title: 'About Us | Mission, Values & Responsibility',
   description:
     'Learn about Skyfalke’s mission, commitments, meritocratic culture, social responsibility, and environmental sustainability — and how we translate values into client delivery.',
   keywords: 'about us, commitments, meritocracy, social responsibility, environmental sustainability, Skyfalke, digital partner Africa',

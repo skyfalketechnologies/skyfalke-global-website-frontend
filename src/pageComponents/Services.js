@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { 
@@ -252,13 +251,6 @@ const Services = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Services - Digital Marketing, Cloud Solutions & Business Tools | Skyfalke</title>
-        <meta name="description" content="Comprehensive technology services including digital marketing, cloud solutions, business tools, and consulting. Transform your business with Skyfalke's expert solutions." />
-        <meta name="keywords" content="digital marketing services, cloud solutions, business tools, technology consulting, SEO, PPC, social media marketing" />
-        <link rel="canonical" href="https://skyfalke.com/services" />
-      </Helmet>
-
       {/* Hero Section */}
       <section className="section-padding bg-gradient-to-br from-primary-500 to-primary-800 relative overflow-hidden pt-32">
         <div className="absolute inset-0 bg-hero-pattern opacity-10"></div>
