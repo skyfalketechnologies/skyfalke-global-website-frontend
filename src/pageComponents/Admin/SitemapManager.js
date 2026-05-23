@@ -37,8 +37,8 @@ const SitemapManager = () => {
         headers: skipCache ? { 'Cache-Control': 'no-cache' } : undefined,
       };
       const [sitemapResponse, robotsResponse] = await Promise.all([
-        fetch(`/api/sitemap.xml${cacheBuster}`, fetchOpts),
-        fetch(`/api/sitemap/robots.txt${cacheBuster}`, fetchOpts),
+        fetch(`/sitemap.xml${cacheBuster}`, fetchOpts),
+        fetch(`/robots.txt${cacheBuster}`, fetchOpts),
       ]);
 
       if (!sitemapResponse.ok || !robotsResponse.ok) {
@@ -114,6 +114,9 @@ const SitemapManager = () => {
       }
 
       const stats = payload.data;
+      if (payload.xml) {
+        setSitemapData(payload.xml);
+      }
       if (stats) {
         setSitemapStats({
           totalUrls: stats.totalUrls || 0,
@@ -130,8 +133,10 @@ const SitemapManager = () => {
         setLastGenerated(new Date());
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await fetchSitemapInfo(true);
+      if (!payload.xml) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        await fetchSitemapInfo(true);
+      }
 
       alert('Sitemap generated successfully!');
     } catch (err) {
@@ -145,7 +150,7 @@ const SitemapManager = () => {
 
   const downloadSitemap = () => {
     const link = document.createElement('a');
-    link.href = '/api/sitemap.xml';
+    link.href = '/sitemap.xml';
     link.download = 'sitemap.xml';
     document.body.appendChild(link);
     link.click();
@@ -154,7 +159,7 @@ const SitemapManager = () => {
 
   const downloadRobots = () => {
     const link = document.createElement('a');
-    link.href = '/api/sitemap/robots.txt';
+    link.href = '/robots.txt';
     link.download = 'robots.txt';
     document.body.appendChild(link);
     link.click();
@@ -330,7 +335,7 @@ const SitemapManager = () => {
               Download Robots.txt
             </button>
             <a
-              href="/api/sitemap.xml"
+              href="/sitemap.xml"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"
@@ -339,7 +344,7 @@ const SitemapManager = () => {
               View Sitemap
             </a>
             <a
-              href="/api/sitemap/robots.txt"
+              href="/robots.txt"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"
