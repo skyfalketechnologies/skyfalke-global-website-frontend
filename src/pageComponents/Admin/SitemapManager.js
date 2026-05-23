@@ -61,7 +61,10 @@ const SitemapManager = () => {
           // More accurate regex patterns that exclude the base /careers route
           const blogMatches = xmlData.match(/<loc>[^<]*\/blog\/[^<]+<\/loc>/g) || [];
           const productMatches = xmlData.match(/<loc>[^<]*\/shop\/product\/[^<]+<\/loc>/g) || [];
-          const caseStudyMatches = xmlData.match(/<loc>[^<]*\/case-studies\/[^<]+<\/loc>/g) || [];
+          const caseStudyMatches =
+            xmlData.match(/<loc>[^<]*\/how-we-work\/case-studies\/[^<]+<\/loc>/g) ||
+            xmlData.match(/<loc>[^<]*\/case-studies\/[^<]+<\/loc>/g) ||
+            [];
           const jobMatches = xmlData.match(/<loc>[^<]*\/careers\/[^<]+<\/loc>/g) || [];
           // Filter out the base /careers route
           const actualJobMatches = jobMatches.filter(url => !url.includes('/careers</loc>') && url.includes('/careers/'));
