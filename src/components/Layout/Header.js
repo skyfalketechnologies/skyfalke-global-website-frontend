@@ -890,7 +890,7 @@ const Header = () => {
                 </Link>
 
                 <Link
-                  href="/about#environmental-sustainability"
+                  href="/about-us/environmental-sustainability"
                   className="block rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3.5 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                   onClick={() => setMobileOpen(false)}
                 >

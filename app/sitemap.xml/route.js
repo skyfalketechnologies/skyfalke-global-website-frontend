@@ -21,7 +21,6 @@ const API_BASE_URL = getApiBaseUrl().replace(/\/+$/, '');
 
 const STATIC_ROUTES = [
   '/',
-  '/about',
   '/about-us',
   '/services',
   '/services/ict-strategy',

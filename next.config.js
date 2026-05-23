@@ -18,6 +18,15 @@ const nextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
   },
+  async redirects() {
+    return [
+      {
+        source: '/about',
+        destination: '/about-us',
+        permanent: true,
+      },
+    ];
+  },
   // Proxy API requests to backend
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 

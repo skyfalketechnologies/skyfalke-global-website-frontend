@@ -25,7 +25,7 @@ const BlogPostSchema = ({ post, siteUrl = DEFAULT_SITE }) => {
       "author": {
         "@type": "Person",
         "name": post.author?.name || "Skyfalke Team",
-        "url": post.author?.url || `${siteUrl}/about`
+        "url": post.author?.url || `${siteUrl}/about-us`
       },
       "publisher": {
         "@type": "Organization",

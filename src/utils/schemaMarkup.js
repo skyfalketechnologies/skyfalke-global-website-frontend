@@ -467,7 +467,7 @@ export const generateAboutPageSchema = () => {
     "name": "About Skyfalke",
     "description":
       "Learn about Skyfalke's mission to provide sustainable cloud solutions and digital marketing services across Africa and beyond.",
-    "url": `${SITE_URL}/about`,
+    "url": `${SITE_URL}/about-us`,
     "mainEntity": { "@id": `${SITE_URL.replace(/\/$/, '')}/#organization` },
   };
 };

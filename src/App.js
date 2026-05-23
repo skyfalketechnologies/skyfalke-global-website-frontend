@@ -21,7 +21,6 @@ import Footer from './components/Layout/Footer';
 
 // Critical Pages (load immediately)
 import Home from './pages/Home';
-import About from './pages/About';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
 import Resources from './pages/Resources';
@@ -217,16 +216,6 @@ function App() {
               <Header />
               <main>
                 <Home />
-              </main>
-              <Footer />
-            </>
-          } />
-          
-          <Route path="/about" element={
-            <>
-              <Header />
-              <main>
-                <About />
               </main>
               <Footer />
             </>

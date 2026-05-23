@@ -8,7 +8,7 @@ export const internalLinkingSuggestions = {
   // Homepage links
   homepage: [
     { url: '/services', text: 'Our Services', context: 'comprehensive digital marketing solutions' },
-    { url: '/about', text: 'About Skyfalke', context: 'learn more about our company' },
+    { url: '/about-us', text: 'About Skyfalke', context: 'learn more about our company' },
     { url: '/case-studies', text: 'Case Studies', context: 'see our success stories' },
     { url: '/blog', text: 'Latest Insights', context: 'read our latest articles' },
     { url: '/contact', text: 'Get Started', context: 'contact us today' }

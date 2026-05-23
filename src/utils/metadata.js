@@ -271,7 +271,7 @@ export const pageMetadata = {
   about: generateMetadata({
     title: 'About Us',
     description: 'Learn about Skyfalke, a leading digital marketing and technology solutions partner in Africa. We provide sustainable cloud hosting, AI-powered business tools, and innovative digital solutions.',
-    url: `${BASE_URL}/about`,
+    url: `${BASE_URL}/about-us`,
   }),
 
   services: generateMetadata({

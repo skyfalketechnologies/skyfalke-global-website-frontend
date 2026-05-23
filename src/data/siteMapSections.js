@@ -18,7 +18,7 @@ const toLinks = (pages, basePath) =>
 
 export const siteMapPrimary = [
   { name: 'Home', href: '/' },
-  { name: 'About', href: '/about' },
+  { name: 'About', href: '/about-us' },
   { name: 'Services overview', href: '/services' },
   { name: 'Case studies', href: '/how-we-work/case-studies' },
   { name: 'Blog', href: '/blog' },
