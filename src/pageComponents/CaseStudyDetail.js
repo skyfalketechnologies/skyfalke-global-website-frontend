@@ -151,7 +151,7 @@ const CaseStudyDetail = ({ slug: propSlug, initialServerData }) => {
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             The case study you're looking for doesn't exist or has been removed.
           </p>
-          <Link href="/case-studies"
+          <Link href="/how-we-work/case-studies"
             className="inline-flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
           >
             <FaArrowLeft />
@@ -164,7 +164,7 @@ const CaseStudyDetail = ({ slug: propSlug, initialServerData }) => {
 
   // --- SEO metadata preparation ---
   const baseUrl = process.env.REACT_APP_SITE_URL || 'https://skyfalke.com';
-  const canonicalUrl = `${baseUrl}/case-studies/${slug}`;
+  const canonicalUrl = `${baseUrl}/how-we-work/case-studies/${slug}`;
 
   const metaTitle = buildCaseStudySeoTitle(
     caseStudy.title,
@@ -297,7 +297,7 @@ const CaseStudyDetail = ({ slug: propSlug, initialServerData }) => {
           <div className="max-w-5xl mx-auto mb-6 sm:mb-8">
             <nav className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               <Link
-                href="/case-studies"
+                href="/how-we-work/case-studies"
                 className="font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
               >
                 Case Studies
@@ -748,7 +748,7 @@ const CaseStudyDetail = ({ slug: propSlug, initialServerData }) => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-center">
             <button
-              onClick={() => router.push('/case-studies')}
+              onClick={() => router.push('/how-we-work/case-studies')}
               className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl"
             >
               <FaArrowLeft />

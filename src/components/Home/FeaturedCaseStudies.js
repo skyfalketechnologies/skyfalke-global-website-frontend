@@ -165,7 +165,7 @@ const FeaturedCaseStudies = () => {
                       <span className="text-sm">{study.timeline}</span>
                     </div>
                     <Link
-                      href={`/case-studies/${study.id}`}
+                      href={`/how-we-work/case-studies/${study.slug || study.id}`}
                       className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-300 group/link"
                     >
                       <span className="text-sm">Read More</span>

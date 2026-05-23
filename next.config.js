@@ -30,6 +30,11 @@ const nextConfig = {
         destination: '/about-us',
         permanent: true,
       },
+      {
+        source: '/case-studies/:slug',
+        destination: '/how-we-work/case-studies/:slug',
+        permanent: true,
+      },
     ];
   },
   // Proxy API requests to backend

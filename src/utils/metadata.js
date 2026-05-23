@@ -23,6 +23,15 @@ const BRAND = 'Skyfalke';
 export const SITE_META_DESCRIPTION =
   'Skyfalke partners with businesses focused on digital growth, reliability, and building sustainable, inclusive capabilities for long-term success.';
 
+/** Public URL path for a case study detail page. */
+export function getCaseStudyPublicPath(slug) {
+  return `/how-we-work/case-studies/${slug}`;
+}
+
+export function getCaseStudyPublicUrl(slug, baseUrl = BASE_URL) {
+  return `${baseUrl}${getCaseStudyPublicPath(slug)}`;
+}
+
 /** Max length for `title` before root layout adds ` | Skyfalke`. */
 export const TEMPLATE_TITLE_MAX = SEO_TITLE_MAX - ` | ${BRAND}`.length;
 
@@ -342,7 +351,7 @@ export function generateCaseStudyMetadata(caseStudy) {
     });
   }
 
-  const caseStudyUrl = `${BASE_URL}/case-studies/${caseStudy.slug}`;
+  const caseStudyUrl = getCaseStudyPublicUrl(caseStudy.slug);
   const caseStudyImage = caseStudy.featuredImage?.url 
     ? (caseStudy.featuredImage.url.startsWith('http') ? caseStudy.featuredImage.url : `${BASE_URL}${caseStudy.featuredImage.url}`)
     : DEFAULT_IMAGE;

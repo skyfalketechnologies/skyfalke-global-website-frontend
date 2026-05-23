@@ -140,7 +140,7 @@ export async function GET() {
 
   const dynamicRoutes = [
     ...blogSlugs.map((slug) => `${BASE_URL}/blog/${slug}`),
-    ...caseStudySlugs.map((slug) => `${BASE_URL}/case-studies/${slug}`),
+    ...caseStudySlugs.map((slug) => `${BASE_URL}/how-we-work/case-studies/${slug}`),
     ...productSlugs.map((slug) => `${BASE_URL}/shop/product/${slug}`),
     ...jobSlugs.map((slug) => `${BASE_URL}/careers/${slug}`),
   ];

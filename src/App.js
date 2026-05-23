@@ -1,5 +1,10 @@
 import React, { useEffect, Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+
+function LegacyCaseStudyRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={`/how-we-work/case-studies/${slug}`} replace />;
+}
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { CartProvider } from './contexts/CartContext';
@@ -779,15 +784,7 @@ function App() {
             </>
           } />
           
-          <Route path="/case-studies/:slug" element={
-            <>
-              <Header />
-              <main>
-                <CaseStudyDetail />
-              </main>
-              <Footer />
-            </>
-          } />
+          <Route path="/case-studies/:slug" element={<LegacyCaseStudyRedirect />} />
           
           <Route path="/support" element={
             <>

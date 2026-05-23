@@ -396,7 +396,7 @@ const CaseStudies = () => {
 
                         {/* Quick Actions */}
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                          <Link href={`/case-studies/${caseStudy.slug}`}
+                          <Link href={`/how-we-work/case-studies/${caseStudy.slug}`}
                             className="bg-white text-gray-800 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-primary-600 hover:text-white flex items-center gap-2"
                           >
                             <FaEye />
@@ -463,7 +463,7 @@ const CaseStudies = () => {
                             </span>
                           </div>
                           
-                          <Link href={`/case-studies/${caseStudy.slug}`}
+                          <Link href={`/how-we-work/case-studies/${caseStudy.slug}`}
                             className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1 group"
                           >
                             Read More

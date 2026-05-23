@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { apiGet, apiPost } from '../../utils/api';
-import api from '../../utils/api';
 import { 
   FaSitemap, 
   FaDownload, 
@@ -32,18 +30,15 @@ const SitemapManager = () => {
       setLoading(true);
       setError(null);
       
-      // Fetch sitemap and robots.txt from Next.js routes (not backend API base URL)
-      // Add cache-busting parameter if skipCache is true
+      // Fetch from backend via same-origin proxy (matches files written by generate-sitemap)
       const cacheBuster = skipCache ? `?t=${Date.now()}` : '';
+      const fetchOpts = {
+        cache: skipCache ? 'no-store' : 'default',
+        headers: skipCache ? { 'Cache-Control': 'no-cache' } : undefined,
+      };
       const [sitemapResponse, robotsResponse] = await Promise.all([
-        fetch(`/sitemap.xml${cacheBuster}`, {
-          cache: skipCache ? 'no-store' : 'default',
-          headers: skipCache ? { 'Cache-Control': 'no-cache' } : undefined,
-        }),
-        fetch(`/robots.txt${cacheBuster}`, {
-          cache: skipCache ? 'no-store' : 'default',
-          headers: skipCache ? { 'Cache-Control': 'no-cache' } : undefined,
-        }),
+        fetch(`/api/sitemap.xml${cacheBuster}`, fetchOpts),
+        fetch(`/api/sitemap/robots.txt${cacheBuster}`, fetchOpts),
       ]);
 
       if (!sitemapResponse.ok || !robotsResponse.ok) {
@@ -99,34 +94,46 @@ const SitemapManager = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await apiPost('/api/sitemap/generate-sitemap');
-      
-      // Update stats from response (use these as the source of truth)
-      if (response.data && response.data.data) {
-        setSitemapStats({
-          totalUrls: response.data.data.totalUrls || 0,
-          staticRoutes: response.data.data.staticRoutes || 0,
-          blogPosts: response.data.data.blogs || 0,
-          products: response.data.data.products || 0,
-          caseStudies: response.data.data.caseStudies || 0,
-          jobs: response.data.data.jobs || 0,
-          courses: response.data.data.courses || 0,
-          events: response.data.data.events || 0,
-          trainers: response.data.data.trainers || 0
-        });
+
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const res = await fetch('/api/sitemap/generate-sitemap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      const payload = await res.json().catch(() => ({}));
+
+      if (!res.ok || payload.success === false) {
+        throw new Error(payload.message || `Failed to generate sitemap (${res.status})`);
       }
-      
-      // Wait a brief moment to ensure file is fully written to disk
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Refresh sitemap data with cache-busting to get the fresh file
+
+      const stats = payload.data;
+      if (stats) {
+        setSitemapStats({
+          totalUrls: stats.totalUrls || 0,
+          staticPages: stats.staticRoutes || 0,
+          staticRoutes: stats.staticRoutes || 0,
+          blogPosts: stats.blogs || 0,
+          products: stats.products || 0,
+          caseStudies: stats.caseStudies || 0,
+          jobs: stats.jobs || 0,
+          courses: stats.courses || 0,
+          events: stats.events || 0,
+          trainers: stats.trainers || 0,
+        });
+        setLastGenerated(new Date());
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await fetchSitemapInfo(true);
-      
-      // Show success message
+
       alert('Sitemap generated successfully!');
     } catch (err) {
-      setError('Failed to generate sitemap');
+      const message = err.message || 'Failed to generate sitemap';
+      setError(message);
       console.error('Error generating sitemap:', err);
     } finally {
       setLoading(false);
@@ -135,7 +142,7 @@ const SitemapManager = () => {
 
   const downloadSitemap = () => {
     const link = document.createElement('a');
-    link.href = '/sitemap.xml';
+    link.href = '/api/sitemap.xml';
     link.download = 'sitemap.xml';
     document.body.appendChild(link);
     link.click();
@@ -144,7 +151,7 @@ const SitemapManager = () => {
 
   const downloadRobots = () => {
     const link = document.createElement('a');
-    link.href = '/robots.txt';
+    link.href = '/api/sitemap/robots.txt';
     link.download = 'robots.txt';
     document.body.appendChild(link);
     link.click();
@@ -320,7 +327,7 @@ const SitemapManager = () => {
               Download Robots.txt
             </button>
             <a
-              href="/sitemap.xml"
+              href="/api/sitemap.xml"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"
@@ -329,7 +336,7 @@ const SitemapManager = () => {
               View Sitemap
             </a>
             <a
-              href="/robots.txt"
+              href="/api/sitemap/robots.txt"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"

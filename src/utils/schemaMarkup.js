@@ -413,7 +413,7 @@ export const generateCaseStudySchema = (caseStudy) => {
     "dateModified": caseStudy.updatedAt || new Date().toISOString(),
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `${SITE_URL}/case-studies/${caseStudy.slug || 'case-study'}`
+      "@id": `${SITE_URL}/how-we-work/case-studies/${caseStudy.slug || 'case-study'}`
     },
     "keywords": caseStudy.tags?.join(", ") || "case study, digital marketing, cloud solutions",
     "articleSection": "Case Studies",
