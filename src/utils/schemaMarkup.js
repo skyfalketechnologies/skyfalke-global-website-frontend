@@ -582,7 +582,7 @@ export const getDefaultSchemas = (pageType, data = {}) => {
     case 'home':
       additionalSchemas = [
         generateWebPageSchema({
-          name: 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset',
+          name: 'Digital Growth Partner in Africa | Skyfalke',
           url: `${SITE_URL}/`,
           description:
             'Growth-focused digital partner for online presence, acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue.',

@@ -15,10 +15,10 @@ import HomeLeadMagnet from '../components/Home/HomeLeadMagnet';
 import CreativeVideoSection from '@/components/Home/CreativeVideoSection';
 import CTASection from '../components/Home/CTASection';
 
-const HOME_TITLE = 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset';
+const HOME_TITLE = 'Digital Growth Partner in Africa | Skyfalke';
 const HOME_DESCRIPTION = 'Growth-focused digital partner: websites, branding, SEO, ads, CRM, automation, and AI roadmaps; one clear strategy to scale revenue.';
 const HOME_KEYWORDS =  'digital growth partner, business automation, SEO and ads, CRM workflows, AI roadmap, digital transformation Kenya, Skyfalke';
-const HOME_OG_TITLE = 'Skyfalke | High-Performing Digital Growth Systems';
+const HOME_OG_TITLE = 'Digital Growth Partner in Africa | Skyfalke';
 const HOME_OG_DESC = 'Build online presence, acquire customers, and streamline operations with strategic technology — not fragmented vendors.';
 const HOME_TWITTER_DESC = 'Websites, marketing, automation, and AI - unified into one growth engine for serious businesses.';
 

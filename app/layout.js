@@ -8,7 +8,7 @@ const globalJsonLd = getGlobalSchemaJsonLd(siteUrl);
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'),
   title: {
-    default: 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset',
+    default: 'Digital Growth Partner in Africa | Skyfalke',
     template: '%s | Skyfalke',
   },
   description:
@@ -41,7 +41,7 @@ export const metadata = {
     locale: 'en_US',
     url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
     siteName: 'Skyfalke',
-    title: 'Skyfalke | High-Performing Digital Growth Systems',
+    title: 'Digital Growth Partner in Africa | Skyfalke',
     description:
       'Build online presence, acquire customers, and streamline operations with strategic technology — one partner, clear execution.',
     images: [
@@ -55,7 +55,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Skyfalke | High-Performing Digital Growth Systems',
+    title: 'Digital Growth Partner in Africa | Skyfalke',
     description:
       'Websites, marketing, automation, and AI — unified into one growth engine for serious businesses.',
     images: [

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import { Helmet } from 'react-helmet-async';
 import SchemaMarkup from './SchemaMarkup';
 
@@ -10,9 +11,9 @@ const HOME_TWITTER_DESCRIPTION =
   'Websites, marketing, automation, and AI - unified into one growth engine for serious businesses.';
 
 const SEOHead = ({
-  title = "Skyfalke | Turn Your Business Into a High-Performing Digital Asset",
-  description = "Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps - one strategy to scale revenue without fragmented vendors.",
-  keywords = "digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke",
+  title = "Digital Growth Partner in Africa | Skyfalke",
+  description = "Growth-focused digital partner: websites, branding, SEO, ads, CRM, automation, and AI roadmaps; one clear strategy to scale revenue.",
+  keywords = "digital growth partner, business automation, SEO and ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke",
   image = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good",
   url = "https://skyfalke.com",
   type = "website",
@@ -22,15 +23,15 @@ const SEOHead = ({
   faqs = [],
   customSchemas = [],
   noIndex = false,
-  /** When true, skips title/description/canonical/OG/robots — use with App Router `export const metadata`. */
   skipBaseMeta = false,
   canonical = null,
-  ogTitle = "Skyfalke | High-Performing Digital Growth Systems",
+  ogTitle = "Digital Growth Partner in Africa | Skyfalke",
   ogDescription,
   twitterDescription,
   twitterTitle = null
 }) => {
-  const fullUrl = canonical || `${url}${typeof window !== 'undefined' ? window.location.pathname : ''}`;
+  const pathname = usePathname();
+  const fullUrl = canonical || `${url}${pathname || ''}`;
   const fullImageUrl = image && typeof image === 'string' && image.startsWith('http') ? image : `${url}${image || ''}`;
   const resolvedOgTitle = ogTitle || title;
   const resolvedTwitterTitle = twitterTitle || resolvedOgTitle;

@@ -68,7 +68,7 @@ export function buildProductSeoTitle(productName, metaTitle) {
     metaTitle,
     `${productName} | Buy from Skyfalke Shop`,
     `${productName} — Skyfalke Shop`,
-    `${productName} | Hardware & Digital Products | ${BRAND}`,
+    `${productName} | ${BRAND}`,
   ]);
 }
 
@@ -76,6 +76,7 @@ export function buildProductSeoTitle(productName, metaTitle) {
 export function stripTitleBrandSuffix(title) {
   if (!title || typeof title !== 'string') return title;
   return title
+    .replace(/^Skyfalke\s*[\|–-]\s*/i, '')
     .replace(/\s*\|\s*Skyfalke\s*-\s*/gi, ' | ')
     .replace(/\s*\|\s*Skyfalke(?:\s+[\w\s&]+)?\s*$/i, '')
     .replace(/\s*-\s*Skyfalke\s*$/i, '')
@@ -169,7 +170,7 @@ export function generateMetadata({
     safeImage && safeImage.startsWith('http')
       ? safeImage
       : `${BASE_URL}${safeImage}`;
-  const defaultTitle = 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset';
+  const defaultTitle = 'Digital Growth Partner in Africa | Skyfalke';
   const finalTitle = titleAbsolute
     ? clampSeoTitle(title || BRAND)
     : fitTemplateTitle(title) ||
@@ -376,7 +377,7 @@ export function generateJobMetadata(job) {
  */
 export const pageMetadata = {
   home: generateMetadata({
-    title: 'Skyfalke | Turn Your Business Into a High-Performing Digital Asset',
+    title: 'Digital Growth Partner in Africa | Skyfalke',
     description:
       'Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.',
     keywords:
@@ -385,10 +386,10 @@ export const pageMetadata = {
     canonical: `${BASE_URL}/`,
     image:
       'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
-    ogTitle: 'Skyfalke | High-Performing Digital Growth Systems',
+    ogTitle: 'Digital Growth Partner in Africa | Skyfalke',
     ogDescription:
       'Build online presence, acquire customers, and streamline operations with strategic technology — one partner, clear execution.',
-    twitterTitle: 'Skyfalke | High-Performing Digital Growth Systems',
+    twitterTitle: 'Digital Growth Partner in Africa | Skyfalke',
     twitterDescription:
       'Websites, marketing, automation, and AI — unified into one growth engine for serious businesses.',
   }),
