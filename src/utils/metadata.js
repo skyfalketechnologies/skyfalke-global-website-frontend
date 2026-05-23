@@ -19,6 +19,10 @@ const isBlockedImage = (url) => {
 const SEO_TITLE_MIN = 30;
 const SEO_TITLE_MAX = 60;
 const BRAND = 'Skyfalke';
+
+export const SITE_META_DESCRIPTION =
+  'Skyfalke partners with businesses focused on digital growth, reliability, and building sustainable, inclusive capabilities for long-term success.';
+
 /** Max length for `title` before root layout adds ` | Skyfalke`. */
 export const TEMPLATE_TITLE_MAX = SEO_TITLE_MAX - ` | ${BRAND}`.length;
 
@@ -106,6 +110,14 @@ export function clampSeoTitle(title) {
   return pickSeoTitle([base, `${base} | ${BRAND}`]);
 }
 
+/** Clamp absolute titles without stripping brand (value is shown as-is in `<title>`). */
+export function clampAbsoluteSeoTitle(title) {
+  if (!title || typeof title !== 'string') return BRAND;
+  if (title.length <= SEO_TITLE_MAX) return title;
+  const trimmed = title.slice(0, SEO_TITLE_MAX).replace(/\s+\S*$/, '').trim();
+  return trimmed.length >= SEO_TITLE_MIN ? trimmed : title.slice(0, SEO_TITLE_MAX);
+}
+
 /**
  * Absolute document title for case study detail pages.
  */
@@ -170,16 +182,15 @@ export function generateMetadata({
     safeImage && safeImage.startsWith('http')
       ? safeImage
       : `${BASE_URL}${safeImage}`;
-  const defaultTitle = 'Digital Growth Partner in Africa | Skyfalke';
+  const defaultSegmentTitle = 'Digital Growth Partner in Africa';
+  const defaultAbsoluteTitle = 'Digital Growth Partner in Africa | Skyfalke';
   const finalTitle = titleAbsolute
-    ? clampSeoTitle(title || BRAND)
+    ? clampAbsoluteSeoTitle(title || defaultAbsoluteTitle)
     : fitTemplateTitle(title) ||
       stripTitleBrandSuffix(title) ||
       title ||
-      defaultTitle;
-  const finalDescription =
-    description ||
-    'Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.';
+      defaultSegmentTitle;
+  const finalDescription = description || SITE_META_DESCRIPTION;
   const finalKeywords =
     keywords ||
     'digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke';
@@ -378,8 +389,8 @@ export function generateJobMetadata(job) {
 export const pageMetadata = {
   home: generateMetadata({
     title: 'Digital Growth Partner in Africa | Skyfalke',
-    description:
-      'Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.',
+    titleAbsolute: true,
+    description: SITE_META_DESCRIPTION,
     keywords:
       'digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke',
     url: `${BASE_URL}/`,
@@ -387,11 +398,9 @@ export const pageMetadata = {
     image:
       'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
     ogTitle: 'Digital Growth Partner in Africa | Skyfalke',
-    ogDescription:
-      'Build online presence, acquire customers, and streamline operations with strategic technology — one partner, clear execution.',
+    ogDescription: SITE_META_DESCRIPTION,
     twitterTitle: 'Digital Growth Partner in Africa | Skyfalke',
-    twitterDescription:
-      'Websites, marketing, automation, and AI — unified into one growth engine for serious businesses.',
+    twitterDescription: SITE_META_DESCRIPTION,
   }),
 
   about: generateMetadata({

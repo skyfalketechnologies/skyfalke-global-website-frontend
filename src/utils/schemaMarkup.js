@@ -30,7 +30,7 @@ export function getGlobalSchemaJsonLd(siteUrl = SITE_URL) {
           height: 60,
         },
         description:
-          'Skyfalke helps growth-focused businesses strengthen digital presence, acquire customers, and scale with connected systems and AI-ready roadmaps.',
+          'Skyfalke partners with businesses focused on digital growth, reliability, and building sustainable, inclusive capabilities for long-term success.',
         address: {
           '@type': 'PostalAddress',
           addressCountry: 'KE',
@@ -53,7 +53,7 @@ export function getGlobalSchemaJsonLd(siteUrl = SITE_URL) {
         name: 'Skyfalke',
         url: base,
         description:
-          'Skyfalke helps growth-focused businesses strengthen digital presence, acquire customers, and scale with connected systems and AI-ready roadmaps.',
+          'Skyfalke partners with businesses focused on digital growth, reliability, and building sustainable, inclusive capabilities for long-term success.',
         publisher: { '@id': `${base}/#organization` },
         inLanguage: 'en-US',
         potentialAction: {
@@ -585,7 +585,7 @@ export const getDefaultSchemas = (pageType, data = {}) => {
           name: 'Digital Growth Partner in Africa | Skyfalke',
           url: `${SITE_URL}/`,
           description:
-            'Growth-focused digital partner for online presence, acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue.',
+            'Skyfalke partners with businesses focused on digital growth, reliability, and building sustainable, inclusive capabilities for long-term success.',
         }),
       ];
       break;

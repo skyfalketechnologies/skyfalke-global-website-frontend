@@ -4,15 +4,14 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { Helmet } from 'react-helmet-async';
 import SchemaMarkup from './SchemaMarkup';
+import { SITE_META_DESCRIPTION } from '@/utils/metadata';
 
-const HOME_OG_DESCRIPTION =
-  'Build online presence, acquire customers, and streamline operations with strategic technology — one partner, clear execution.';
-const HOME_TWITTER_DESCRIPTION =
-  'Websites, marketing, automation, and AI - unified into one growth engine for serious businesses.';
+const HOME_OG_DESCRIPTION = SITE_META_DESCRIPTION;
+const HOME_TWITTER_DESCRIPTION = SITE_META_DESCRIPTION;
 
 const SEOHead = ({
   title = "Digital Growth Partner in Africa | Skyfalke",
-  description = "Growth-focused digital partner: websites, branding, SEO, ads, CRM, automation, and AI roadmaps; one clear strategy to scale revenue.",
+  description = SITE_META_DESCRIPTION,
   keywords = "digital growth partner, business automation, SEO and ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke",
   image = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good",
   url = "https://skyfalke.com",

@@ -1,6 +1,7 @@
 import './globals.css';
 import Providers from './providers';
 import { getGlobalSchemaJsonLd } from '@/utils/schemaMarkup';
+import { SITE_META_DESCRIPTION } from '@/utils/metadata';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 const globalJsonLd = getGlobalSchemaJsonLd(siteUrl);
@@ -11,8 +12,7 @@ export const metadata = {
     default: 'Digital Growth Partner in Africa | Skyfalke',
     template: '%s | Skyfalke',
   },
-  description:
-    'Growth-focused digital partner: online presence, customer acquisition, CRM, automation, and AI roadmaps — one strategy to scale revenue without fragmented vendors.',
+  description: SITE_META_DESCRIPTION,
   keywords: [
     'digital growth partner',
     'business automation Kenya',
@@ -42,22 +42,20 @@ export const metadata = {
     url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
     siteName: 'Skyfalke',
     title: 'Digital Growth Partner in Africa | Skyfalke',
-    description:
-      'Build online presence, acquire customers, and streamline operations with strategic technology — one partner, clear execution.',
+    description: SITE_META_DESCRIPTION,
     images: [
       {
         url: 'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
         width: 1200,
         height: 630,
-        alt: 'Skyfalke — digital growth partner for websites, marketing, automation, and AI strategy',
+        alt: 'Skyfalke - digital growth partner for websites, marketing, automation, and AI strategy',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Digital Growth Partner in Africa | Skyfalke',
-    description:
-      'Websites, marketing, automation, and AI — unified into one growth engine for serious businesses.',
+    description: SITE_META_DESCRIPTION,
     images: [
       'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
     ],
