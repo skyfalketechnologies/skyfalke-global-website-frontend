@@ -350,7 +350,7 @@ export default function BlogEditorToolbar({
         </div>
       )}
 
-      <div className="flex flex-col gap-2 border-b border-gray-200 bg-gradient-to-b from-gray-50 to-white p-3 dark:border-gray-600 dark:from-gray-800 dark:to-gray-800/95">
+      <div className="sticky top-0 z-30 flex flex-col gap-2 rounded-t-xl border-b border-gray-200 bg-white/95 p-3 shadow-md backdrop-blur-sm supports-[backdrop-filter]:bg-white/90 dark:border-gray-600 dark:bg-gray-800/95 dark:supports-[backdrop-filter]:bg-gray-800/90">
         <div className="flex flex-wrap items-center gap-2">
           <ToolbarGroup label="Style">
             <select

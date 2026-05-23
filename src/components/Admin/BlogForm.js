@@ -702,7 +702,7 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
         </div>
 
         {/* Main Content Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
           {/* Tab Navigation */}
           <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex space-x-8 px-6">
@@ -898,18 +898,16 @@ const BlogForm = ({ blogId, onClose, onSave }) => {
                    </label>
                    
                    <div
-                     className={`overflow-hidden rounded-xl border bg-white shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-primary-500/30 dark:bg-gray-800 ${
+                     className={`rounded-xl border bg-white shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-primary-500/30 dark:bg-gray-800 ${
                        errors.content ? 'border-red-300 dark:border-red-600' : 'border-gray-200 dark:border-gray-600'
                      }`}
                    >
                      {editor && (
-                       <div className="sticky top-0 z-20">
-                         <BlogEditorToolbar
-                           editor={editor}
-                           uploadingImage={uploadingImage}
-                           onInsertImageFromFile={handleInsertImageFromFile}
-                         />
-                       </div>
+                       <BlogEditorToolbar
+                         editor={editor}
+                         uploadingImage={uploadingImage}
+                         onInsertImageFromFile={handleInsertImageFromFile}
+                       />
                      )}
                      <div className={`border-t border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-900/40 ${errors.content ? '' : ''}`}>
                      {editor ? (
