@@ -286,9 +286,18 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="border-t border-white/10 bg-black/20">
           <div className="container-custom flex flex-col gap-6 py-6 md:flex-row md:items-center md:justify-between md:gap-8">
-            <p className="text-center text-xs text-zinc-500 md:text-left">
-              © {currentYear} Skyfalke Limited. All rights reserved.
-            </p>
+            <div className="flex flex-col items-center gap-4 md:flex-row md:items-center md:gap-6">
+              <p className="text-center text-xs text-zinc-500 md:text-left">
+                © {currentYear} Skyfalke Limited. All rights reserved.
+              </p>
+              <img
+                src="/pci.svg"
+                alt="PCI DSS compliant"
+                className="h-9 w-auto opacity-90"
+                width={68}
+                height={54}
+              />
+            </div>
 
             <nav
               aria-label="Policies and sitemap"
