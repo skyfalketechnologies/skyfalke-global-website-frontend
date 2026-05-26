@@ -2,76 +2,91 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaChess, FaHandshake, FaRocket, FaAward } from 'react-icons/fa';
+import {
+  HiOutlinePresentationChartLine,
+  HiOutlineBuildingOffice2,
+  HiOutlineArrowTrendingUp,
+  HiOutlineShieldCheck,
+} from 'react-icons/hi2';
+
+const DIFFERENTIATION_IMAGE =
+  'https://ik.imagekit.io/g3nahgeeu/skyfalke-strategy.webp';
 
 const points = [
   {
     text: 'Strategic, Not Just Technical',
-    icon: FaChess,
-    label: 'Chess piece metaphor for strategic thinking beyond pure implementation',
+    Icon: HiOutlinePresentationChartLine,
+    label: 'Strategic planning beyond pure technical implementation',
   },
   {
     text: 'All-in-One Partner',
-    icon: FaHandshake,
-    label: 'Handshake representing a single trusted partner across disciplines',
+    Icon: HiOutlineBuildingOffice2,
+    label: 'Single trusted partner across disciplines',
   },
   {
     text: 'Built for Growth',
-    icon: FaRocket,
-    label: 'Rocket symbolizing scalable growth orientation',
+    Icon: HiOutlineArrowTrendingUp,
+    label: 'Scalable growth orientation',
   },
   {
     text: 'Professional Execution',
-    icon: FaAward,
-    label: 'Award icon representing disciplined delivery quality',
+    Icon: HiOutlineShieldCheck,
+    label: 'Disciplined delivery quality',
   },
 ];
 
 export default function HomeDifferentiation() {
   return (
-    <section className="section-padding bg-[#E0AE00]" aria-labelledby="why-heading">
-      <div className="container-custom max-w-6xl mx-auto">
-        <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-12">
-          <p className="text-xs sm:text-sm font-semibold tracking-[0.14em] uppercase text-black/70 mb-3">
-            Our Differentiation
-          </p>
-          <h2 id="why-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black tracking-tight">
-            Why Businesses Choose Skyfalke
-          </h2>
-          <p className="mt-4 text-sm sm:text-base text-black/80 leading-relaxed">
-            We combine business strategy, execution discipline, creativity and scalable technology to deliver measurable outcomes.
-          </p>
-        </div>
-
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
-          {points.map((p, index) => {
-            const Icon = p.icon;
-            return (
-              <motion.li
-                key={p.text}
-                initial={{ opacity: 0, x: -8 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.35, delay: index * 0.05 }}
-                className="group rounded-xl border border-black/10 bg-white/95 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="flex items-start gap-4 p-5 sm:p-6">
+    <section
+      className="section-padding bg-[#E0AE00] border-b border-black/10"
+      aria-labelledby="why-heading"
+    >
+      <div className="container-custom">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center max-w-6xl mx-auto">
+          <div>
+            <h2
+              id="why-heading"
+              className="text-2xl sm:text-3xl md:text-[2rem] font-bold text-primary-600 tracking-tight leading-snug mb-6"
+            >
+              Why Businesses Choose Skyfalke
+            </h2>
+            <p className="text-base sm:text-lg text-primary-900/80 leading-relaxed mb-8 max-w-xl">
+              We combine business strategy, execution discipline, creativity and scalable technology to deliver measurable outcomes.
+            </p>
+            <ul className="space-y-4">
+              {points.map(({ text, Icon, label }) => (
+                <li key={text} className="flex gap-4 text-gray-800 text-base sm:text-lg leading-relaxed">
                   <span
-                    className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-lg border border-[#E0AE00]/60 bg-[#E0AE00]/15 text-black"
+                    className="mt-0.5 shrink-0 flex h-10 w-10 items-center justify-center rounded-sm border border-gray-200 bg-white text-[#303661] shadow-sm"
                     role="img"
-                    aria-label={p.label}
+                    aria-label={label}
                   >
-                    <Icon aria-hidden />
+                    <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden />
                   </span>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-snug">{p.text}</h3>
-                    <p className="mt-1 text-sm text-gray-600">Designed to help you move faster with confidence and clarity.</p>
-                  </div>
-                </div>
-              </motion.li>
-            );
-          })}
-        </ul>
+                  <span className="pt-1.5 font-medium">{text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55 }}
+            className="relative rounded-sm overflow-hidden shadow-[0_20px_50px_-20px_rgba(48,54,97,0.25)] bg-black"
+          >
+            <img
+              src={DIFFERENTIATION_IMAGE}
+              alt="Orange chess king on a board, symbolizing strategic leadership and differentiation"
+              className="w-full h-auto block"
+              loading="lazy"
+              decoding="async"
+              width={800}
+              height={800}
+            />
+          </motion.div>
+        </div>
       </div>
     </section>
   );
