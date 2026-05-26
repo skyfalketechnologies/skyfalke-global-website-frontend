@@ -21,7 +21,7 @@ const SEO_TITLE_MAX = 60;
 const BRAND = 'Skyfalke';
 
 export const SITE_META_DESCRIPTION =
-  'Skyfalke partners with businesses focused on digital growth, reliability, and building sustainable, inclusive capabilities for long-term success.';
+  'Skyfalke partners with businesses across Africa to drive digital growth through technology, cloud solutions, branding, automation, and sustainable innovation.';
 
 /** Public URL path for a case study detail page. */
 export function getCaseStudyPublicPath(slug) {

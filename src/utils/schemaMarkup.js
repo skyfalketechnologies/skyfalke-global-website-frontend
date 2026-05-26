@@ -1,6 +1,8 @@
 // SEO-friendly Schema Markup Generator
 // This utility generates structured data for better search engine understanding
 
+import { SITE_META_DESCRIPTION } from './metadata';
+
 /** Canonical site origin (matches NEXT_PUBLIC_SITE_URL in production). */
 export const SITE_URL =
   (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_SITE_URL) ||
@@ -29,8 +31,7 @@ export function getGlobalSchemaJsonLd(siteUrl = SITE_URL) {
           width: 200,
           height: 60,
         },
-        description:
-          'Skyfalke partners with businesses focused on digital growth, reliability, and building sustainable, inclusive capabilities for long-term success.',
+        description: SITE_META_DESCRIPTION,
         address: {
           '@type': 'PostalAddress',
           addressCountry: 'KE',
@@ -52,8 +53,7 @@ export function getGlobalSchemaJsonLd(siteUrl = SITE_URL) {
         '@id': `${base}/#website`,
         name: 'Skyfalke',
         url: base,
-        description:
-          'Skyfalke partners with businesses focused on digital growth, reliability, and building sustainable, inclusive capabilities for long-term success.',
+        description: SITE_META_DESCRIPTION,
         publisher: { '@id': `${base}/#organization` },
         inLanguage: 'en-US',
         potentialAction: {
@@ -79,8 +79,7 @@ export const generateOrganizationSchema = () => {
       "@type": "ImageObject",
       "url": LOGO_URL,
     },
-    "description":
-      "Digital growth and automation systems for modern organizations - combining AI, cloud, data, and digital marketing.",
+    "description": SITE_META_DESCRIPTION,
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "KE"
@@ -98,8 +97,7 @@ export const generateWebsiteSchema = () => {
     "@type": "WebSite",
     "name": "Skyfalke",
     "url": SITE_URL,
-    "description":
-      "Digital growth and automation systems for modern organizations — combining AI, cloud, data, and digital marketing.",
+    "description": SITE_META_DESCRIPTION,
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
@@ -584,8 +582,7 @@ export const getDefaultSchemas = (pageType, data = {}) => {
         generateWebPageSchema({
           name: 'Digital Growth Partner in Africa | Skyfalke',
           url: `${SITE_URL}/`,
-          description:
-            'Skyfalke partners with businesses focused on digital growth, reliability, and building sustainable, inclusive capabilities for long-term success.',
+          description: SITE_META_DESCRIPTION,
         }),
       ];
       break;
