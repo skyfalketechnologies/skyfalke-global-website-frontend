@@ -3,14 +3,14 @@
 
 ## Core Documentation
 - [Getting Started](/): Homepage with company overview and key services
-- [About Us](/about): Company background, mission, and team information
+- [About Us](/about-us): Company background, mission, and team information
 - [Services Overview](/services): Comprehensive digital marketing and technology solutions
 - [Cloud Solutions](/cloud): Sustainable hosting and cloud infrastructure services
 - [Contact](/contact): Get in touch for consultations and support
 
 ## High-Value Pages
 - [Blog](/blog): Latest insights on digital marketing, technology trends, and industry best practices
-- [Case Studies](/case-studies): Real-world success stories and client transformations
+- [Case Studies](/how-we-work/case-studies): Real-world success stories and client transformations
 - [Careers](/careers): Join our team of digital marketing and technology experts
 - [Partners](/partners): Strategic partnerships and technology integrations
 - [Events](/events): Industry events, webinars, and networking opportunities
@@ -75,4 +75,4 @@
 - Business Development: business@skyfalke.com
 - Technical Support: support@skyfalke.com
 - Careers: careers@skyfalke.com
-- Last Updated: 2025-01-27
+- Last Updated: 2026-07-06

@@ -98,14 +98,14 @@ const SEOHead = ({
         <meta name="format-detection" content="telephone=no" />
         <meta name="theme-color" content="#303661" />
         
-        {/* Geo Meta Tags */}
-        <meta name="geo.region" content="Global" />
-        <meta name="geo.position" content="0;0" />
-        <meta name="ICBM" content="0, 0" />
+        {/* Geo Meta Tags — Nairobi, Kenya */}
+        <meta name="geo.region" content="KE-30" />
+        <meta name="geo.placename" content="Nairobi, Kenya" />
+        <meta name="geo.position" content="-1.286389;36.817223" />
+        <meta name="ICBM" content="-1.286389, 36.817223" />
         
         {/* Verification Meta Tags */}
         <meta name="google-site-verification" content="T8MkAO4SIbD1tIYOfP4vQUg9wvKb_mZIdYHqQYi9n3E" />
-        <meta name="msvalidate.01" content="your-bing-verification-code" />
         
         {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://www.google-analytics.com" />

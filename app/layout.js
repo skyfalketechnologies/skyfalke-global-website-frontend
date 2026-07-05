@@ -1,7 +1,26 @@
 import './globals.css';
+import localFont from 'next/font/local';
 import Providers from './providers';
 import { getGlobalSchemaJsonLd } from '@/utils/schemaMarkup';
 import { SITE_META_DESCRIPTION } from '@/utils/metadata';
+
+const nexaLight = localFont({
+  src: '../public/font/Nexa-ExtraLight.ttf',
+  weight: '200',
+  style: 'normal',
+  display: 'swap',
+  variable: '--font-nexa-light',
+  preload: true,
+});
+
+const nexaHeavy = localFont({
+  src: '../public/font/Nexa-Heavy.ttf',
+  weight: '800',
+  style: 'normal',
+  display: 'swap',
+  variable: '--font-nexa-heavy',
+  preload: true,
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
 const globalJsonLd = getGlobalSchemaJsonLd(siteUrl);
@@ -65,6 +84,7 @@ export const metadata = {
   alternates: {
     canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
   },
+  manifest: '/manifest.json',
   // Favicon / app icons for all pages
   icons: {
     icon: [
@@ -82,7 +102,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${nexaLight.variable} ${nexaHeavy.variable}`}>
       <body className="font-sans">
         <script
           type="application/ld+json"

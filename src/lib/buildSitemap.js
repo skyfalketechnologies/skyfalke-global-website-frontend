@@ -40,7 +40,6 @@ export const getStaticPaths = () => {
     '/industries',
     '/site-map',
     '/blog',
-    '/case-studies',
     '/shop',
     '/careers',
     '/contact',
@@ -124,13 +123,23 @@ const changefreqFor = (url) => {
   if (url.endsWith('/careers') || url.includes('/careers/')) return 'weekly';
   if (url.includes('/shop')) return 'daily';
   if (url === getSiteBaseUrl() || url === `${getSiteBaseUrl()}/`) return 'daily';
+  if (url.includes('/blog/')) return 'weekly';
   return 'monthly';
+};
+
+// Static pages change infrequently; use a fixed deploy-time date so Google
+// doesn't see every page as "just modified" on every crawl.
+const STATIC_LASTMOD = '2026-07-06';
+
+const lastmodFor = (url, baseUrl, dynamicDate) => {
+  if (url === baseUrl || url === `${baseUrl}/`) return new Date().toISOString().split('T')[0];
+  if (dynamicDate) return dynamicDate;
+  return STATIC_LASTMOD;
 };
 
 export const buildSitemapXml = async () => {
   const baseUrl = getSiteBaseUrl();
   const apiBase = getApiBaseUrl().replace(/\/+$/, '');
-  const now = new Date().toISOString();
 
   const staticUrls = getStaticPaths().map((path) =>
     path === '/' ? baseUrl : `${baseUrl}${path}`
@@ -161,13 +170,16 @@ export const buildSitemapXml = async () => {
 
   const allUrls = [...new Set([...staticUrls, ...dynamicUrls])];
 
+  const isDynamic = new Set(dynamicUrls);
+
   const body = allUrls
     .map((url) => {
       const priority = priorityFor(url, baseUrl);
       const changefreq = changefreqFor(url);
+      const lastmod = lastmodFor(url, baseUrl, isDynamic.has(url) ? STATIC_LASTMOD : null);
       return `  <url>
     <loc>${url}</loc>
-    <lastmod>${now}</lastmod>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`;

@@ -10,11 +10,11 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['Nexa', 'sans-serif'],
-        'serif': ['Nexa-Heavy', 'Nexa', 'sans-serif'],
-        'nexa': ['Nexa', 'sans-serif'],
-        'nexa-light': ['Nexa-ExtraLight', 'Nexa', 'sans-serif'],
-        'nexa-heavy': ['Nexa-Heavy', 'Nexa', 'sans-serif'],
+        'sans': ['var(--font-nexa-light)', 'sans-serif'],
+        'serif': ['var(--font-nexa-heavy)', 'var(--font-nexa-light)', 'sans-serif'],
+        'nexa': ['var(--font-nexa-light)', 'sans-serif'],
+        'nexa-light': ['var(--font-nexa-light)', 'sans-serif'],
+        'nexa-heavy': ['var(--font-nexa-heavy)', 'var(--font-nexa-light)', 'sans-serif'],
       },
       colors: {
         // Brand Colors
