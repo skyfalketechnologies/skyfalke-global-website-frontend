@@ -50,6 +50,56 @@ const api = axios.create({
   },
 });
 
+const isNetworkError = (error) => {
+  return (
+    error?.code === 'ERR_NETWORK' ||
+    error?.message?.includes('Network Error') ||
+    !error?.response
+  );
+};
+
+const canRetryOnSameOrigin = (url, config = {}) => {
+  if (typeof window === 'undefined') return false;
+  if (!url?.startsWith('/api/')) return false;
+  if (config.__skipSameOriginRetry) return false;
+
+  // In local development when the API base URL points to localhost,
+  // retrying through same-origin usually hits the same dead backend via proxy
+  // and turns a network error into a noisy 500.
+  const baseUrl = api.defaults.baseURL || '';
+  const isLocalApiBase =
+    baseUrl.includes('localhost:5000') ||
+    baseUrl.includes('127.0.0.1:5000');
+
+  if (process.env.NODE_ENV === 'development' && isLocalApiBase) {
+    return false;
+  }
+
+  return true;
+};
+
+const requestSameOrigin = async (url, method = 'get', data = null, config = {}) => {
+  const retryConfig = {
+    ...config,
+    __skipSameOriginRetry: true,
+  };
+
+  switch (method.toLowerCase()) {
+    case 'get':
+      return axios.get(url, retryConfig);
+    case 'post':
+      return axios.post(url, data, retryConfig);
+    case 'put':
+      return axios.put(url, data, retryConfig);
+    case 'patch':
+      return axios.patch(url, data, retryConfig);
+    case 'delete':
+      return axios.delete(url, retryConfig);
+    default:
+      throw new Error(`Unsupported HTTP method: ${method}`);
+  }
+};
+
 // Note: Axios adapter override removed - console logging is already suppressed in index.js
 
 // Request interceptor to add auth token
@@ -85,47 +135,13 @@ api.interceptors.response.use(
       // Don't redirect on SSL errors, let the calling component handle it
     }
     
-    // Handle Network Errors
+    // Network / no response: expected when API is offline locally — keep logs minimal (debug only)
     if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response) {
-      // Extract all available error information
-      const errorCode = error.code || 'ERR_NETWORK';
-      const errorMessage = error.message || 'Network request failed - API server may be unavailable';
-      const apiUrl = error.config?.baseURL || getApiBaseUrl();
       const endpoint = error.config?.url || 'Unknown';
       const method = error.config?.method?.toUpperCase() || 'GET';
-      const fullUrl = error.config ? `${error.config.baseURL || ''}${error.config.url || ''}` : 'Unknown';
-      
-      const errorDetails = {
-        type: 'Network Error',
-        code: errorCode,
-        message: errorMessage,
-        apiUrl: apiUrl,
-        endpoint: endpoint,
-        method: method,
-        fullUrl: fullUrl,
-        timestamp: new Date().toISOString(),
-        suggestion: 'Please ensure the API server is running and accessible',
-        // Include additional error properties if available
-        ...(error.name && { errorName: error.name }),
-        ...(error.stack && { stack: error.stack.split('\n').slice(0, 3).join('\n') })
-      };
-      
-      // Only log if in development to avoid console spam
-      // Use console.warn instead of console.error for network errors as they're often expected
-      // (e.g., when API server is not running during development)
-      if (process.env.NODE_ENV === 'development') {
-        // Log with explicit structure but use warn level (less alarming)
-        console.warn('Network Error (API may be unavailable):', {
-          endpoint: errorDetails.endpoint,
-          method: errorDetails.method,
-          suggestion: errorDetails.suggestion
-        });
-        // Skip logger.error for network errors since we already logged to console.warn
-        // This prevents duplicate/empty error logs
+      if (process.env.NODE_ENV === 'development' && typeof console !== 'undefined' && console.debug) {
+        console.debug('[API] Unreachable:', method, endpoint);
       }
-      
-      // Don't throw for network errors in production - let components handle gracefully
-      // This prevents the app from breaking when API is temporarily unavailable
     }
     
     // Handle 401 Unauthorized
@@ -225,6 +241,19 @@ const throttledRequest = async (url, method = 'get', data = null, config = {}) =
   } catch (error) {
     // Remove from queue on error to allow retry
     requestQueue.delete(requestKey);
+
+    // If direct API host fails, retry once on same-origin /api endpoint.
+    // This allows Next.js rewrites to proxy requests and avoids CORS/cert issues.
+    if (isNetworkError(error) && canRetryOnSameOrigin(url, config)) {
+      try {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[API] Network error on base URL, retrying via same-origin:', url);
+        }
+        return await requestSameOrigin(url, method, data, config);
+      } catch (retryError) {
+        throw retryError;
+      }
+    }
     
     // For network errors, the interceptor has already logged them appropriately
     // Just re-throw to let components handle gracefully

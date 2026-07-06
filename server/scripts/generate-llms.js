@@ -21,7 +21,7 @@ const OUTPUT_PATH = path.join(__dirname, '../../client/public/llms.txt');
 const HIGH_PRIORITY_PAGES = {
   // Core pages
   '/': 'Homepage with company overview and key services',
-  '/about': 'Company background, mission, and team information',
+  '/about-us': 'Company background, mission, and team information',
   '/services': 'Comprehensive digital marketing and technology solutions',
   '/cloud': 'Sustainable hosting and cloud infrastructure services',
   '/contact': 'Get in touch for consultations and support',
@@ -128,7 +128,7 @@ async function generateLLMSTxt() {
 `;
 
   // Add core documentation
-  const corePages = ['/', '/about', '/services', '/cloud', '/contact'];
+  const corePages = ['/', '/about-us', '/services', '/cloud', '/contact'];
   corePages.forEach(page => {
     if (HIGH_PRIORITY_PAGES[page]) {
       content += `- [${getPageTitle(page)}](${page}): ${HIGH_PRIORITY_PAGES[page]}\n`;

@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const employeeSchema = new mongoose.Schema({
+  /** Login user linked to this employee record (Employee Portal) */
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    sparse: true
+  },
   employeeId: {
     type: String,
     unique: true,
@@ -114,6 +120,13 @@ const employeeSchema = new mongoose.Schema({
     }
   }],
   skills: [String],
+  /** Annual / sick / etc. balances per calendar year */
+  leaveBalances: [{
+    year: { type: Number, required: true },
+    annual: { allocated: { type: Number, default: 0 }, used: { type: Number, default: 0 } },
+    sick: { allocated: { type: Number, default: 0 }, used: { type: Number, default: 0 } },
+    personal: { allocated: { type: Number, default: 0 }, used: { type: Number, default: 0 } }
+  }],
   notes: String,
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -141,6 +154,7 @@ employeeSchema.virtual('fullName').get(function() {
 // Indexes
 // Note: employeeId index is automatically created by unique: true in schema
 employeeSchema.index({ 'personalInfo.email': 1 });
+employeeSchema.index({ user: 1 });
 employeeSchema.index({ 'employmentInfo.department': 1 });
 employeeSchema.index({ 'employmentInfo.status': 1 });
 employeeSchema.index({ 'employmentInfo.hireDate': -1 });

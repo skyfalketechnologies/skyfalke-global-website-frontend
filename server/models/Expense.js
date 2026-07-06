@@ -86,8 +86,8 @@ const expenseSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Generate expense number
-expenseSchema.pre('save', async function(next) {
+// Generate expense number before validation (required runs after pre('validate'))
+expenseSchema.pre('validate', async function() {
   if (this.isNew && !this.expenseNumber) {
     const year = new Date().getFullYear();
     const count = await mongoose.model('Expense').countDocuments({
@@ -98,7 +98,6 @@ expenseSchema.pre('save', async function(next) {
     });
     this.expenseNumber = `EXP${year}${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // Indexes

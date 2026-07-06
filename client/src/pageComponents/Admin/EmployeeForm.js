@@ -8,7 +8,7 @@ import { adminApiGet, adminApiPost, adminApiPut } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 const EmployeeForm = () => {
-  const { isSuperAdmin } = useAuth();
+  const { canAccessHRModule } = useAuth();
   const router = useRouter();
   const params = useParams();
   const id = params?.id;
@@ -57,13 +57,29 @@ const EmployeeForm = () => {
   });
 
   const [newSkill, setNewSkill] = useState('');
+  const [linkableUsers, setLinkableUsers] = useState([]);
+  const [linkedUserId, setLinkedUserId] = useState('');
 
   useEffect(() => {
     if (isEditing) {
       fetchEmployee();
     }
     fetchEmployees();
+    fetchLinkableUsers();
   }, [id]);
+
+  const fetchLinkableUsers = async () => {
+    try {
+      const response = await adminApiGet('/api/hr/linkable-users');
+      if (response.success && response.data?.success) {
+        setLinkableUsers(response.data.data || []);
+      } else if (response.success && Array.isArray(response.data?.data)) {
+        setLinkableUsers(response.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching linkable users:', err);
+    }
+  };
 
   const fetchEmployee = async () => {
     try {
@@ -106,6 +122,7 @@ const EmployeeForm = () => {
           skills: employee.skills || [],
           notes: employee.notes || ''
         });
+        setLinkedUserId(employee.user?._id ? String(employee.user._id) : '');
       }
     } catch (err) {
       setError('Failed to fetch employee details');
@@ -218,6 +235,12 @@ const EmployeeForm = () => {
         }
       };
 
+      if (linkedUserId) {
+        submitData.user = linkedUserId;
+      } else if (isEditing) {
+        submitData.user = null;
+      }
+
       let response;
       if (isEditing) {
         response = await adminApiPut(`/api/hr/employees/${id}`, submitData);
@@ -241,14 +264,13 @@ const EmployeeForm = () => {
     }
   };
 
-  // Check if user is super admin before allowing access
   useEffect(() => {
-    if (!isSuperAdmin()) {
-      alert('Access denied. Super admin role required to create or edit employees.');
+    if (!canAccessHRModule()) {
+      alert('Access denied. HR or Admin role required to create or edit employees.');
       router.push('/system/dashboard/hr/employees');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuperAdmin]);
+  }, [canAccessHRModule]);
 
   if (loading) {
     return (
@@ -258,12 +280,12 @@ const EmployeeForm = () => {
     );
   }
 
-  if (!isSuperAdmin()) {
+  if (!canAccessHRModule()) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-red-600 font-semibold">Access Denied</p>
-          <p className="text-gray-600 mt-2">Super admin role required to access this page.</p>
+          <p className="text-gray-600 mt-2">HR or Admin role required to access this page.</p>
         </div>
       </div>
     );
@@ -491,6 +513,38 @@ const EmployeeForm = () => {
                 />
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Portal: link CMS user account */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Employee Portal login</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Link a staff user account so this person can use the Employee Portal (leave, directory, etc.). The
+            account email should match your HR policy; role is usually <strong>employee</strong>.
+          </p>
+          <div className="max-w-xl">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Linked user account
+            </label>
+            <select
+              value={linkedUserId}
+              onChange={(e) => setLinkedUserId(e.target.value)}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-900"
+            >
+              <option value="">No portal account linked</option>
+              {linkableUsers.map((u) => {
+                const taken =
+                  u.employeeProfile &&
+                  (!isEditing || String(u.employeeProfile) !== String(id));
+                return (
+                  <option key={u._id} value={u._id} disabled={!!taken}>
+                    {u.name} ({u.email}) — {u.role}
+                    {taken ? ' [already linked]' : ''}
+                  </option>
+                );
+              })}
+            </select>
           </div>
         </div>
 

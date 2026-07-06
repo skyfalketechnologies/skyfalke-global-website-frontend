@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaPlus, FaEdit, FaCheck, FaTimes, FaSpinner, FaSearch, FaFileInvoice } from 'react-icons/fa';
@@ -8,7 +9,9 @@ import { adminApiGet, adminApiPost } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Expenses = () => {
-  const { isSuperAdmin } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -21,11 +24,7 @@ const Expenses = () => {
     search: '' 
   });
 
-  useEffect(() => {
-    fetchExpenses();
-  }, [page, filters]);
-
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -43,7 +42,24 @@ const Expenses = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, filters]);
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status) {
+      setFilters((prev) => ({ ...prev, status }));
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
+    fetchExpenses();
+  }, [authLoading, canAccessAccounting, fetchExpenses]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) router.replace('/system/dashboard');
+  }, [authLoading, canAccessAccounting, router]);
 
   const handleApprove = async (id) => {
     if (window.confirm('Are you sure you want to approve this expense?')) {
@@ -58,6 +74,14 @@ const Expenses = () => {
       }
     }
   };
+
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
 
   if (loading && expenses.length === 0) {
     return (
@@ -230,7 +254,7 @@ const Expenses = () => {
                     >
                       <FaEdit />
                     </Link>
-                    {expense.status === 'pending' && isSuperAdmin() && (
+                    {expense.status === 'pending' && canAccessAccounting() && (
                       <button
                         onClick={() => handleApprove(expense._id)}
                         className="text-green-600 hover:text-green-900"

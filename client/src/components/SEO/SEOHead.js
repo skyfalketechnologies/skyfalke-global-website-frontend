@@ -1,14 +1,19 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import { Helmet } from 'react-helmet-async';
 import SchemaMarkup from './SchemaMarkup';
+import { SITE_META_DESCRIPTION } from '@/utils/metadata';
+
+const HOME_OG_DESCRIPTION = SITE_META_DESCRIPTION;
+const HOME_TWITTER_DESCRIPTION = SITE_META_DESCRIPTION;
 
 const SEOHead = ({
-  title = "Skyfalke • Leading Digital Marketing & Technology Solutions Partner in Africa | Sustainable Cloud Hosting & AI Business Tools",
-  description = "Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics. Serving Africa & beyond with eco-friendly solutions.",
-  keywords = "digital marketing agency Africa, sustainable cloud hosting Kenya, AI business solutions, eco-friendly web hosting, renewable energy servers, digital transformation Africa, IT consultancy Kenya, creative services Africa, data analytics, business intelligence, SEO services, social media marketing, web development, mobile app development, cloud computing, cybersecurity, digital advertising, content marketing, brand design, UI UX design, performance optimization, marketing automation, lead generation, e-commerce solutions, digital strategy, technology consulting, startup solutions, enterprise IT support, green technology, carbon-neutral hosting, sustainable business solutions",
-  image = "/favicon-512x512.png",
+  title = "Digital Growth Partner in Africa | Skyfalke",
+  description = SITE_META_DESCRIPTION,
+  keywords = "digital growth partner, business automation, SEO and ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke",
+  image = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good",
   url = "https://skyfalke.com",
   type = "website",
   pageType = "home",
@@ -17,81 +22,92 @@ const SEOHead = ({
   faqs = [],
   customSchemas = [],
   noIndex = false,
+  skipBaseMeta = false,
   canonical = null,
-  ogTitle = null
+  ogTitle = "Digital Growth Partner in Africa | Skyfalke",
+  ogDescription,
+  twitterDescription,
+  twitterTitle = null
 }) => {
-  const fullUrl = canonical || `${url}${typeof window !== 'undefined' ? window.location.pathname : ''}`;
+  const pathname = usePathname();
+  const fullUrl = canonical || `${url}${pathname || ''}`;
   const fullImageUrl = image && typeof image === 'string' && image.startsWith('http') ? image : `${url}${image || ''}`;
+  const resolvedOgTitle = ogTitle || title;
+  const resolvedTwitterTitle = twitterTitle || resolvedOgTitle;
+  const resolvedOgDescription =
+    ogDescription ?? (pageType === 'home' ? HOME_OG_DESCRIPTION : description);
+  const resolvedTwitterDescription =
+    twitterDescription ?? (pageType === 'home' ? HOME_TWITTER_DESCRIPTION : description);
 
   return (
     <>
       <Helmet>
-        {/* Basic Meta Tags */}
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <meta name="keywords" content={keywords} />
-        <meta name="author" content="Skyfalke" />
-        
-        {/* Canonical URL */}
-        <link rel="canonical" href={fullUrl} />
-        
-        {/* Robots Meta */}
-        {noIndex ? (
-          <meta name="robots" content="noindex, nofollow" />
-        ) : (
-          <meta name="robots" content="index, follow" />
-        )}
-        
-        {/* Open Graph Meta Tags */}
-        <meta property="og:title" content={ogTitle || title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:type" content={type} />
-        <meta property="og:url" content={fullUrl} />
-        <meta property="og:image" content={fullImageUrl} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={description} />
-        <meta property="og:site_name" content="Skyfalke" />
-        <meta property="og:locale" content="en_US" />
-        
-        {/* Additional Open Graph tags for articles */}
-        {type === 'article' && (
+        {!skipBaseMeta ? (
           <>
-            <meta property="article:published_time" content={data.publishedAt} />
-            <meta property="article:author" content={data.author?.name || 'Skyfalke Team'} />
-            <meta property="article:section" content={data.category} />
-            {data.tags && data.tags.map((tag, index) => (
-              <meta key={index} property="article:tag" content={tag} />
-            ))}
+            {/* Basic Meta Tags */}
+            <title>{title}</title>
+            <meta name="description" content={description} />
+            <meta name="keywords" content={keywords} />
+            <meta name="author" content="Skyfalke" />
+
+            {/* Canonical URL */}
+            <link rel="canonical" href={fullUrl} />
+
+            {/* Only emit robots when blocking — public pages use Next.js `metadata.robots` */}
+            {noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}
+
+            {/* Open Graph Meta Tags */}
+            <meta property="og:title" content={resolvedOgTitle} />
+            <meta property="og:description" content={resolvedOgDescription} />
+            <meta property="og:type" content={type} />
+            <meta property="og:url" content={fullUrl} />
+            <meta property="og:image" content={fullImageUrl} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content="Skyfalke - digital growth partner for websites, marketing, automation, and AI strategy" />
+            <meta property="og:site_name" content="Skyfalke" />
+            <meta property="og:locale" content="en_US" />
+
+            {/* Additional Open Graph tags for articles */}
+            {type === 'article' && (
+              <>
+                <meta property="article:published_time" content={data.publishedAt} />
+                <meta property="article:author" content={data.author?.name || 'Skyfalke Team'} />
+                <meta property="article:section" content={data.category} />
+                {data.tags && data.tags.map((tag, index) => (
+                  <meta key={index} property="article:tag" content={tag} />
+                ))}
+              </>
+            )}
+
+            {/* Twitter Card Meta Tags */}
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={resolvedTwitterTitle} />
+            <meta name="twitter:description" content={resolvedTwitterDescription} />
+            <meta name="twitter:image" content={fullImageUrl} />
+            <meta name="twitter:image:alt" content="Skyfalke — digital growth partner for websites, marketing, automation, and AI strategy" />
+            <meta name="twitter:site" content="@skyfalke" />
+            <meta name="twitter:creator" content="@skyfalke" />
           </>
-        )}
-        
-        {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={fullImageUrl} />
-        <meta name="twitter:image:alt" content={description} />
-        <meta name="twitter:site" content="@skyfalke" />
-        <meta name="twitter:creator" content="@skyfalke" />
-        
+        ) : noIndex ? (
+          <meta name="robots" content="noindex, nofollow" />
+        ) : null}
+
         {/* Additional Meta Tags */}
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="theme-color" content="#303661" />
         
-        {/* Geo Meta Tags */}
-        <meta name="geo.region" content="Global" />
-        <meta name="geo.position" content="0;0" />
-        <meta name="ICBM" content="0, 0" />
+        {/* Geo Meta Tags — Nairobi, Kenya */}
+        <meta name="geo.region" content="KE-30" />
+        <meta name="geo.placename" content="Nairobi, Kenya" />
+        <meta name="geo.position" content="-1.286389;36.817223" />
+        <meta name="ICBM" content="-1.286389, 36.817223" />
         
         {/* Verification Meta Tags */}
-        <meta name="google-site-verification" content="your-google-verification-code" />
-        <meta name="msvalidate.01" content="your-bing-verification-code" />
+        <meta name="google-site-verification" content="T8MkAO4SIbD1tIYOfP4vQUg9wvKb_mZIdYHqQYi9n3E" />
         
         {/* Preconnect to external domains for performance */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.google-analytics.com" />
         
         {/* Enhanced Favicon and Icons */}

@@ -1,14 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const { adminAuth, superAdminAuth } = require('../middleware/auth');
+const { adminAuth, superAdminAuth, hrManagementAuth } = require('../middleware/auth');
 const Employee = require('../models/Employee');
+const User = require('../models/User');
 const Payroll = require('../models/Payroll');
 const Attendance = require('../models/Attendance');
+const { syncEmployeeUserLink } = require('../utils/hrEmployeeLink');
+
+// Staff accounts available to link to an Employee record (portal login)
+router.get('/linkable-users', hrManagementAuth, async (req, res) => {
+  try {
+    const users = await User.find({ isActive: true })
+      .select('name email role employeeProfile')
+      .sort({ name: 1 })
+      .lean();
+    res.json({ success: true, data: users });
+  } catch (error) {
+    console.error('linkable-users error:', error);
+    res.status(500).json({ success: false, message: 'Failed to load users' });
+  }
+});
 
 // ========== EMPLOYEE ROUTES ==========
 
 // Get all employees
-router.get('/employees', superAdminAuth, async (req, res) => {
+router.get('/employees', hrManagementAuth, async (req, res) => {
   try {
     const { page = 1, limit = 10, status, department, search } = req.query;
     const query = {};
@@ -26,6 +42,7 @@ router.get('/employees', superAdminAuth, async (req, res) => {
 
     const employees = await Employee.find(query)
       .populate('employmentInfo.manager', 'personalInfo.firstName personalInfo.lastName employeeId')
+      .populate('user', 'name email role')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -49,11 +66,12 @@ router.get('/employees', superAdminAuth, async (req, res) => {
 });
 
 // Get single employee
-router.get('/employees/:id', superAdminAuth, async (req, res) => {
+router.get('/employees/:id', hrManagementAuth, async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id)
       .populate('employmentInfo.manager', 'personalInfo.firstName personalInfo.lastName employeeId')
-      .populate('createdBy', 'name email');
+      .populate('createdBy', 'name email')
+      .populate('user', 'name email role employeeProfile');
 
     if (!employee) {
       return res.status(404).json({ success: false, message: 'Employee not found' });
@@ -67,14 +85,20 @@ router.get('/employees/:id', superAdminAuth, async (req, res) => {
 });
 
 // Create employee
-router.post('/employees', superAdminAuth, async (req, res) => {
+router.post('/employees', hrManagementAuth, async (req, res) => {
   try {
+    const { user: linkUserId, ...body } = req.body;
     const employee = new Employee({
-      ...req.body,
+      ...body,
       createdBy: req.user._id
     });
     await employee.save();
-    res.status(201).json({ success: true, data: employee });
+    if (linkUserId !== undefined) {
+      await syncEmployeeUserLink(employee._id, linkUserId || null);
+    }
+    const populated = await Employee.findById(employee._id)
+      .populate('user', 'name email role employeeProfile');
+    res.status(201).json({ success: true, data: populated });
   } catch (error) {
     console.error('Create employee error:', error);
     res.status(400).json({ success: false, message: error.message });
@@ -82,17 +106,24 @@ router.post('/employees', superAdminAuth, async (req, res) => {
 });
 
 // Update employee
-router.put('/employees/:id', superAdminAuth, async (req, res) => {
+router.put('/employees/:id', hrManagementAuth, async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const hasUserField = Object.prototype.hasOwnProperty.call(req.body, 'user');
+    const { user: linkUserId, ...body } = req.body;
+    const employee = await Employee.findByIdAndUpdate(req.params.id, body, {
+      new: true,
+      runValidators: true
+    });
     if (!employee) {
       return res.status(404).json({ success: false, message: 'Employee not found' });
     }
-    res.json({ success: true, data: employee });
+    if (hasUserField) {
+      await syncEmployeeUserLink(employee._id, linkUserId || null);
+    }
+    const populated = await Employee.findById(employee._id)
+      .populate('employmentInfo.manager', 'personalInfo.firstName personalInfo.lastName employeeId')
+      .populate('user', 'name email role employeeProfile');
+    res.json({ success: true, data: populated });
   } catch (error) {
     console.error('Update employee error:', error);
     res.status(400).json({ success: false, message: error.message });
@@ -100,12 +131,14 @@ router.put('/employees/:id', superAdminAuth, async (req, res) => {
 });
 
 // Delete employee
-router.delete('/employees/:id', superAdminAuth, async (req, res) => {
+router.delete('/employees/:id', hrManagementAuth, async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndDelete(req.params.id);
-    if (!employee) {
+    const existing = await Employee.findById(req.params.id);
+    if (!existing) {
       return res.status(404).json({ success: false, message: 'Employee not found' });
     }
+    await syncEmployeeUserLink(req.params.id, null);
+    await Employee.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Employee deleted' });
   } catch (error) {
     console.error('Delete employee error:', error);
@@ -114,7 +147,7 @@ router.delete('/employees/:id', superAdminAuth, async (req, res) => {
 });
 
 // Get employee stats
-router.get('/employees/stats', superAdminAuth, async (req, res) => {
+router.get('/employees/stats', hrManagementAuth, async (req, res) => {
   try {
     const stats = await Employee.aggregate([
       {
@@ -323,7 +356,7 @@ router.get('/payrolls/stats', superAdminAuth, async (req, res) => {
 // ========== ATTENDANCE ROUTES ==========
 
 // Get all attendance records
-router.get('/attendance', superAdminAuth, async (req, res) => {
+router.get('/attendance', hrManagementAuth, async (req, res) => {
   try {
     const { page = 1, limit = 10, employee, startDate, endDate, status } = req.query;
     const query = {};
@@ -362,7 +395,7 @@ router.get('/attendance', superAdminAuth, async (req, res) => {
 });
 
 // Get single attendance record
-router.get('/attendance/:id', superAdminAuth, async (req, res) => {
+router.get('/attendance/:id', hrManagementAuth, async (req, res) => {
   try {
     const attendance = await Attendance.findById(req.params.id)
       .populate('employee')
@@ -380,7 +413,7 @@ router.get('/attendance/:id', superAdminAuth, async (req, res) => {
 });
 
 // Create attendance record
-router.post('/attendance', superAdminAuth, async (req, res) => {
+router.post('/attendance', hrManagementAuth, async (req, res) => {
   try {
     const attendance = new Attendance({
       ...req.body,
@@ -396,7 +429,7 @@ router.post('/attendance', superAdminAuth, async (req, res) => {
 });
 
 // Update attendance record
-router.put('/attendance/:id', superAdminAuth, async (req, res) => {
+router.put('/attendance/:id', hrManagementAuth, async (req, res) => {
   try {
     const attendance = await Attendance.findByIdAndUpdate(
       req.params.id,
@@ -415,7 +448,7 @@ router.put('/attendance/:id', superAdminAuth, async (req, res) => {
 });
 
 // Get attendance stats
-router.get('/attendance/stats', superAdminAuth, async (req, res) => {
+router.get('/attendance/stats', hrManagementAuth, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
     const query = {};

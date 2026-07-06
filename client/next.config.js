@@ -11,8 +11,35 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'apis.mwangikinyanjuiadvocates.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
+  },
+  async redirects() {
+    return [
+      {
+        source: '/about',
+        destination: '/about-us',
+        permanent: true,
+      },
+      {
+        source: '/about/',
+        destination: '/about-us',
+        permanent: true,
+      },
+      {
+        source: '/case-studies/:slug',
+        destination: '/how-we-work/case-studies/:slug',
+        permanent: true,
+      },
+    ];
   },
   // Proxy API requests to backend
   async rewrites() {

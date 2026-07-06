@@ -9,22 +9,40 @@ import { formatBlogDate, getReadingTime } from '../utils/formatters';
  * Blog Card Component - Displays blog post preview
  * SEO-friendly with proper semantic HTML
  */
+// Request a right-sized, auto-format rendition from ImageKit instead of the
+// full-resolution original; non-ImageKit URLs pass through untouched.
+const optimizeImageUrl = (url, width) => {
+  if (!url || !url.includes('ik.imagekit.io') || url.includes('tr=')) return url;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}tr=w-${width},f-auto,q-auto:good`;
+};
+
 const BlogCard = ({ post, featured = false }) => {
   if (!post) return null;
 
   const cardClasses = featured
     ? 'bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300'
     : 'bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300';
+  const imageWrapperClasses = featured
+    ? 'block relative overflow-hidden bg-slate-100 p-2 sm:p-3'
+    : 'block relative overflow-hidden';
+  const imageClasses = featured
+    ? 'w-full h-auto max-h-[30rem] object-contain'
+    : 'w-full h-48 object-cover';
+  const imageHoverClasses = featured
+    ? 'transition-opacity duration-300 hover:opacity-95'
+    : 'hover:scale-105 transition-transform duration-300';
 
   return (
     <article className={cardClasses} itemScope itemType="https://schema.org/BlogPosting">
       {post.featuredImage?.url && (
-        <Link href={`/blog/${post.slug}`} className="block relative overflow-hidden">
+        <Link href={`/blog/${post.slug}`} className={imageWrapperClasses}>
           <img
-            src={post.featuredImage.url}
+            src={optimizeImageUrl(post.featuredImage.url, featured ? 1200 : 600)}
             alt={post.title}
-            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+            className={`${imageClasses} ${imageHoverClasses}`}
             loading="lazy"
+            decoding="async"
             itemProp="image"
           />
         </Link>

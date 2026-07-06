@@ -103,11 +103,11 @@ function normalizeImageUrl(imageUrl, defaultImage = 'https://skyfalke.com/images
  */
 function generateMetaTags(data, routeType) {
   let metaTags = '';
-  let title = 'Skyfalke • Leading Digital Marketing & Technology Solutions Partner in Africa';
-  let description = 'Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics. Serving Africa & beyond with eco-friendly solutions.';
-  let image = 'https://skyfalke.com/images/logos/logo.svg';
+  let title = 'Skyfalke | Digital Growth & Automation Systems for Modern Organizations';
+  let description = 'Skyfalke partners with businesses across Africa to drive digital growth through technology, cloud solutions, branding, automation, and sustainable innovation.';
+  let image = 'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp';
   let url = 'https://skyfalke.com';
-  let keywords = 'digital marketing agency Africa, sustainable cloud hosting Kenya, AI business solutions, eco-friendly web hosting, renewable energy servers, digital transformation Africa, IT consultancy Kenya, creative services Africa, data analytics, business intelligence, SEO services, social media marketing, web development, mobile app development, cloud computing, cybersecurity, digital advertising, content marketing, brand design, UI UX design, performance optimization, marketing automation, lead generation, e-commerce solutions, digital strategy, technology consulting, startup solutions, enterprise IT support, green technology, carbon-neutral hosting, sustainable business solutions';
+  let keywords = 'business automation Kenya, digital transformation Africa, AI solutions for SMEs, cloud services Nairobi, workflow automation, digital marketing agency Kenya, enterprise backup, data systems';
   
   // Handle default/static routes with path-based meta tags
   if (routeType === 'default' && data && data.path) {
@@ -116,9 +116,9 @@ function generateMetaTags(data, routeType) {
     
     // Route-specific meta tags
     if (path === '/' || path === '') {
-      title = 'Skyfalke • Helping Businesses Succeed Online';
-      description = 'Skyfalke is a digital firm based in Nairobi, Kenya, offering web hosting, domain registration, cloud computing, IT consultancy, and digital marketing services.';
-      keywords = 'digital firm, marketing agency, advertisement agency, Marketing agency in Nairobi, Marketing agency in Kenya, Marketing agency in Africa, SSL certificates, sectigo, SSL certificates, hosting, eco-friendly web hosting, renewable energy servers, sustainable hosting, domain names, cloud computing, reliable hosting, carbon-neutral hosting, IT consultancy, AI agency, SME business solutions, cloud computing services, digital marketing agency, IT services, business technology solutions, enterprise IT support, technology consulting';
+      title = 'Skyfalke | Digital Growth & Automation Systems for Modern Organizations';
+      description = 'Skyfalke partners with businesses across Africa to drive digital growth through technology, cloud solutions, branding, automation, and sustainable innovation.';
+      keywords = 'business automation Kenya, digital transformation Africa, AI solutions for SMEs, cloud services Nairobi, workflow automation, digital marketing agency Kenya, enterprise backup, data systems';
     } else if (path.includes('/about')) {
       title = 'About Us | Skyfalke';
       description = 'Learn about Skyfalke, a leading digital marketing and technology solutions partner in Africa. Our mission, vision, and commitment to sustainable technology.';

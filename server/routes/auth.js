@@ -17,12 +17,16 @@ router.post('/register', dbCheck, async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // Public registration cannot assign privileged roles (super_admin, admin, accounts)
+    const allowedSelfServeRoles = ['editor'];
+    const assignedRole = allowedSelfServeRoles.includes(role) ? role : 'editor';
+
     // Create new user
     const user = new User({
       name,
       email,
       password,
-      role: role || 'editor'
+      role: assignedRole
     });
 
     await user.save();
@@ -91,7 +95,10 @@ router.post('/login', dbCheck, async (req, res) => {
 // Get current user
 router.get('/me', auth, async (req, res) => {
   try {
-    res.json(req.user);
+    const user = await User.findById(req.user._id)
+      .select('-password')
+      .populate('employeeProfile', 'employeeId personalInfo employmentInfo.department employmentInfo.jobTitle employmentInfo.status skills');
+    res.json(user);
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -101,10 +108,20 @@ router.get('/me', auth, async (req, res) => {
 // Update user profile
 router.put('/profile', auth, async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, authorProfile } = req.body;
+    const updateData = { name, email };
+    if (authorProfile && typeof authorProfile === 'object') {
+      updateData.authorProfile = {
+        name: authorProfile.name || '',
+        role: authorProfile.role || '',
+        bio: authorProfile.bio || '',
+        avatar: authorProfile.avatar || '',
+        linkedin: authorProfile.linkedin || ''
+      };
+    }
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { name, email },
+      updateData,
       { new: true, runValidators: true }
     ).select('-password');
 
@@ -240,7 +257,7 @@ router.post('/staff', superAdminAuth, async (req, res) => {
     }
 
     // Validate role
-    const validRoles = ['super_admin', 'admin', 'editor'];
+    const validRoles = ['super_admin', 'admin', 'editor', 'accounts', 'hr', 'employee', 'finance'];
     if (role && !validRoles.includes(role)) {
       return res.status(400).json({ success: false, message: 'Invalid role' });
     }

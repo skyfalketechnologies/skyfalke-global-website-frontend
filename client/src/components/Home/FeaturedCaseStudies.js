@@ -165,7 +165,7 @@ const FeaturedCaseStudies = () => {
                       <span className="text-sm">{study.timeline}</span>
                     </div>
                     <Link
-                      href={`/case-studies/${study.id}`}
+                      href={`/how-we-work/case-studies/${study.slug || study.id}`}
                       className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-300 group/link"
                     >
                       <span className="text-sm">Read More</span>
@@ -203,7 +203,7 @@ const FeaturedCaseStudies = () => {
                 <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
               <Link
-                href="/case-studies"
+                href="/how-we-work/case-studies"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300 group"
               >
                 <span>View All Case Studies</span>

@@ -145,3 +145,78 @@ export async function getJobById(id) {
   }
 }
 
+/**
+ * Get blog listing (server-side)
+ */
+export async function getBlogList({ page = 1, limit = 6, category = '', search = '' } = {}) {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+
+    if (category && category !== 'All') params.append('category', category);
+    if (search) params.append('search', search);
+
+    const response = await serverFetch(`/api/blogs?${params.toString()}`);
+    if (!response) return null;
+
+    const data = response.data || response;
+    return {
+      blogs: data.blogs || [],
+      currentPage: data.currentPage || page,
+      totalPages: data.totalPages || 1,
+      total: data.total || 0,
+    };
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error fetching blog list:', error.message);
+    }
+    return null;
+  }
+}
+
+/**
+ * Get case studies listing (server-side)
+ */
+export async function getCaseStudiesList({
+  page = 1,
+  limit = 6,
+  search = '',
+  industry = '',
+  service = '',
+  featured,
+  sortBy = 'publishedAt',
+  sortOrder = 'desc',
+} = {}) {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      sortBy: String(sortBy),
+      sortOrder: String(sortOrder),
+    });
+
+    if (search) params.append('search', search);
+    if (industry && industry !== 'All') params.append('industry', industry);
+    if (service && service !== 'All') params.append('service', service);
+    if (typeof featured === 'boolean') params.append('featured', String(featured));
+
+    const response = await serverFetch(`/api/case-studies?${params.toString()}`);
+    if (!response) return null;
+
+    const data = response.data || response;
+    const payload = data.data || data;
+
+    return {
+      caseStudies: payload.caseStudies || [],
+      pagination: payload.pagination || null,
+    };
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error fetching case studies list:', error.message);
+    }
+    return null;
+  }
+}
+

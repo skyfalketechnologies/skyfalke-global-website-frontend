@@ -17,7 +17,7 @@ import { adminApiGet } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 const HRDashboard = () => {
-  const { isSuperAdmin } = useAuth();
+  const { canAccessHRModule } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState({
     totalEmployees: 0,
@@ -34,8 +34,8 @@ const HRDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isSuperAdmin()) {
-      alert('Access denied. Super admin role required to access HR Management.');
+    if (!canAccessHRModule()) {
+      alert('Access denied. HR or Admin role required.');
       router.push('/system/dashboard');
       return;
     }

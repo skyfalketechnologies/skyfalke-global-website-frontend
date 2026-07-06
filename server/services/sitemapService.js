@@ -12,6 +12,7 @@ const CaseStudy = require('../models/CaseStudy');
 const Course = require('../models/Course');
 const Event = require('../models/Event');
 const Trainer = require('../models/Trainer');
+const { getMarketingStaticRoutes } = require('../data/marketingStaticRoutes');
 
 class SitemapService {
   constructor() {
@@ -27,61 +28,7 @@ class SitemapService {
     try {
       const currentDate = new Date().toISOString();
 
-      // Static routes
-      const staticRoutes = [
-        { url: '', priority: '1.0', changefreq: 'daily' },
-        { url: '/about', priority: '0.8', changefreq: 'monthly' },
-        { url: '/services', priority: '0.8', changefreq: 'monthly' },
-        { url: '/cloud', priority: '0.8', changefreq: 'monthly' },
-        { url: '/contact', priority: '0.7', changefreq: 'monthly' },
-        { url: '/careers', priority: '0.7', changefreq: 'weekly' },
-        { url: '/shop', priority: '0.8', changefreq: 'daily' },
-        { url: '/case-studies', priority: '0.8', changefreq: 'weekly' },
-        { url: '/blog', priority: '0.8', changefreq: 'weekly' },
-        { url: '/support', priority: '0.6', changefreq: 'monthly' },
-        { url: '/privacy', priority: '0.3', changefreq: 'yearly' },
-        { url: '/terms', priority: '0.3', changefreq: 'yearly' },
-        { url: '/partners', priority: '0.6', changefreq: 'monthly' },
-        { url: '/events', priority: '0.7', changefreq: 'weekly' },
-        { url: '/academy', priority: '0.8', changefreq: 'weekly' },
-        { url: '/schedule-consultation', priority: '0.7', changefreq: 'monthly' },
-        // Solution pages
-        { url: '/services/data-analytics', priority: '0.7', changefreq: 'monthly' },
-        { url: '/services/earned-media', priority: '0.7', changefreq: 'monthly' },
-        { url: '/services/paid-media', priority: '0.7', changefreq: 'monthly' },
-        { url: '/services/creative', priority: '0.7', changefreq: 'monthly' },
-        { url: '/services/business-tools', priority: '0.7', changefreq: 'monthly' },
-        // Data Analytics sub-pages
-        { url: '/services/data-analytics/business-intelligence', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/data-analytics/data-analytics', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/data-analytics/predictive-analytics', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/data-analytics/performance-tracking', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/data-analytics/custom-dashboards', priority: '0.6', changefreq: 'monthly' },
-        // Earned Media sub-pages
-        { url: '/services/earned-media/public-relations', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/earned-media/influencer-marketing', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/earned-media/content-marketing', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/earned-media/social-media-management', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/earned-media/brand-awareness', priority: '0.6', changefreq: 'monthly' },
-        // Paid Media sub-pages
-        { url: '/services/paid-media/google-ads', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/paid-media/social-media-ads', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/paid-media/display-advertising', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/paid-media/video-advertising', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/paid-media/retargeting-campaigns', priority: '0.6', changefreq: 'monthly' },
-        // Creative sub-pages
-        { url: '/services/creative/brand-design', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/creative/ui-ux-design', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/creative/graphic-design', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/creative/video-production', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/creative/content-creation', priority: '0.6', changefreq: 'monthly' },
-        // Business Tools sub-pages
-        { url: '/services/business-tools/seo-tools-analytics', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/business-tools/process-automation', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/business-tools/custom-applications', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/business-tools/business-intelligence', priority: '0.6', changefreq: 'monthly' },
-        { url: '/services/business-tools/performance-optimization', priority: '0.6', changefreq: 'monthly' }
-      ];
+      const staticRoutes = getMarketingStaticRoutes();
 
       console.log('📋 Fetching dynamic content for sitemap...');
 
@@ -230,7 +177,7 @@ class SitemapService {
           : (caseStudy.updatedAt ? new Date(caseStudy.updatedAt).toISOString() : currentDate);
         sitemap += `
   <url>
-    <loc>${this.baseUrl}/case-studies/${caseStudy.slug}</loc>
+    <loc>${this.baseUrl}/how-we-work/case-studies/${caseStudy.slug}</loc>
     <lastmod>${lastMod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

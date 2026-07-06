@@ -125,7 +125,13 @@ const invoiceSchema = new mongoose.Schema({
   sentAt: Date,
   paidAt: Date,
   paymentMethod: String,
-  paymentReference: String
+  paymentReference: String,
+  /** Posted journal when invoice is marked paid (cash-basis recognition) */
+  paymentJournalEntry: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'JournalEntry',
+    default: null
+  }
 }, {
   timestamps: true
 });

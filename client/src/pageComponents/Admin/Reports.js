@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -10,7 +10,8 @@ import { adminApiGet, adminApiPost } from '../../utils/adminApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Reports = () => {
-  const { isSuperAdmin } = useAuth();
+  const router = useRouter();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
@@ -22,16 +23,7 @@ const Reports = () => {
   });
   const [availableAccounts, setAvailableAccounts] = useState([]);
 
-  useEffect(() => {
-    fetchReports();
-    fetchAccounts();
-  }, []);
-
-  if (!isSuperAdmin()) {
-    return <Navigate to="/system/dashboard" replace />;
-  }
-
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
       const response = await adminApiGet('/api/accounting/reports');
@@ -43,23 +35,43 @@ const Reports = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     try {
       const response = await adminApiGet('/api/accounting/accounts?isActive=true');
       if (response.success && response.data) {
-        setAvailableAccounts(response.data.data || []);
+        const payload = response.data.data ?? response.data;
+        setAvailableAccounts(Array.isArray(payload) ? payload : []);
       }
     } catch (error) {
       console.error('Error fetching accounts:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
+    fetchReports();
+    fetchAccounts();
+  }, [authLoading, canAccessAccounting, fetchReports, fetchAccounts]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) router.replace('/system/dashboard');
+  }, [authLoading, canAccessAccounting, router]);
 
   const handleGenerate = async (e) => {
     e.preventDefault();
     try {
-      const response = await adminApiPost('/api/accounting/reports/generate', reportForm);
+      const body = {
+        type: reportForm.type,
+        period: {
+          startDate: reportForm.startDate,
+          endDate: reportForm.endDate
+        },
+        accounts: reportForm.accounts || []
+      };
+      const response = await adminApiPost('/api/accounting/reports/generate', body);
       if (response.success) {
         setShowGenerateModal(false);
         fetchReports();
@@ -101,6 +113,14 @@ const Reports = () => {
         return FaFileAlt;
     }
   };
+
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
 
   if (loading && reports.length === 0) {
     return (
@@ -208,7 +228,7 @@ const Reports = () => {
                   <FaFileAlt className="inline mr-2" />
                   View
                 </Link>
-                {report.status === 'draft' && isSuperAdmin() && (
+                {report.status === 'draft' && canAccessAccounting() && (
                   <button
                     onClick={() => handleApprove(report._id)}
                     className="px-4 py-2 text-sm font-medium text-green-600 hover:text-green-700 border border-green-600 rounded-md hover:bg-green-50"
@@ -263,6 +283,7 @@ const Reports = () => {
                     <option value="balance-sheet">Balance Sheet</option>
                     <option value="cash-flow">Cash Flow</option>
                     <option value="income-statement">Income Statement</option>
+                    <option value="trial-balance">Trial Balance</option>
                     <option value="expense-report">Expense Report</option>
                   </select>
                 </div>

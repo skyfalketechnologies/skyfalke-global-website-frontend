@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { adminAuth } = require('../middleware/auth');
+const { staffProjectsAuth } = require('../middleware/auth');
 const Project = require('../models/Project');
 const Task = require('../models/Task');
 const TaskComment = require('../models/TaskComment');
@@ -11,7 +11,7 @@ const { sendNotificationToProjectMembers, sendNotificationToAdmin } = require('.
 // ========== PROJECT ROUTES ==========
 
 // Get all projects
-router.get('/', adminAuth, async (req, res) => {
+router.get('/', staffProjectsAuth, async (req, res) => {
   try {
     const { page = 1, limit = 20, status, priority, search, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
     const query = {};
@@ -78,7 +78,7 @@ router.get('/', adminAuth, async (req, res) => {
 });
 
 // Get single project
-router.get('/:id', adminAuth, async (req, res) => {
+router.get('/:id', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findOne({
       _id: req.params.id,
@@ -133,7 +133,7 @@ router.get('/:id', adminAuth, async (req, res) => {
 });
 
 // Create project
-router.post('/', adminAuth, async (req, res) => {
+router.post('/', staffProjectsAuth, async (req, res) => {
   try {
     const project = new Project({
       ...req.body,
@@ -161,7 +161,7 @@ router.post('/', adminAuth, async (req, res) => {
 });
 
 // Update project
-router.put('/:id', adminAuth, async (req, res) => {
+router.put('/:id', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     
@@ -234,7 +234,7 @@ router.put('/:id', adminAuth, async (req, res) => {
 });
 
 // Delete project
-router.delete('/:id', adminAuth, async (req, res) => {
+router.delete('/:id', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     
@@ -264,7 +264,7 @@ router.delete('/:id', adminAuth, async (req, res) => {
 });
 
 // Add member to project
-router.post('/:id/members', adminAuth, async (req, res) => {
+router.post('/:id/members', staffProjectsAuth, async (req, res) => {
   try {
     const { userId, role = 'member' } = req.body;
     const project = await Project.findById(req.params.id);
@@ -329,7 +329,7 @@ router.post('/:id/members', adminAuth, async (req, res) => {
 });
 
 // Remove member from project
-router.delete('/:id/members/:memberId', adminAuth, async (req, res) => {
+router.delete('/:id/members/:memberId', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
 
@@ -356,7 +356,7 @@ router.delete('/:id/members/:memberId', adminAuth, async (req, res) => {
 // ========== TASK ROUTES ==========
 
 // Get all tasks for a project
-router.get('/:projectId/tasks', adminAuth, async (req, res) => {
+router.get('/:projectId/tasks', staffProjectsAuth, async (req, res) => {
   try {
     const { status, assignee, priority, section, includeSubtasks = 'true' } = req.query;
     const project = await Project.findById(req.params.projectId);
@@ -405,7 +405,7 @@ router.get('/:projectId/tasks', adminAuth, async (req, res) => {
 });
 
 // Get single task
-router.get('/:projectId/tasks/:taskId', adminAuth, async (req, res) => {
+router.get('/:projectId/tasks/:taskId', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
     
@@ -441,7 +441,7 @@ router.get('/:projectId/tasks/:taskId', adminAuth, async (req, res) => {
 });
 
 // Create task
-router.post('/:projectId/tasks', adminAuth, async (req, res) => {
+router.post('/:projectId/tasks', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
     
@@ -512,7 +512,7 @@ router.post('/:projectId/tasks', adminAuth, async (req, res) => {
 });
 
 // Update task
-router.put('/:projectId/tasks/:taskId', adminAuth, async (req, res) => {
+router.put('/:projectId/tasks/:taskId', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
     
@@ -614,7 +614,7 @@ router.put('/:projectId/tasks/:taskId', adminAuth, async (req, res) => {
 });
 
 // Delete task
-router.delete('/:projectId/tasks/:taskId', adminAuth, async (req, res) => {
+router.delete('/:projectId/tasks/:taskId', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
     
@@ -650,7 +650,7 @@ router.delete('/:projectId/tasks/:taskId', adminAuth, async (req, res) => {
 });
 
 // Reorder tasks
-router.post('/:projectId/tasks/reorder', adminAuth, async (req, res) => {
+router.post('/:projectId/tasks/reorder', staffProjectsAuth, async (req, res) => {
   try {
     const { taskIds, section } = req.body;
     const project = await Project.findById(req.params.projectId);
@@ -677,7 +677,7 @@ router.post('/:projectId/tasks/reorder', adminAuth, async (req, res) => {
 // ========== TASK COMMENT ROUTES ==========
 
 // Get comments for a task
-router.get('/:projectId/tasks/:taskId/comments', adminAuth, async (req, res) => {
+router.get('/:projectId/tasks/:taskId/comments', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
     
@@ -708,7 +708,7 @@ router.get('/:projectId/tasks/:taskId/comments', adminAuth, async (req, res) => 
 });
 
 // Create comment
-router.post('/:projectId/tasks/:taskId/comments', adminAuth, async (req, res) => {
+router.post('/:projectId/tasks/:taskId/comments', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
     
@@ -743,7 +743,7 @@ router.post('/:projectId/tasks/:taskId/comments', adminAuth, async (req, res) =>
 });
 
 // Update comment
-router.put('/:projectId/tasks/:taskId/comments/:commentId', adminAuth, async (req, res) => {
+router.put('/:projectId/tasks/:taskId/comments/:commentId', staffProjectsAuth, async (req, res) => {
   try {
     const comment = await TaskComment.findById(req.params.commentId);
 
@@ -770,7 +770,7 @@ router.put('/:projectId/tasks/:taskId/comments/:commentId', adminAuth, async (re
 });
 
 // Delete comment
-router.delete('/:projectId/tasks/:taskId/comments/:commentId', adminAuth, async (req, res) => {
+router.delete('/:projectId/tasks/:taskId/comments/:commentId', staffProjectsAuth, async (req, res) => {
   try {
     const comment = await TaskComment.findById(req.params.commentId);
 
@@ -793,7 +793,7 @@ router.delete('/:projectId/tasks/:taskId/comments/:commentId', adminAuth, async 
 // ========== TASK ATTACHMENT ROUTES ==========
 
 // Get attachments for a task
-router.get('/:projectId/tasks/:taskId/attachments', adminAuth, async (req, res) => {
+router.get('/:projectId/tasks/:taskId/attachments', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
     
@@ -813,7 +813,7 @@ router.get('/:projectId/tasks/:taskId/attachments', adminAuth, async (req, res) 
 });
 
 // Create attachment (URL should be provided, file upload handled separately)
-router.post('/:projectId/tasks/:taskId/attachments', adminAuth, async (req, res) => {
+router.post('/:projectId/tasks/:taskId/attachments', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
     
@@ -847,7 +847,7 @@ router.post('/:projectId/tasks/:taskId/attachments', adminAuth, async (req, res)
 });
 
 // Delete attachment
-router.delete('/:projectId/tasks/:taskId/attachments/:attachmentId', adminAuth, async (req, res) => {
+router.delete('/:projectId/tasks/:taskId/attachments/:attachmentId', staffProjectsAuth, async (req, res) => {
   try {
     const attachment = await TaskAttachment.findById(req.params.attachmentId);
 
@@ -875,7 +875,7 @@ router.delete('/:projectId/tasks/:taskId/attachments/:attachmentId', adminAuth, 
 // ========== STATISTICS ROUTES ==========
 
 // Get project statistics
-router.get('/:id/stats', adminAuth, async (req, res) => {
+router.get('/:id/stats', staffProjectsAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     

@@ -20,12 +20,63 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['super_admin', 'admin', 'editor'],
+    enum: [
+      'super_admin',
+      'admin',
+      'editor',
+      'accounts',
+      'hr',
+      'employee',
+      'finance'
+    ],
     default: 'editor'
+  },
+  /** Linked HR employee profile (directory, leave, org chart) */
+  employeeProfile: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee',
+    default: null
+  },
+  twoFactorEnabled: {
+    type: Boolean,
+    default: false
+  },
+  twoFactorSecret: {
+    type: String,
+    default: '',
+    select: false
   },
   avatar: {
     type: String,
     default: ''
+  },
+  authorProfile: {
+    name: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    role: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: 10000,
+      default: ''
+    },
+    avatar: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    linkedin: {
+      type: String,
+      trim: true,
+      default: ''
+    }
   },
   isActive: {
     type: Boolean,

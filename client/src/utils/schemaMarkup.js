@@ -1,61 +1,93 @@
 // SEO-friendly Schema Markup Generator
 // This utility generates structured data for better search engine understanding
 
+import { SITE_META_DESCRIPTION } from './metadata';
+
+/** Canonical site origin (matches NEXT_PUBLIC_SITE_URL in production). */
+export const SITE_URL =
+  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_SITE_URL) ||
+  'https://skyfalke.com';
+
+const LOGO_URL = `${SITE_URL}/images/logos/logo.svg`;
+
+/**
+ * Global Organization + WebSite graph — injected once in app/layout.js to avoid
+ * duplicating these on every page (client SchemaMarkup adds page-level types only).
+ */
+export function getGlobalSchemaJsonLd(siteUrl = SITE_URL) {
+  const base = siteUrl.replace(/\/$/, '');
+  const logoUrl = `${base}/images/logos/logo.svg`;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${base}/#organization`,
+        name: 'Skyfalke',
+        url: base,
+        logo: {
+          '@type': 'ImageObject',
+          url: logoUrl,
+          width: 200,
+          height: 60,
+        },
+        description: SITE_META_DESCRIPTION,
+        address: {
+          '@type': 'PostalAddress',
+          addressCountry: 'KE',
+        },
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'customer service',
+          email: 'info@skyfalke.com',
+          telephone: '+254-717-797-238',
+          url: `${base}/contact`,
+        },
+        sameAs: [
+          'https://www.linkedin.com/company/skyfalke',
+          'https://twitter.com/skyfalke',
+        ],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${base}/#website`,
+        name: 'Skyfalke',
+        url: base,
+        description: SITE_META_DESCRIPTION,
+        publisher: { '@id': `${base}/#organization` },
+        inLanguage: 'en-US',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${base}/blog?search={search_term_string}`,
+          },
+          'query-input': 'required name=search_term_string',
+        },
+      },
+    ],
+  };
+}
+
 export const generateOrganizationSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Skyfalke",
-    "url": "https://skyfalke.com",
-    "logo": "https://skyfalke.com/images/logos/logo.svg",
-    "description": "Skyfalke offers sustainable and reliable web hosting powered by 100% renewable energy. Enjoy eco-friendly domain registration, server renting, and cloud computing services with top-notch performance.",
-    "foundingDate": "2020",
+    "url": SITE_URL,
+    "logo": {
+      "@type": "ImageObject",
+      "url": LOGO_URL,
+    },
+    "description": SITE_META_DESCRIPTION,
     "address": {
       "@type": "PostalAddress",
-      "addressCountry": "Global",
-      "addressRegion": "Africa"
-    },
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer service",
-      "email": "info@skyfalke.com",
-      "url": "https://skyfalke.com/contact"
+      "addressCountry": "KE"
     },
     "sameAs": [
       "https://www.linkedin.com/company/skyfalke",
-      "https://twitter.com/skyfalke",
-      "https://facebook.com/skyfalke"
-    ],
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "Digital Services",
-      "itemListElement": [
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Green Web Hosting",
-            "description": "Eco-friendly web hosting powered by renewable energy"
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Digital Marketing",
-            "description": "Comprehensive digital marketing solutions"
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Cloud Computing",
-            "description": "Sustainable cloud computing services"
-          }
-        }
-      ]
-    }
+      "https://twitter.com/skyfalke"
+    ]
   };
 };
 
@@ -64,13 +96,13 @@ export const generateWebsiteSchema = () => {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Skyfalke",
-    "url": "https://skyfalke.com",
-    "description": "Sustainable Cloud Solutions Partner In Africa & Beyond",
+    "url": SITE_URL,
+    "description": SITE_META_DESCRIPTION,
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://skyfalke.com/search?q={search_term_string}"
+        "urlTemplate": `${SITE_URL}/blog?search={search_term_string}`
       },
       "query-input": "required name=search_term_string"
     },
@@ -79,7 +111,7 @@ export const generateWebsiteSchema = () => {
       "name": "Skyfalke",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://skyfalke.com/images/logos/logo.svg"
+        "url": LOGO_URL
       }
     }
   };
@@ -126,7 +158,7 @@ export const generateArticleSchema = (article) => {
     "@type": "Article",
     "headline": article.title || "Blog Post",
     "description": article.excerpt || (article.content ? article.content.substring(0, 160) : "Blog post content"),
-    "image": article.featuredImage || "https://skyfalke.com/images/logos/logo.svg",
+    "image": article.featuredImage || LOGO_URL,
     "author": {
       "@type": "Person",
       "name": article.author?.name || "Skyfalke Team"
@@ -136,16 +168,16 @@ export const generateArticleSchema = (article) => {
       "name": "Skyfalke",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://skyfalke.com/images/logos/logo.svg"
+        "url": LOGO_URL
       }
     },
     "datePublished": article.publishedAt || new Date().toISOString(),
     "dateModified": article.updatedAt || new Date().toISOString(),
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://skyfalke.com/blog/${article.slug || 'post'}`
+      "@id": `${SITE_URL}/blog/${article.slug || 'post'}`
     },
-    "keywords": article.tags?.join(", ") || "digital marketing, cloud solutions, green hosting",
+    "keywords": article.tags?.join(", ") || "digital marketing, cloud solutions, web hosting",
     "articleSection": article.category || "Digital Marketing"
   };
 };
@@ -156,12 +188,12 @@ export const generateProductSchema = (product) => {
     return null;
   }
 
-  return {
+  const base = {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": product.name || "Product",
     "description": product.description || "Product description",
-    "image": product.images?.[0]?.url || "https://skyfalke.com/images/logos/logo.svg",
+    "image": product.images?.[0]?.url || LOGO_URL,
     "brand": {
       "@type": "Brand",
       "name": "Skyfalke"
@@ -171,15 +203,18 @@ export const generateProductSchema = (product) => {
       "price": product.price || 0,
       "priceCurrency": "USD",
       "availability": product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      "url": `https://skyfalke.com/shop/product/${product.slug || 'product'}`
+      "url": `${SITE_URL}/shop/product/${product.slug || 'product'}`
     },
     "category": product.category || "General",
-    "aggregateRating": product.rating ? {
+  };
+  if (product.rating) {
+    base.aggregateRating = {
       "@type": "AggregateRating",
       "ratingValue": product.rating,
       "reviewCount": product.reviewCount || 0
-    } : undefined
-  };
+    };
+  }
+  return base;
 };
 
 export const generateJobPostingSchema = (job) => {
@@ -199,7 +234,7 @@ export const generateJobPostingSchema = (job) => {
     "hiringOrganization": {
       "@type": "Organization",
       "name": "Skyfalke",
-      "sameAs": "https://skyfalke.com"
+      "sameAs": SITE_URL
     },
     "jobLocation": {
       "@type": "Place",
@@ -235,7 +270,7 @@ export const generateServiceSchema = (service) => {
     return null;
   }
 
-  return {
+  const schema = {
     "@context": "https://schema.org",
     "@type": "Service",
     "name": service.name || "Service",
@@ -243,20 +278,24 @@ export const generateServiceSchema = (service) => {
     "provider": {
       "@type": "Organization",
       "name": "Skyfalke",
-      "url": "https://skyfalke.com"
+      "url": SITE_URL
     },
     "areaServed": {
       "@type": "Country",
       "name": "Global"
     },
     "serviceType": service.category || "General Service",
-    "offers": {
+  };
+  const price = service.price;
+  if (price != null && Number(price) > 0) {
+    schema.offers = {
       "@type": "Offer",
-      "price": service.price || 0,
+      "price": price,
       "priceCurrency": "USD",
       "availability": "https://schema.org/InStock"
-    }
-  };
+    };
+  }
+  return schema;
 };
 
 export const generateFAQSchema = (faqs) => {
@@ -285,18 +324,13 @@ export const generateLocalBusinessSchema = () => {
     "@type": "LocalBusiness",
     "name": "Skyfalke",
     "description": "Sustainable Cloud Solutions Partner In Africa & Beyond",
-    "url": "https://skyfalke.com",
+    "url": SITE_URL,
     "telephone": "+254-717-797-238",
     "email": "info@skyfalke.com",
     "address": {
       "@type": "PostalAddress",
-      "addressCountry": "Global",
+      "addressCountry": "KE",
       "addressRegion": "Africa"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": 0,
-      "longitude": 0
     },
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",
@@ -338,7 +372,7 @@ export const generateEventSchema = (event) => {
     "organizer": {
       "@type": "Organization",
       "name": "Skyfalke",
-      "url": "https://skyfalke.com"
+      "url": SITE_URL
     },
     "performer": {
       "@type": "Organization",
@@ -360,7 +394,7 @@ export const generateCaseStudySchema = (caseStudy) => {
     "@type": "Article",
     "headline": caseStudy.title || "Case Study",
     "description": caseStudy.summary || "Case study summary",
-    "image": caseStudy.images?.[0]?.url || "https://skyfalke.com/images/logos/logo.svg",
+    "image": caseStudy.images?.[0]?.url || LOGO_URL,
     "author": {
       "@type": "Organization",
       "name": "Skyfalke"
@@ -370,14 +404,14 @@ export const generateCaseStudySchema = (caseStudy) => {
       "name": "Skyfalke",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://skyfalke.com/images/logos/logo.svg"
+        "url": LOGO_URL
       }
     },
     "datePublished": caseStudy.publishedAt || new Date().toISOString(),
     "dateModified": caseStudy.updatedAt || new Date().toISOString(),
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://skyfalke.com/case-studies/${caseStudy.slug || 'case-study'}`
+      "@id": `${SITE_URL}/how-we-work/case-studies/${caseStudy.slug || 'case-study'}`
     },
     "keywords": caseStudy.tags?.join(", ") || "case study, digital marketing, cloud solutions",
     "articleSection": "Case Studies",
@@ -395,7 +429,7 @@ export const generateContactPageSchema = () => {
     "@type": "ContactPage",
     "name": "Contact Skyfalke",
     "description": "Get in touch with Skyfalke for sustainable cloud solutions and digital marketing services",
-    "url": "https://skyfalke.com/contact",
+    "url": `${SITE_URL}/contact`,
     "mainEntity": {
       "@type": "Organization",
       "name": "Skyfalke",
@@ -403,10 +437,128 @@ export const generateContactPageSchema = () => {
         "@type": "ContactPoint",
         "contactType": "customer service",
         "email": "info@skyfalke.com",
-        "url": "https://skyfalke.com/contact"
+        "url": `${SITE_URL}/contact`
       }
     }
   };
+};
+
+/** Generic WebPage for home, academy hub, etc. */
+export const generateWebPageSchema = (page = {}) => {
+  const url = page.url || SITE_URL;
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${url.replace(/\/$/, '')}/#webpage`,
+    "name": page.name || "Skyfalke",
+    "description": page.description || "",
+    "url": url,
+    "isPartOf": { "@id": `${SITE_URL.replace(/\/$/, '')}/#website` },
+    "inLanguage": "en-US",
+  };
+};
+
+export const generateAboutPageSchema = () => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "About Skyfalke",
+    "description":
+      "Learn about Skyfalke's mission to provide sustainable cloud solutions and digital marketing services across Africa and beyond.",
+    "url": `${SITE_URL}/about-us`,
+    "mainEntity": { "@id": `${SITE_URL.replace(/\/$/, '')}/#organization` },
+  };
+};
+
+/** Blog listing: CollectionPage + Blog (publisher references global Organization). */
+export const generateBlogIndexSchemas = () => {
+  const base = SITE_URL.replace(/\/$/, '');
+  const blogUrl = `${base}/blog`;
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "@id": `${blogUrl}/#webpage`,
+      name: "Skyfalke Blog",
+      description:
+        "Insights on digital marketing, cloud solutions, sustainable technology, and business growth.",
+      url: blogUrl,
+      isPartOf: { "@id": `${base}/#website` },
+      inLanguage: "en-US",
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "@id": `${blogUrl}/#blog`,
+      name: "Skyfalke Blog",
+      url: blogUrl,
+      publisher: { "@id": `${base}/#organization` },
+      inLanguage: "en-US",
+    },
+  ];
+};
+
+export const generateCollectionPageSchema = (page = {}) => {
+  const url = page.url || SITE_URL;
+  const base = SITE_URL.replace(/\/$/, '');
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: page.name || "Skyfalke",
+    description: page.description || "",
+    url,
+    isPartOf: { "@id": `${base}/#website` },
+    inLanguage: "en-US",
+  };
+};
+
+export const generateCourseSchema = (course) => {
+  if (!course || typeof course !== "object") {
+    return null;
+  }
+  const slug = course.slug || "course";
+  const pageUrl = `${SITE_URL}/academy/courses/${slug}`;
+  const imageUrl =
+    course.image && String(course.image).startsWith("http")
+      ? course.image
+      : course.image
+        ? `${SITE_URL.replace(/\/$/, "")}${course.image.startsWith("/") ? "" : "/"}${course.image}`
+        : LOGO_URL;
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: course.title || "Course",
+    description: course.shortDescription || course.description || "",
+    url: pageUrl,
+    provider: {
+      "@type": "Organization",
+      name: "Skyfalke",
+      url: SITE_URL,
+      sameAs: [
+        "https://www.linkedin.com/company/skyfalke",
+        "https://twitter.com/skyfalke",
+      ],
+    },
+    educationalLevel: course.level || undefined,
+    courseCode: course.category || undefined,
+    image: imageUrl,
+  };
+
+  if (course.price != null && Number(course.price) > 0) {
+    schema.offers = {
+      "@type": "Offer",
+      price: course.price,
+      priceCurrency: "USD",
+      url: pageUrl,
+    };
+  }
+
+  if (course.durationHours != null) {
+    schema.timeRequired = `PT${course.durationHours}H`;
+  }
+
+  return JSON.parse(JSON.stringify(schema));
 };
 
 // Helper function to generate multiple schemas
@@ -417,24 +569,34 @@ export const generatePageSchemas = (schemas) => {
   }));
 };
 
-// Default schemas for common pages
+/**
+ * Page-level JSON-LD only. Organization + WebSite are emitted once via
+ * getGlobalSchemaJsonLd() in the root layout.
+ */
 export const getDefaultSchemas = (pageType, data = {}) => {
-  const baseSchemas = [generateOrganizationSchema(), generateWebsiteSchema()];
-  
   let additionalSchemas = [];
-  
+
   switch (pageType) {
     case 'home':
-      additionalSchemas = [];
+      additionalSchemas = [
+        generateWebPageSchema({
+          name: 'Digital Growth Partner in Africa | Skyfalke',
+          url: `${SITE_URL}/`,
+          description: SITE_META_DESCRIPTION,
+        }),
+      ];
       break;
     case 'about':
-      additionalSchemas = [generateLocalBusinessSchema()];
+      additionalSchemas = [generateAboutPageSchema()];
       break;
     case 'contact':
       additionalSchemas = [generateContactPageSchema()];
       break;
     case 'blog':
       additionalSchemas = [generateArticleSchema(data)];
+      break;
+    case 'blog-index':
+      additionalSchemas = generateBlogIndexSchemas();
       break;
     case 'product':
       additionalSchemas = [generateProductSchema(data)];
@@ -451,11 +613,42 @@ export const getDefaultSchemas = (pageType, data = {}) => {
     case 'event':
       additionalSchemas = [generateEventSchema(data)];
       break;
+    case 'course':
+      additionalSchemas = [generateCourseSchema(data)];
+      break;
+    case 'courses':
+      additionalSchemas = [
+        generateCollectionPageSchema({
+          name: 'All Courses | Skyfalke Academy',
+          description:
+            'Browse online courses in ICT, AI, digital transformation, and cloud innovation.',
+          url: `${SITE_URL}/academy/courses`,
+        }),
+      ];
+      break;
+    case 'academy':
+      additionalSchemas = [
+        generateWebPageSchema({
+          name: 'Skyfalke Academy – Online ICT & AI Learning',
+          url: `${SITE_URL}/academy`,
+          description:
+            'Short courses and masterclasses in ICT, AI, Cloud, and Digital Transformation.',
+        }),
+      ];
+      break;
+    case 'resources':
+      additionalSchemas = [
+        generateCollectionPageSchema({
+          name: 'Free Marketing & Business Resources | Skyfalke',
+          description:
+            'Templates, guides, and tools for digital marketing, SEO, and business growth.',
+          url: `${SITE_URL}/resources`,
+        }),
+      ];
+      break;
     default:
       additionalSchemas = [];
   }
-  
-  // Filter out any null schemas and combine with base schemas
-  const validAdditionalSchemas = additionalSchemas.filter(schema => schema !== null);
-  return [...baseSchemas, ...validAdditionalSchemas];
+
+  return additionalSchemas.filter((schema) => schema !== null);
 };

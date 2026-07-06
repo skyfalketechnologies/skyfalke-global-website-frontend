@@ -107,8 +107,16 @@ const transactionSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Generate transaction number
-transactionSchema.pre('save', async function(next) {
+/** Prefix map — income/expense both start with "INC"/"EXP"; avoid substring collisions. */
+const TX_NUMBER_PREFIX = {
+  income: 'INC',
+  expense: 'EXP',
+  transfer: 'TRF',
+  adjustment: 'ADJ'
+};
+
+// Generate transaction number before validation (required runs after pre('validate'))
+transactionSchema.pre('validate', async function() {
   if (this.isNew && !this.transactionNumber) {
     const year = new Date().getFullYear();
     const count = await mongoose.model('Transaction').countDocuments({
@@ -117,10 +125,15 @@ transactionSchema.pre('save', async function(next) {
         $lt: new Date(year + 1, 0, 1)
       }
     });
-    const prefix = this.type.toUpperCase().substring(0, 3);
+    const prefix =
+      TX_NUMBER_PREFIX[this.type] ||
+      String(this.type || 'TX')
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '')
+        .substring(0, 3) ||
+      'TX';
     this.transactionNumber = `${prefix}${year}${String(count + 1).padStart(6, '0')}`;
   }
-  next();
 });
 
 // Update account balance only when transaction is approved

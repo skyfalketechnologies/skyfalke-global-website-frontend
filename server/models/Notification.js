@@ -13,12 +13,12 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['info', 'success', 'warning', 'error', 'contact', 'order', 'blog', 'application', 'project'],
+    enum: ['info', 'success', 'warning', 'error', 'contact', 'order', 'blog', 'application', 'project', 'portal'],
     default: 'info'
   },
   category: {
     type: String,
-    enum: ['contact', 'order', 'blog', 'application', 'system', 'user', 'project'],
+    enum: ['contact', 'order', 'blog', 'application', 'system', 'user', 'project', 'portal'],
     required: true
   },
   recipient: {

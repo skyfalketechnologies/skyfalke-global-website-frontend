@@ -1,5 +1,10 @@
 import React, { useEffect, Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+
+function LegacyCaseStudyRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={`/how-we-work/case-studies/${slug}`} replace />;
+}
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { CartProvider } from './contexts/CartContext';
@@ -21,7 +26,6 @@ import Footer from './components/Layout/Footer';
 
 // Critical Pages (load immediately)
 import Home from './pages/Home';
-import About from './pages/About';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
 import Resources from './pages/Resources';
@@ -217,16 +221,6 @@ function App() {
               <Header />
               <main>
                 <Home />
-              </main>
-              <Footer />
-            </>
-          } />
-          
-          <Route path="/about" element={
-            <>
-              <Header />
-              <main>
-                <About />
               </main>
               <Footer />
             </>
@@ -790,15 +784,7 @@ function App() {
             </>
           } />
           
-          <Route path="/case-studies/:slug" element={
-            <>
-              <Header />
-              <main>
-                <CaseStudyDetail />
-              </main>
-              <Footer />
-            </>
-          } />
+          <Route path="/case-studies/:slug" element={<LegacyCaseStudyRedirect />} />
           
           <Route path="/support" element={
             <>

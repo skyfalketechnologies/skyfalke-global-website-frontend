@@ -104,6 +104,7 @@ const limiter = rateLimit({
     // Skip rate limiting for admin routes, health checks, public forms, and payment routes
     return req.path.startsWith('/api/admin') || 
            req.path.startsWith('/api/dashboard') || 
+           req.path.startsWith('/api/portal') ||
            req.path.includes('/admin') ||                       // Skip any route with /admin in the path
            req.path === '/api/health' ||
            req.path.startsWith('/api/auth/') ||
@@ -111,6 +112,7 @@ const limiter = rateLimit({
            req.path.startsWith('/api/orders') ||                // Skip order routes
            req.path === '/api/subscriptions/subscribe' ||
            req.path === '/api/contact/submit' ||
+           req.path.startsWith('/api/chat') ||
            (process.env.NODE_ENV === 'development' && req.headers['x-skip-rate-limit'] === 'true');
   }
 });
@@ -210,6 +212,7 @@ app.use('/api/content', require('./routes/content'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/subscriptions', require('./routes/subscriptions'));
 app.use('/api/blogs', require('./routes/blog'));
+app.use('/api/chat', require('./routes/chatInsights'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/jobs', require('./routes/jobs'));
 app.use('/api/applications', require('./routes/applications'));
@@ -225,6 +228,7 @@ app.use('/api/quotations', require('./routes/quotations'));
 app.use('/api/academy', require('./routes/academy'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/hr', require('./routes/hr'));
+app.use('/api/portal', require('./routes/employeePortal'));
 app.use('/api/accounting', require('./routes/accounting'));
 app.use('/api/campaigns', require('./routes/campaigns'));
 app.use('/api/whatsapp', require('./routes/whatsapp'));
@@ -396,68 +400,8 @@ app.get('/sitemap.xml', async (req, res) => {
     const baseUrl = 'https://skyfalke.com';
     const currentDate = new Date().toISOString();
     
-    // Static routes
-    const staticRoutes = [
-      { url: '', priority: '1.0', changefreq: 'daily' },
-      { url: '/about', priority: '0.8', changefreq: 'monthly' },
-      { url: '/services', priority: '0.8', changefreq: 'monthly' },
-      { url: '/cloud', priority: '0.8', changefreq: 'monthly' },
-      { url: '/contact', priority: '0.7', changefreq: 'monthly' },
-      { url: '/careers', priority: '0.7', changefreq: 'weekly' },
-      { url: '/shop', priority: '0.8', changefreq: 'daily' },
-      { url: '/case-studies', priority: '0.8', changefreq: 'weekly' },
-      { url: '/blog', priority: '0.8', changefreq: 'weekly' },
-      { url: '/support', priority: '0.6', changefreq: 'monthly' },
-      { url: '/privacy', priority: '0.3', changefreq: 'yearly' },
-      { url: '/terms', priority: '0.3', changefreq: 'yearly' },
-      { url: '/partners', priority: '0.6', changefreq: 'monthly' },
-      { url: '/events', priority: '0.7', changefreq: 'weekly' },
-      { url: '/academy', priority: '0.8', changefreq: 'weekly' },
-      { url: '/academy/courses', priority: '0.7', changefreq: 'weekly' },
-      { url: '/schedule-consultation', priority: '0.7', changefreq: 'monthly' },
-      
-      // Solution pages
-      { url: '/services/data-analytics', priority: '0.7', changefreq: 'monthly' },
-      { url: '/services/earned-media', priority: '0.7', changefreq: 'monthly' },
-      { url: '/services/paid-media', priority: '0.7', changefreq: 'monthly' },
-      { url: '/services/creative', priority: '0.7', changefreq: 'monthly' },
-      { url: '/services/business-tools', priority: '0.7', changefreq: 'monthly' },
-      
-      // Data Analytics sub-pages
-      { url: '/services/data-analytics/business-intelligence', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/data-analytics/data-analytics', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/data-analytics/predictive-analytics', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/data-analytics/performance-tracking', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/data-analytics/custom-dashboards', priority: '0.6', changefreq: 'monthly' },
-      
-      // Earned Media sub-pages
-      { url: '/services/earned-media/public-relations', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/earned-media/influencer-marketing', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/earned-media/content-marketing', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/earned-media/social-media-management', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/earned-media/brand-awareness', priority: '0.6', changefreq: 'monthly' },
-      
-      // Paid Media sub-pages
-      { url: '/services/paid-media/google-ads', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/paid-media/social-media-ads', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/paid-media/display-advertising', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/paid-media/video-advertising', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/paid-media/retargeting-campaigns', priority: '0.6', changefreq: 'monthly' },
-      
-      // Creative sub-pages
-      { url: '/services/creative/brand-design', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/creative/ui-ux-design', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/creative/graphic-design', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/creative/video-production', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/creative/content-creation', priority: '0.6', changefreq: 'monthly' },
-      
-      // Business Tools sub-pages
-      { url: '/services/business-tools/seo-tools-analytics', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/business-tools/process-automation', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/business-tools/custom-applications', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/business-tools/business-intelligence', priority: '0.6', changefreq: 'monthly' },
-      { url: '/services/business-tools/performance-optimization', priority: '0.6', changefreq: 'monthly' }
-    ];
+    const { getMarketingStaticRoutes } = require('./data/marketingStaticRoutes');
+    const staticRoutes = getMarketingStaticRoutes();
 
     // Fetch dynamic content (with error handling for database connection issues)
     let blogs = [], jobs = [], products = [], caseStudies = [], courses = [], events = [], trainers = [];
@@ -562,7 +506,7 @@ app.get('/sitemap.xml', async (req, res) => {
         : (caseStudy.updatedAt ? new Date(caseStudy.updatedAt).toISOString() : currentDate);
       sitemap += `
   <url>
-    <loc>${baseUrl}/case-studies/${caseStudy.slug}</loc>
+    <loc>${baseUrl}/how-we-work/case-studies/${caseStudy.slug}</loc>
     <lastmod>${lastMod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

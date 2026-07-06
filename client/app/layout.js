@@ -1,17 +1,46 @@
-import { Inter } from 'next/font/google';
 import './globals.css';
+import localFont from 'next/font/local';
 import Providers from './providers';
+import { getGlobalSchemaJsonLd } from '@/utils/schemaMarkup';
+import { SITE_META_DESCRIPTION } from '@/utils/metadata';
 
-const inter = Inter({ subsets: ['latin'] });
+const nexaLight = localFont({
+  src: '../public/font/Nexa-ExtraLight.ttf',
+  weight: '200',
+  style: 'normal',
+  display: 'swap',
+  variable: '--font-nexa-light',
+  preload: true,
+});
+
+const nexaHeavy = localFont({
+  src: '../public/font/Nexa-Heavy.ttf',
+  weight: '800',
+  style: 'normal',
+  display: 'swap',
+  variable: '--font-nexa-heavy',
+  preload: true,
+});
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
+const globalJsonLd = getGlobalSchemaJsonLd(siteUrl);
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'),
   title: {
-    default: 'Skyfalke • Leading Digital Marketing & Technology Solutions Partner in Africa',
+    default: 'Digital Growth Partner in Africa | Skyfalke',
     template: '%s | Skyfalke',
   },
-  description: 'Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics. Serving Africa & beyond with eco-friendly solutions.',
-  keywords: ['digital marketing agency Africa', 'sustainable cloud hosting Kenya', 'AI business solutions', 'eco-friendly web hosting', 'renewable energy servers', 'digital transformation Africa', 'IT consultancy Kenya', 'creative services Africa', 'data analytics', 'business intelligence'],
+  description: SITE_META_DESCRIPTION,
+  keywords: [
+    'digital growth partner',
+    'business automation Kenya',
+    'SEO and digital ads',
+    'CRM workflows',
+    'AI roadmap',
+    'digital transformation Africa',
+    'Skyfalke',
+  ],
   authors: [{ name: 'Skyfalke' }],
   creator: 'Skyfalke',
   publisher: 'Skyfalke',
@@ -29,30 +58,33 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com',
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
     siteName: 'Skyfalke',
-    title: 'Skyfalke • Leading Digital Marketing & Technology Solutions Partner in Africa',
-    description: 'Skyfalke - Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics.',
+    title: 'Digital Growth Partner in Africa | Skyfalke',
+    description: SITE_META_DESCRIPTION,
     images: [
       {
-        url: '/favicon-512x512.png',
+        url: 'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
         width: 1200,
         height: 630,
-        alt: 'Skyfalke - Digital Marketing & Technology Solutions',
+        alt: 'Skyfalke - digital growth partner for websites, marketing, automation, and AI strategy',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Skyfalke • Leading Digital Marketing & Technology Solutions',
-    description: 'Leading digital marketing & technology solutions partner in Africa',
-    images: ['/favicon-512x512.png'],
+    title: 'Digital Growth Partner in Africa | Skyfalke',
+    description: SITE_META_DESCRIPTION,
+    images: [
+      'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
+    ],
     site: '@skyfalke',
     creator: '@skyfalke',
   },
   alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com',
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
   },
+  manifest: '/manifest.json',
   // Favicon / app icons for all pages
   icons: {
     icon: [
@@ -70,8 +102,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="en" suppressHydrationWarning className={`${nexaLight.variable} ${nexaHeavy.variable}`}>
+      <body className="font-sans">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(globalJsonLd),
+          }}
+        />
         <Providers>
           {children}
         </Providers>

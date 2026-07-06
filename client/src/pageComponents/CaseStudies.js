@@ -160,9 +160,12 @@ const CaseStudies = () => {
               <h1 className="text-4xl md:text-6xl font-bold mb-4">
                 Case Studies
               </h1>
-              <p className="text-xl md:text-2xl mb-8 text-primary-100">
-                Real Results, Real Success Stories
-              </p>
+              <div className="text-xl md:text-2xl mb-8 text-primary-100 max-w-3xl mx-auto space-y-4">
+                <p>Real results from real engagements — digital growth, platform modernization, and operational transformation.</p>
+                <p className="text-lg text-primary-100/90">
+                  Each case study outlines the challenge, approach, and measurable outcomes. Filter by industry or service to find stories closest to your context.
+                </p>
+              </div>
               <div className="flex flex-wrap justify-center gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <FaChartLine className="text-primary-200" />
@@ -180,6 +183,18 @@ const CaseStudies = () => {
             </motion.div>
           </div>
         </div>
+
+        <section className="bg-white border-b border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+          <div className="container mx-auto px-4 py-12 max-w-3xl">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">What you will find here</h2>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+              We document baselines, key decisions, and post-launch impact so prospects and clients can see how we work under real constraints — budget, legacy systems, regulation, and adoption risk.
+            </p>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Looking for our delivery model? Visit <a href="/how-we-work/case-studies" className="text-primary-600 hover:underline font-medium">How We Work — Case Studies</a> for the framework behind these stories.
+            </p>
+          </div>
+        </section>
 
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
@@ -381,7 +396,7 @@ const CaseStudies = () => {
 
                         {/* Quick Actions */}
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                          <Link href={`/case-studies/${caseStudy.slug}`}
+                          <Link href={`/how-we-work/case-studies/${caseStudy.slug}`}
                             className="bg-white text-gray-800 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-primary-600 hover:text-white flex items-center gap-2"
                           >
                             <FaEye />
@@ -448,7 +463,7 @@ const CaseStudies = () => {
                             </span>
                           </div>
                           
-                          <Link href={`/case-studies/${caseStudy.slug}`}
+                          <Link href={`/how-we-work/case-studies/${caseStudy.slug}`}
                             className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1 group"
                           >
                             Read More

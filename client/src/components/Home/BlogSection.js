@@ -25,21 +25,8 @@ const BlogSection = () => {
       setLoading(true);
       const response = await apiGet('/api/blogs?limit=3&featured=true');
       setBlogs(response.data?.blogs || []);
-    } catch (error) {
-      // Silently handle network errors - API might not be available
-      // Only log in development mode
-      if (process.env.NODE_ENV === 'development') {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to fetch blogs';
-      const errorDetails = {
-        message: errorMessage,
-        status: error?.response?.status,
-        url: error?.config?.url,
-          code: error?.code,
-          note: error?.code === 'ERR_NETWORK' ? 'API server may be unavailable' : 'Request failed'
-      };
-        console.warn('Blog fetch error (non-critical):', errorDetails);
-      }
-      // Set empty array to show no blogs gracefully
+    } catch {
+      // API unavailable or error: hide section (empty blogs) without logging
       setBlogs([]);
     } finally {
       setLoading(false);
@@ -92,8 +79,11 @@ const BlogSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Latest Insights
+            Latest Insights from the Skyfalke Team
           </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Expert thinking on AI, cloud, automation, digital marketing, and what's shaping modern business in Africa and globally.
+          </p>
         </motion.div>
 
         {/* Blog Grid */}

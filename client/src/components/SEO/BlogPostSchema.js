@@ -1,7 +1,18 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
+const DEFAULT_SITE =
+  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_SITE_URL) ||
+  'https://skyfalke.com';
+
+const BlogPostSchema = ({ post, siteUrl = DEFAULT_SITE }) => {
+  const base = String(siteUrl).replace(/\/$/, '');
+  /** Breadcrumb `item` as WebPage so Google gets `item.name`, not only a URL node without a name. */
+  const breadcrumbWebPage = (name, path) => ({
+    '@type': 'WebPage',
+    '@id': `${base}${path}`,
+    name,
+  });
   if (!post) return null;
 
   const generateArticleSchema = () => {
@@ -14,7 +25,7 @@ const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
       "author": {
         "@type": "Person",
         "name": post.author?.name || "Skyfalke Team",
-        "url": post.author?.url || `${siteUrl}/about`
+        "url": post.author?.url || `${siteUrl}/about-us`
       },
       "publisher": {
         "@type": "Organization",
@@ -65,19 +76,19 @@ const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
           "@type": "ListItem",
           "position": 1,
           "name": "Home",
-          "item": siteUrl
+          "item": breadcrumbWebPage("Home", "/")
         },
         {
           "@type": "ListItem",
           "position": 2,
           "name": "Blog",
-          "item": `${siteUrl}/blog`
+          "item": breadcrumbWebPage("Blog", "/blog")
         },
         {
           "@type": "ListItem",
           "position": 3,
           "name": postTitle,
-          "item": `${siteUrl}/blog/${postSlug}`
+          "item": breadcrumbWebPage(postTitle, `/blog/${postSlug}`)
         }
       ]
     };
@@ -101,55 +112,25 @@ const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": siteUrl
+            "item": breadcrumbWebPage("Home", "/")
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Blog",
-            "item": `${siteUrl}/blog`
+            "item": breadcrumbWebPage("Blog", "/blog")
           },
           {
             "@type": "ListItem",
             "position": 3,
             "name": (post.title && post.title.trim()) || "Blog Post",
-            "item": `${siteUrl}/blog/${post.slug || 'post'}`
+            "item": breadcrumbWebPage(
+              (post.title && post.title.trim()) || "Blog Post",
+              `/blog/${post.slug || 'post'}`
+            )
           }
         ]
       }
-    };
-  };
-
-  const generateOrganizationSchema = () => {
-    return {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Skyfalke",
-      "url": siteUrl,
-      "logo": {
-        "@type": "ImageObject",
-        "url": `${siteUrl}/images/logos/logo.svg`,
-        "width": 200,
-        "height": 60
-      },
-      "description": "Leading digital marketing & technology solutions partner in Africa. Sustainable cloud hosting, AI-powered business tools, creative services & data analytics.",
-      "foundingDate": "2020",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "Global",
-        "addressRegion": "Africa"
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer service",
-        "email": "info@skyfalke.com",
-        "url": `${siteUrl}/contact`
-      },
-      "sameAs": [
-        "https://www.linkedin.com/company/skyfalke",
-        "https://twitter.com/skyfalke",
-        "https://facebook.com/skyfalke"
-      ]
     };
   };
 
@@ -157,7 +138,6 @@ const BlogPostSchema = ({ post, siteUrl = 'https://skyfalke.com' }) => {
     generateArticleSchema(),
     generateBreadcrumbSchema(),
     generateWebPageSchema(),
-    generateOrganizationSchema()
   ];
 
   return (

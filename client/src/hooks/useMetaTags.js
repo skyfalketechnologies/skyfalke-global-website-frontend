@@ -94,9 +94,10 @@ const useMetaTags = (metaData) => {
     }
     canonicalLink.setAttribute('href', canonicalUrl);
 
-    // Update robots meta
-    const robotsContent = noIndex ? 'noindex, nofollow' : 'index, follow';
-    updateMetaTag('robots', robotsContent);
+    // Only set robots when explicitly blocking — public pages use Next.js metadata
+    if (noIndex) {
+      updateMetaTag('robots', 'noindex, nofollow');
+    }
 
     // Update article-specific meta tags for blog posts
     if (type === 'article') {

@@ -2,39 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Font Declarations */
-@font-face {
-  font-family: 'Nexa';
-  src: url('/font/Nexa-ExtraLight.ttf') format('truetype');
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Nexa';
-  src: url('/font/Nexa-Heavy.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Nexa-ExtraLight';
-  src: url('/font/Nexa-ExtraLight.ttf') format('truetype');
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Nexa-Heavy';
-  src: url('/font/Nexa-Heavy.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Custom CSS Variables */
 :root {
   --primary-color: #303661; /* dark-blue */
@@ -45,8 +12,9 @@
   --error-color: #e53e3e;
   --text-primary: #2d3748;
   --text-secondary: #4a5568;
-  --background-light: #f7fafc;
-  --background-dark: #1a202c;
+  /* App surfaces: slight tint from brand #303661 */
+  --background-light: #f0f1f7;
+  --background-dark: #303661;
   
   /* Brand Colors */
   --dark-blue: #303661;
@@ -109,7 +77,7 @@ html {
 
 body {
   margin: 0;
-  font-family: 'Nexa', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Nexa', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -118,7 +86,7 @@ body {
   text-rendering: optimizeLegibility;
   line-height: 1.7;
   color: var(--text-primary);
-  background-color: #ffffff;
+  background-color: var(--background-light);
   overflow-x: hidden;
 }
 
@@ -214,6 +182,23 @@ code {
 
 .marquee-slide:hover {
   animation-play-state: paused;
+}
+
+@keyframes headerMega {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .header-mega-animate {
+    animation: headerMega 0.2s ease-out;
+  }
 }
 
 /* All CSS styles are included above - no need to import from index.css */

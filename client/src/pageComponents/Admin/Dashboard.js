@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchDashboardData, handleAdminApiError } from '../../utils/adminApi';
 import { apiGet } from '../../utils/api';
+import { useAuth } from '../../contexts/AuthContext';
 import { 
   FaUsers,
   FaBlog,
@@ -35,7 +36,14 @@ import {
 
 const Dashboard = () => {
   const router = useRouter();
+  const { canAccessAccounting, user } = useAuth();
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.role === 'employee') {
+      router.replace('/system/dashboard/portal');
+    }
+  }, [user?.role, router]);
   const [apiError, setApiError] = useState(null);
   const [stats, setStats] = useState({
     totalVisitors: 0,
@@ -64,7 +72,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardDataHandler();
-  }, []);
+  }, [canAccessAccounting]);
 
   const fetchDashboardDataHandler = async () => {
     try {
@@ -93,7 +101,9 @@ const Dashboard = () => {
         apiGet('/api/orders?limit=1000').catch(() => ({ data: { success: false, data: [] } })),
         apiGet('/api/applications/stats').catch(() => ({ data: { success: false, data: {} } })),
         apiGet('/api/contact?status=new&limit=1000').catch(() => ({ data: { success: false, data: [] } })),
-        apiGet('/api/accounting/transactions/stats').catch(() => ({ data: { success: false, data: {} } }))
+        canAccessAccounting()
+          ? apiGet('/api/accounting/transactions/stats').catch(() => ({ data: { success: false, data: {} } }))
+          : Promise.resolve({ data: { success: false, data: {} } })
       ]);
 
       const { overview, activity, contacts, blogs } = dashboardRes;

@@ -1,5 +1,8 @@
 import { generateBlogMetadata } from '@/utils/metadata';
 import { getBlogBySlug } from '@/utils/serverApi';
+import { notFound } from 'next/navigation';
+
+const VALID_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
 
 /**
  * Generate metadata for blog post pages
@@ -11,9 +14,9 @@ export async function generateMetadata({ params }) {
     // Await params in Next.js 15+
     const resolvedParams = await params;
     const slug = resolvedParams?.slug;
-    
-    if (!slug) {
-      return generateBlogMetadata(null);
+
+    if (!slug || !VALID_SLUG_PATTERN.test(slug)) {
+      notFound();
     }
 
     // Fetch blog post data (server-side)

@@ -125,11 +125,7 @@ const MetaManager = ({
       <link rel="canonical" href={canonical || currentUrl} />
       
       {/* Robots Meta */}
-      {noIndex ? (
-        <meta name="robots" content="noindex, nofollow" />
-      ) : (
-        <meta name="robots" content="index, follow" />
-      )}
+      {noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}
       
       {/* Open Graph Meta Tags */}
       <meta property="og:title" content={ogTitle || title} />

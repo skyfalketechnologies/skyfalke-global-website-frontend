@@ -7,6 +7,14 @@ const ImageKitService = require('../services/imageKitService');
 
 const router = express.Router();
 
+const buildAuthorProfileFromUser = (user) => ({
+  name: user?.authorProfile?.name || user?.name || '',
+  role: user?.authorProfile?.role || '',
+  bio: user?.authorProfile?.bio || '',
+  avatar: user?.authorProfile?.avatar || user?.avatar || '',
+  linkedin: user?.authorProfile?.linkedin || ''
+});
+
 // Configure multer for memory storage
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -55,7 +63,7 @@ router.get('/', async (req, res) => {
     }
 
     const blogs = await Blog.find(query)
-      .populate('author', 'name')
+      .populate('author', 'name avatar authorProfile')
       .sort({ publishedAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
@@ -83,7 +91,7 @@ router.get('/slug/:slug', async (req, res) => {
     const blog = await Blog.findOne({ 
       slug: req.params.slug, 
       status: 'published' 
-    }).populate('author', 'name');
+    }).populate('author', 'name avatar authorProfile');
 
     console.log('Blog found:', blog ? 'Yes' : 'No');
 
@@ -104,7 +112,7 @@ router.get('/slug/:slug', async (req, res) => {
 router.get('/featured/latest', async (req, res) => {
   try {
     const blogs = await Blog.findFeatured()
-      .populate('author', 'name')
+      .populate('author', 'name avatar authorProfile')
       .sort({ views: -1, publishedAt: -1 })
       .limit(3)
       .select('-seo.structuredData');
@@ -147,7 +155,7 @@ router.get('/admin/all', adminAuth, async (req, res) => {
     console.log('Page:', page, 'Limit:', limit);
 
     const blogs = await Blog.find(query)
-      .populate('author', 'name')
+      .populate('author', 'name avatar authorProfile')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
@@ -265,7 +273,8 @@ router.post('/', adminAuth, async (req, res) => {
     
     const blogData = {
       ...req.body,
-      author: req.user._id // Use the user's _id from the populated user object
+      author: req.user._id, // Use the user's _id from the populated user object
+      authorProfile: buildAuthorProfileFromUser(req.user)
     };
     
     console.log('Final blog data:', blogData);
@@ -273,7 +282,7 @@ router.post('/', adminAuth, async (req, res) => {
     const blog = new Blog(blogData);
     await blog.save();
     
-    const populatedBlog = await Blog.findById(blog._id).populate('author', 'name');
+    const populatedBlog = await Blog.findById(blog._id).populate('author', 'name avatar authorProfile');
     res.status(201).json(populatedBlog);
   } catch (error) {
     console.error('Create blog error:', error);
@@ -296,11 +305,13 @@ router.post('/', adminAuth, async (req, res) => {
 // Update blog (auth required)
 router.put('/:id', adminAuth, async (req, res) => {
   try {
+    // Never allow author or authorProfile to be changed after creation
+    const { author, authorProfile, ...updateData } = req.body;
     const blog = await Blog.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
-    ).populate('author', 'name');
+    ).populate('author', 'name avatar authorProfile');
 
     if (!blog) {
       return res.status(404).json({ message: 'Blog not found' });
@@ -410,7 +421,7 @@ router.get('/admin/stats', adminAuth, async (req, res) => {
     ]);
 
     const recentBlogs = await Blog.find()
-      .populate('author', 'name')
+      .populate('author', 'name avatar authorProfile')
       .sort({ createdAt: -1 })
       .limit(5)
       .select('title status views createdAt');
@@ -441,7 +452,7 @@ router.patch('/:id/status', adminAuth, async (req, res) => {
       req.params.id,
       { status },
       { new: true, runValidators: true }
-    ).populate('author', 'name');
+    ).populate('author', 'name avatar authorProfile');
 
     if (!blog) {
       return res.status(404).json({ message: 'Blog not found' });
@@ -462,7 +473,7 @@ router.patch('/:id/featured', adminAuth, async (req, res) => {
       req.params.id,
       { isFeatured },
       { new: true, runValidators: true }
-    ).populate('author', 'name');
+    ).populate('author', 'name avatar authorProfile');
 
     if (!blog) {
       return res.status(404).json({ message: 'Blog not found' });
@@ -478,7 +489,7 @@ router.patch('/:id/featured', adminAuth, async (req, res) => {
 // Get single blog for admin (with all data)
 router.get('/admin/:id', adminAuth, async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id).populate('author', 'name');
+    const blog = await Blog.findById(req.params.id).populate('author', 'name avatar authorProfile');
     
     if (!blog) {
       return res.status(404).json({ message: 'Blog not found' });
@@ -609,7 +620,7 @@ router.get('/:id/related', async (req, res) => {
         { tags: { $in: blog.tags } }
       ]
     })
-    .populate('author', 'name')
+    .populate('author', 'name avatar authorProfile')
     .sort({ publishedAt: -1 })
     .limit(3)
     .select('-seo.structuredData');
@@ -694,7 +705,7 @@ router.get('/search', async (req, res) => {
     sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
     const blogs = await Blog.find(query)
-      .populate('author', 'name')
+      .populate('author', 'name avatar authorProfile')
       .sort(sortOptions)
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit))
@@ -1135,7 +1146,7 @@ router.post('/admin/:id/duplicate', adminAuth, async (req, res) => {
 
     await duplicatedBlog.save();
     
-    const populatedBlog = await Blog.findById(duplicatedBlog._id).populate('author', 'name');
+  const populatedBlog = await Blog.findById(duplicatedBlog._id).populate('author', 'name avatar authorProfile');
     res.status(201).json(populatedBlog);
   } catch (error) {
     console.error('Duplicate blog error:', error);
@@ -1146,7 +1157,7 @@ router.post('/admin/:id/duplicate', adminAuth, async (req, res) => {
 // Preview blog (for draft preview)
 router.get('/admin/:id/preview', adminAuth, async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id).populate('author', 'name');
+    const blog = await Blog.findById(req.params.id).populate('author', 'name avatar authorProfile');
     
     if (!blog) {
       return res.status(404).json({ message: 'Blog not found' });

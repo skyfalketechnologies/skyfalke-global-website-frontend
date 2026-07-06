@@ -1,6 +1,8 @@
 import { generateMetadata as genMeta } from '@/utils/metadata';
 import PageLayout from '../../components/PageLayout';
 import CoursesClient from './CoursesClient';
+import ServerPageIntro from '@/components/marketing/ServerPageIntro';
+import { COURSES_PAGE_INTRO } from '@/data/serverPageIntros';
 
 export const metadata = genMeta({
   title: 'Courses | Skyfalke Academy - Browse All Courses',
@@ -12,6 +14,7 @@ export default function CoursesPage() {
   return (
     <PageLayout>
       <CoursesClient />
+      <ServerPageIntro {...COURSES_PAGE_INTRO} />
     </PageLayout>
   );
 }

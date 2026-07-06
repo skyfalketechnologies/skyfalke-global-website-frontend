@@ -5,11 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import { adminApiGet, adminApiPost, adminApiPut } from '../../utils/adminApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AccountForm = () => {
   const params = useParams();
   const id = params?.id;
   const router = useRouter();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const isEditing = Boolean(id);
 
   const [loading, setLoading] = useState(false);
@@ -49,12 +51,6 @@ const AccountForm = () => {
     'accounts-payable'
   ];
 
-  useEffect(() => {
-    if (isEditing) {
-      fetchAccount();
-    }
-  }, [id]);
-
   const fetchAccount = async () => {
     try {
       setLoading(true);
@@ -88,6 +84,18 @@ const AccountForm = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
+    if (isEditing) {
+      fetchAccount();
+    }
+  }, [id, authLoading, canAccessAccounting, isEditing]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) router.replace('/system/dashboard');
+  }, [authLoading, canAccessAccounting, router]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -131,11 +139,29 @@ const AccountForm = () => {
 
     try {
       setSaving(true);
+
+      const openingRaw = formData.openingBalanceDate;
+      const parsedOpening = openingRaw ? new Date(openingRaw) : new Date();
+      const openingBalanceDate = Number.isNaN(parsedOpening.getTime()) ? new Date() : parsedOpening;
+
       const submitData = {
-        ...formData,
+        name: formData.name.trim(),
+        type: formData.type,
+        category: formData.category?.trim() || undefined,
+        currency: formData.currency || 'KES',
         balance: parseFloat(formData.balance) || 0,
         openingBalance: parseFloat(formData.openingBalance) || 0,
-        openingBalanceDate: new Date(formData.openingBalanceDate)
+        openingBalanceDate,
+        isActive: Boolean(formData.isActive),
+        bankDetails: {
+          bankName: formData.bankDetails?.bankName?.trim() || '',
+          accountName: formData.bankDetails?.accountName?.trim() || '',
+          accountNumber: formData.bankDetails?.accountNumber?.trim() || '',
+          branch: formData.bankDetails?.branch?.trim() || '',
+          swiftCode: formData.bankDetails?.swiftCode?.trim() || '',
+          iban: formData.bankDetails?.iban?.trim() || ''
+        },
+        notes: formData.notes?.trim() || undefined
       };
 
       let response;
@@ -154,12 +180,25 @@ const AccountForm = () => {
         setError(response.error?.message || 'Failed to save account');
       }
     } catch (err) {
-      setError(err.message || 'An error occurred while saving');
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          'An error occurred while saving'
+      );
       console.error('Error saving account:', err);
     } finally {
       setSaving(false);
     }
   };
+
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

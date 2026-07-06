@@ -48,6 +48,44 @@ const blogSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  authorProfile: {
+    name: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    role: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: 10000,
+      default: ''
+    },
+    avatar: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    website: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    linkedin: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    twitter: {
+      type: String,
+      trim: true,
+      default: ''
+    }
+  },
   category: {
     type: String,
     required: true,

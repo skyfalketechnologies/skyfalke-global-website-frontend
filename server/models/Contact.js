@@ -38,7 +38,7 @@ const contactSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['contact', 'hire_us', 'quote_request', 'partnership', 'consultation'],
+    enum: ['contact', 'hire_us', 'quote_request', 'partnership', 'consultation', 'academy'],
     default: 'contact'
   },
   service: {

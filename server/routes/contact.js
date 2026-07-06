@@ -92,6 +92,10 @@ router.post('/submit', contactLimiter, async (req, res) => {
           typeTitle = 'New Consultation Request';
           notificationMessage = `New consultation request from ${name}${company ? ` from ${company}` : ''} - ${subject}`;
           break;
+        case 'academy':
+          typeTitle = 'New Academy Enrollment Request';
+          notificationMessage = `New academy enrollment from ${name}${company ? ` from ${company}` : ''} - ${subject}`;
+          break;
         case 'contact':
         default:
           typeTitle = 'New Contact Inquiry';

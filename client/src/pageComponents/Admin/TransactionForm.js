@@ -5,11 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import { adminApiGet, adminApiPost, adminApiPut } from '../../utils/adminApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TransactionForm = () => {
   const params = useParams();
   const id = params?.id;
   const router = useRouter();
+  const { loading: authLoading, canAccessAccounting } = useAuth();
   const isEditing = Boolean(id);
 
   const [loading, setLoading] = useState(false);
@@ -29,16 +31,9 @@ const TransactionForm = () => {
     category: '',
     reference: '',
     paymentMethod: 'bank',
-    status: 'completed',
+    status: 'pending_approval',
     notes: ''
   });
-
-  useEffect(() => {
-    if (isEditing) {
-      fetchTransaction();
-    }
-    fetchAccounts();
-  }, [id]);
 
   const fetchTransaction = async () => {
     try {
@@ -57,7 +52,7 @@ const TransactionForm = () => {
           category: transaction.category || '',
           reference: transaction.reference || '',
           paymentMethod: transaction.paymentMethod || 'bank',
-          status: transaction.status || 'completed',
+          status: transaction.status || 'pending_approval',
           notes: transaction.notes || ''
         });
       }
@@ -73,12 +68,26 @@ const TransactionForm = () => {
     try {
       const response = await adminApiGet('/api/accounting/accounts?isActive=true');
       if (response.success && response.data) {
-        setAccounts(response.data.data || []);
+        const payload = response.data.data ?? response.data;
+        setAccounts(Array.isArray(payload) ? payload : []);
       }
     } catch (err) {
       console.error('Error fetching accounts:', err);
     }
   };
+
+  useEffect(() => {
+    if (authLoading || !canAccessAccounting()) return;
+    if (isEditing) {
+      fetchTransaction();
+    }
+    fetchAccounts();
+  }, [id, authLoading, canAccessAccounting, isEditing]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!canAccessAccounting()) router.replace('/system/dashboard');
+  }, [authLoading, canAccessAccounting, router]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -115,11 +124,23 @@ const TransactionForm = () => {
     try {
       setSaving(true);
       const submitData = {
-        ...formData,
-        amount: parseFloat(formData.amount),
+        type: formData.type,
         date: new Date(formData.date),
-        toAccount: formData.type === 'transfer' ? formData.toAccount : undefined
+        account: formData.account,
+        amount: parseFloat(formData.amount),
+        currency: formData.currency || 'KES',
+        description: formData.description.trim(),
+        category: formData.category?.trim() || undefined,
+        reference: formData.reference?.trim() || undefined,
+        paymentMethod: formData.paymentMethod,
+        notes: formData.notes?.trim() || undefined
       };
+      if (formData.type === 'transfer' && formData.toAccount) {
+        submitData.toAccount = formData.toAccount;
+      }
+      if (isEditing) {
+        submitData.status = formData.status;
+      }
 
       let response;
       if (isEditing) {
@@ -137,12 +158,20 @@ const TransactionForm = () => {
         setError(response.error?.message || 'Failed to save transaction');
       }
     } catch (err) {
-      setError(err.message || 'An error occurred while saving');
+      setError(err.response?.data?.message || err.message || 'An error occurred while saving');
       console.error('Error saving transaction:', err);
     } finally {
       setSaving(false);
     }
   };
+
+  if (authLoading || !canAccessAccounting()) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-primary-600" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

@@ -141,14 +141,17 @@ const Support = () => {
               >
                 How can we help you?
               </motion.h1>
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-xl text-blue-100 mb-8"
+                className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto space-y-4"
               >
-                Our support team is here to help you succeed with our digital solutions
-              </motion.p>
+                <p>Our support team is here to help you succeed with our digital solutions.</p>
+                <p className="text-lg text-blue-100/90">
+                  Browse FAQs on hosting, billing, academy access, and project delivery — or reach us by chat, email, or phone during business hours (East Africa Time). Existing clients can reference your project or invoice number for faster routing.
+                </p>
+              </motion.div>
 
               {/* Search Bar */}
               <motion.div

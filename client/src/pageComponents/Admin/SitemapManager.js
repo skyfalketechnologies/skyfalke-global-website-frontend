@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { apiGet, apiPost } from '../../utils/api';
-import api from '../../utils/api';
 import { 
   FaSitemap, 
   FaDownload, 
@@ -32,32 +30,41 @@ const SitemapManager = () => {
       setLoading(true);
       setError(null);
       
-      // Fetch sitemap and robots.txt with text response type (not JSON)
-      // Add cache-busting parameter if skipCache is true
+      // Fetch from backend via same-origin proxy (matches files written by generate-sitemap)
       const cacheBuster = skipCache ? `?t=${Date.now()}` : '';
+      const fetchOpts = {
+        cache: skipCache ? 'no-store' : 'default',
+        headers: skipCache ? { 'Cache-Control': 'no-cache' } : undefined,
+      };
       const [sitemapResponse, robotsResponse] = await Promise.all([
-        api.get(`/api/sitemap.xml${cacheBuster}`, { 
-          responseType: 'text',
-          headers: skipCache ? { 'Cache-Control': 'no-cache' } : {}
-        }),
-        api.get(`/robots.txt${cacheBuster}`, { 
-          responseType: 'text',
-          headers: skipCache ? { 'Cache-Control': 'no-cache' } : {}
-        })
+        fetch(`/sitemap.xml${cacheBuster}`, fetchOpts),
+        fetch(`/robots.txt${cacheBuster}`, fetchOpts),
       ]);
-      
-      setSitemapData(sitemapResponse.data);
-      setRobotsData(robotsResponse.data);
+
+      if (!sitemapResponse.ok || !robotsResponse.ok) {
+        throw new Error('Failed to fetch sitemap or robots content');
+      }
+
+      const [sitemapText, robotsText] = await Promise.all([
+        sitemapResponse.text(),
+        robotsResponse.text(),
+      ]);
+
+      setSitemapData(sitemapText);
+      setRobotsData(robotsText);
       
       // Only parse stats from XML if this is a normal fetch (not after generation)
       // When skipCache is true, we already have correct stats from the generate response
       if (!skipCache) {
-        const xmlData = sitemapResponse.data;
+        const xmlData = sitemapText;
         if (xmlData) {
           // More accurate regex patterns that exclude the base /careers route
           const blogMatches = xmlData.match(/<loc>[^<]*\/blog\/[^<]+<\/loc>/g) || [];
           const productMatches = xmlData.match(/<loc>[^<]*\/shop\/product\/[^<]+<\/loc>/g) || [];
-          const caseStudyMatches = xmlData.match(/<loc>[^<]*\/case-studies\/[^<]+<\/loc>/g) || [];
+          const caseStudyMatches =
+            xmlData.match(/<loc>[^<]*\/how-we-work\/case-studies\/[^<]+<\/loc>/g) ||
+            xmlData.match(/<loc>[^<]*\/case-studies\/[^<]+<\/loc>/g) ||
+            [];
           const jobMatches = xmlData.match(/<loc>[^<]*\/careers\/[^<]+<\/loc>/g) || [];
           // Filter out the base /careers route
           const actualJobMatches = jobMatches.filter(url => !url.includes('/careers</loc>') && url.includes('/careers/'));
@@ -74,7 +81,7 @@ const SitemapManager = () => {
       }
       
       // Get last modified from headers
-      const lastModified = sitemapResponse.headers['last-modified'];
+      const lastModified = sitemapResponse.headers.get('last-modified');
       if (lastModified) {
         setLastGenerated(new Date(lastModified));
       }
@@ -90,34 +97,51 @@ const SitemapManager = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await apiPost('/api/sitemap/generate-sitemap');
-      
-      // Update stats from response (use these as the source of truth)
-      if (response.data && response.data.data) {
-        setSitemapStats({
-          totalUrls: response.data.data.totalUrls || 0,
-          staticRoutes: response.data.data.staticRoutes || 0,
-          blogPosts: response.data.data.blogs || 0,
-          products: response.data.data.products || 0,
-          caseStudies: response.data.data.caseStudies || 0,
-          jobs: response.data.data.jobs || 0,
-          courses: response.data.data.courses || 0,
-          events: response.data.data.events || 0,
-          trainers: response.data.data.trainers || 0
-        });
+
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const res = await fetch('/api/sitemap/generate-sitemap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      const payload = await res.json().catch(() => ({}));
+
+      if (!res.ok || payload.success === false) {
+        throw new Error(payload.message || `Failed to generate sitemap (${res.status})`);
       }
-      
-      // Wait a brief moment to ensure file is fully written to disk
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Refresh sitemap data with cache-busting to get the fresh file
-      await fetchSitemapInfo(true);
-      
-      // Show success message
+
+      const stats = payload.data;
+      if (payload.xml) {
+        setSitemapData(payload.xml);
+      }
+      if (stats) {
+        setSitemapStats({
+          totalUrls: stats.totalUrls || 0,
+          staticPages: stats.staticRoutes || 0,
+          staticRoutes: stats.staticRoutes || 0,
+          blogPosts: stats.blogs || 0,
+          products: stats.products || 0,
+          caseStudies: stats.caseStudies || 0,
+          jobs: stats.jobs || 0,
+          courses: stats.courses || 0,
+          events: stats.events || 0,
+          trainers: stats.trainers || 0,
+        });
+        setLastGenerated(new Date());
+      }
+
+      if (!payload.xml) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        await fetchSitemapInfo(true);
+      }
+
       alert('Sitemap generated successfully!');
     } catch (err) {
-      setError('Failed to generate sitemap');
+      const message = err.message || 'Failed to generate sitemap';
+      setError(message);
       console.error('Error generating sitemap:', err);
     } finally {
       setLoading(false);

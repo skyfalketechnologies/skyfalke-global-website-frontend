@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const Invoice = require('../models/Invoice');
-const { adminAuth } = require('../middleware/auth');
+const { accountingAuth } = require('../middleware/auth');
+const { postInvoicePaymentJournal } = require('../utils/invoiceJournalPosting');
 const nodemailer = require('nodemailer');
 const PDFDocument = require('pdfkit');
 const fs = require('fs').promises;
 const path = require('path');
 
 // Get all invoices with pagination and filtering
-router.get('/', adminAuth, async (req, res) => {
+router.get('/', accountingAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -61,12 +62,49 @@ router.get('/', adminAuth, async (req, res) => {
   }
 });
 
+// Get invoice statistics (must be before /:id)
+router.get('/stats/overview', accountingAuth, async (req, res) => {
+  try {
+    const stats = await Invoice.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          totalAmount: { $sum: '$total' }
+        }
+      }
+    ]);
+
+    const totalInvoices = await Invoice.countDocuments();
+    const totalRevenue = await Invoice.aggregate([
+      { $match: { status: 'paid' } },
+      { $group: { _id: null, total: { $sum: '$total' } } }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        stats,
+        totalInvoices,
+        totalRevenue: totalRevenue[0]?.total || 0
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching invoice stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch invoice statistics'
+    });
+  }
+});
+
 // Get single invoice
-router.get('/:id', adminAuth, async (req, res) => {
+router.get('/:id', accountingAuth, async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id)
       .populate('createdBy', 'name email')
-      .populate('lastModifiedBy', 'name email');
+      .populate('lastModifiedBy', 'name email')
+      .populate('paymentJournalEntry', 'entryNumber description status');
 
     if (!invoice) {
       return res.status(404).json({
@@ -89,13 +127,13 @@ router.get('/:id', adminAuth, async (req, res) => {
 });
 
 // Create new invoice
-router.post('/', adminAuth, async (req, res) => {
+router.post('/', accountingAuth, async (req, res) => {
   try {
     const invoiceData = req.body;
     
     // Generate invoice number
     invoiceData.invoiceNumber = await Invoice.generateInvoiceNumber();
-    invoiceData.createdBy = req.user.id;
+    invoiceData.createdBy = req.user._id || req.user.id;
 
     const invoice = new Invoice(invoiceData);
     await invoice.save();
@@ -103,10 +141,21 @@ router.post('/', adminAuth, async (req, res) => {
     const populatedInvoice = await Invoice.findById(invoice._id)
       .populate('createdBy', 'name email');
 
+    let journalWarning;
+    if (populatedInvoice.status === 'paid') {
+      try {
+        await postInvoicePaymentJournal(populatedInvoice, req.user._id || req.user.id, req);
+      } catch (je) {
+        console.error('Invoice payment journal post failed:', je.message);
+        journalWarning = je.message;
+      }
+    }
+
     res.status(201).json({
       success: true,
       data: populatedInvoice,
-      message: 'Invoice created successfully'
+      message: 'Invoice created successfully',
+      ...(journalWarning && { journalWarning })
     });
   } catch (error) {
     console.error('Error creating invoice:', error);
@@ -118,10 +167,11 @@ router.post('/', adminAuth, async (req, res) => {
 });
 
 // Update invoice
-router.put('/:id', adminAuth, async (req, res) => {
+router.put('/:id', accountingAuth, async (req, res) => {
   try {
     const invoiceData = req.body;
-    invoiceData.lastModifiedBy = req.user.id;
+    const prev = await Invoice.findById(req.params.id).lean();
+    invoiceData.lastModifiedBy = req.user._id || req.user.id;
 
     const invoice = await Invoice.findByIdAndUpdate(
       req.params.id,
@@ -137,10 +187,22 @@ router.put('/:id', adminAuth, async (req, res) => {
       });
     }
 
+    let journalWarning;
+    const becamePaid = invoice.status === 'paid' && prev?.status !== 'paid';
+    if (becamePaid) {
+      try {
+        await postInvoicePaymentJournal(invoice, req.user._id || req.user.id, req);
+      } catch (je) {
+        console.error('Invoice payment journal post failed:', je.message);
+        journalWarning = je.message;
+      }
+    }
+
     res.json({
       success: true,
       data: invoice,
-      message: 'Invoice updated successfully'
+      message: 'Invoice updated successfully',
+      ...(journalWarning && { journalWarning })
     });
   } catch (error) {
     console.error('Error updating invoice:', error);
@@ -152,7 +214,7 @@ router.put('/:id', adminAuth, async (req, res) => {
 });
 
 // Delete invoice
-router.delete('/:id', adminAuth, async (req, res) => {
+router.delete('/:id', accountingAuth, async (req, res) => {
   try {
     const invoice = await Invoice.findByIdAndDelete(req.params.id);
 
@@ -177,7 +239,7 @@ router.delete('/:id', adminAuth, async (req, res) => {
 });
 
 // Generate PDF
-router.get('/:id/pdf', adminAuth, async (req, res) => {
+router.get('/:id/pdf', accountingAuth, async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     
@@ -212,7 +274,7 @@ router.get('/:id/pdf', adminAuth, async (req, res) => {
 });
 
 // Send invoice by email
-router.post('/:id/send', adminAuth, async (req, res) => {
+router.post('/:id/send', accountingAuth, async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     
@@ -347,7 +409,7 @@ router.post('/:id/send', adminAuth, async (req, res) => {
 });
 
 // Mark invoice as paid
-router.patch('/:id/paid', adminAuth, async (req, res) => {
+router.patch('/:id/paid', accountingAuth, async (req, res) => {
   try {
     const { paymentMethod, paymentReference } = req.body;
     
@@ -369,52 +431,25 @@ router.patch('/:id/paid', adminAuth, async (req, res) => {
       });
     }
 
+    let journalWarning;
+    try {
+      await postInvoicePaymentJournal(invoice, req.user._id || req.user.id, req);
+    } catch (je) {
+      console.error('Invoice payment journal post failed:', je.message);
+      journalWarning = je.message;
+    }
+
     res.json({
       success: true,
       data: invoice,
-      message: 'Invoice marked as paid'
+      message: 'Invoice marked as paid',
+      ...(journalWarning && { journalWarning })
     });
   } catch (error) {
     console.error('Error marking invoice as paid:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update invoice status'
-    });
-  }
-});
-
-// Get invoice statistics
-router.get('/stats/overview', adminAuth, async (req, res) => {
-  try {
-    const stats = await Invoice.aggregate([
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 },
-          totalAmount: { $sum: '$total' }
-        }
-      }
-    ]);
-
-    const totalInvoices = await Invoice.countDocuments();
-    const totalRevenue = await Invoice.aggregate([
-      { $match: { status: 'paid' } },
-      { $group: { _id: null, total: { $sum: '$total' } } }
-    ]);
-
-    res.json({
-      success: true,
-      data: {
-        stats,
-        totalInvoices,
-        totalRevenue: totalRevenue[0]?.total || 0
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching invoice stats:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch invoice statistics'
     });
   }
 });

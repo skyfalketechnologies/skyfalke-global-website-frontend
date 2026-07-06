@@ -7,295 +7,313 @@
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
     <loc>https://skyfalke.com</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://skyfalke.com/about</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <loc>https://skyfalke.com/about-us</loc>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/cloud</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/contact</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/careers</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/shop</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/case-studies</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/blog</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/support</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/privacy</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/terms</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/partners</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/events</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/academy</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/schedule-consultation</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/data-analytics</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/earned-media</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/paid-media</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/creative</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/business-tools</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/data-analytics/business-intelligence</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/data-analytics/data-analytics</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/data-analytics/predictive-analytics</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/data-analytics/performance-tracking</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/data-analytics/custom-dashboards</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/earned-media/public-relations</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/earned-media/influencer-marketing</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/earned-media/content-marketing</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/earned-media/social-media-management</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/earned-media/brand-awareness</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/paid-media/google-ads</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/paid-media/social-media-ads</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/paid-media/display-advertising</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/paid-media/video-advertising</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/paid-media/retargeting-campaigns</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/creative/brand-design</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/creative/ui-ux-design</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/creative/graphic-design</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/creative/video-production</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/creative/content-creation</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/business-tools/seo-tools-analytics</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/business-tools/process-automation</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/business-tools/custom-applications</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/business-tools/business-intelligence</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/services/business-tools/performance-optimization</loc>
-    <lastmod>2026-01-19T15:14:49.424Z</lastmod>
+    <lastmod>2026-05-05T10:34:39.175Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://skyfalke.com/blog/ai-firms-in-kenya-leading-innovation-and-growth-in-technology</loc>
-    <lastmod>2025-12-05T18:52:12.143Z</lastmod>
+    <loc>https://skyfalke.com/blog/the-future-of-ai-for-businesses-or-key-trends-strategy-and-roadmap</loc>
+    <lastmod>2026-05-05T10:10:16.268Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://skyfalke.com/blog/next-level-it-disaster-recovery-with-skyfalke-cloud-is-your-business-ready-for-the-unexpected</loc>
-    <lastmod>2025-10-25T15:07:07.287Z</lastmod>
+    <loc>https://skyfalke.com/blog/how-to-choose-the-right-web-development-firm</loc>
+    <lastmod>2026-04-18T10:51:43.097Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://skyfalke.com/blog/top-data-analytics-firm-in-kenya-driving-smart-business-decisions</loc>
-    <lastmod>2025-12-28T14:18:07.081Z</lastmod>
+    <loc>https://skyfalke.com/blog/7-powerful-reasons-to-hire-a-creative-agency-for-your-brand-in-2026</loc>
+    <lastmod>2026-04-01T19:59:01.106Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/why-smart-kenyan-businesses-are-moving-to-google-workspace-now</loc>
+    <lastmod>2026-04-14T14:06:39.868Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/why-top-founders-outsource-software-developers-to-africa</loc>
+    <lastmod>2026-04-01T19:42:24.784Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/what-is-a-brand-led-performance-marketing-agency</loc>
+    <lastmod>2026-03-16T20:31:31.462Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -306,8 +324,86 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://skyfalke.com/blog/geo-best-practices-optimize-for-ai-search-in-2026</loc>
+    <lastmod>2026-04-06T07:57:11.277Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/skyfalke-the-best-digital-marketing-agency-in-kenya</loc>
+    <lastmod>2026-04-28T12:30:43.306Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://skyfalke.com/blog/top-10-advertising-agencies-in-kenya-driving-business-growth-in-2026</loc>
-    <lastmod>2025-12-29T20:30:49.327Z</lastmod>
+    <lastmod>2026-04-25T14:11:43.809Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/top-data-analytics-firm-in-kenya-driving-smart-business-decisions</loc>
+    <lastmod>2025-12-28T14:18:07.081Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/how-technology-firms-in-kenya-are-transforming-businesses-in-2026</loc>
+    <lastmod>2026-04-09T03:10:39.685Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/digital-marketing-agencies-explained-the-complete-guide-for-business-owners</loc>
+    <lastmod>2026-04-04T13:19:38.176Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/cloud-experts-for-businesses-of-all-sizes-or-skyfalke-cloud</loc>
+    <lastmod>2026-03-08T19:01:58.761Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/what-is-your-real-approach-to-digital-success-in-2026</loc>
+    <lastmod>2026-03-02T07:04:20.403Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/digital-marketing-agency-for-your-brand-in-africa</loc>
+    <lastmod>2026-03-14T19:10:26.681Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/ai-firms-in-kenya-leading-innovation-and-growth-in-technology</loc>
+    <lastmod>2025-12-05T18:52:12.143Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/ai-and-seo-how-ai-crawlers-are-changing-website-rankings</loc>
+    <lastmod>2026-03-08T18:39:59.780Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/next-level-it-disaster-recovery-with-skyfalke-cloud-is-your-business-ready-for-the-unexpected</loc>
+    <lastmod>2025-10-25T15:07:07.287Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/seo-2026-why-it-matters-and-skyfalke-digital-advantage</loc>
+    <lastmod>2026-03-14T02:31:50.046Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/blog/cheapest-web-hosting-in-kenya-affordable-reliable-and-fast</loc>
+    <lastmod>2026-01-26T09:00:15.077Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -318,44 +414,20 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://skyfalke.com/blog/skyfalke-the-best-digital-marketing-agency-in-kenya</loc>
-    <lastmod>2025-12-21T17:11:07.444Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://skyfalke.com/blog/seo-2026-why-it-matters-and-skyfalke-digital-advantage</loc>
-    <lastmod>2025-12-14T09:55:47.896Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://skyfalke.com/blog/the-future-of-ai-for-businesses-or-key-trends-strategy-and-roadmap</loc>
-    <lastmod>2025-12-05T19:04:56.117Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://skyfalke.com/blog/cheapest-web-hosting-in-kenya-affordable-reliable-and-fast</loc>
-    <lastmod>2025-12-04T18:26:37.391Z</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://skyfalke.com/careers/part-time-ai-strategist-policy-developer</loc>
-    <lastmod>2026-01-18T13:08:35.087Z</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://skyfalke.com/careers/motion-graphics-designer</loc>
-    <lastmod>2026-01-12T20:22:26.091Z</lastmod>
+    <loc>https://skyfalke.com/careers/sales-developer</loc>
+    <lastmod>2026-04-28T12:46:03.484Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://skyfalke.com/careers/part-time-full-stack-software-developer</loc>
-    <lastmod>2026-01-11T22:04:35.966Z</lastmod>
+    <lastmod>2026-04-27T02:21:19.972Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://skyfalke.com/careers/motion-graphics-designer</loc>
+    <lastmod>2026-04-23T04:14:21.800Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

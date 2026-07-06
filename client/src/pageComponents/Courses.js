@@ -84,10 +84,17 @@ const Courses = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
               All Courses
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Discover our comprehensive range of courses designed to help you master the latest 
-              digital technologies and advance your career.
-            </p>
+            <div className="text-xl text-gray-300 max-w-3xl mx-auto space-y-5">
+              <p>
+                Discover our comprehensive range of courses designed to help you master digital technologies and advance your career.
+              </p>
+              <p className="text-lg text-gray-400">
+                Skyfalke Academy offers practical training in ICT, AI, cloud, data analytics, cybersecurity, and digital transformation — led by practitioners who work on live engagements. Courses combine structured lessons with exercises you can apply immediately.
+              </p>
+              <p className="text-lg text-gray-400">
+                Filter by category, level, or difficulty to find the right fit. Many programs include certificates of completion and optional mentorship for teams rolling out new capabilities.
+              </p>
+            </div>
           </div>
         </section>
 

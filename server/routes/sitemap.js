@@ -125,7 +125,7 @@ router.get('/llms.txt', (req, res) => {
 
 ## Core Documentation
 - [Home](/): Company overview and services
-- [About](/about): Company information
+- [About](/about-us): Company information
 - [Services](/services): Digital marketing solutions
 - [Contact](/contact): Get in touch
 

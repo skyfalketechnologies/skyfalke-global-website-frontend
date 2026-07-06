@@ -46,13 +46,29 @@ import {
   FaProjectDiagram,
   FaTasks,
   FaUsersCog,
-  FaFileContract
+  FaFileContract,
+  FaBook,
+  FaUniversity,
+  FaHistory,
+  FaFilePdf,
+  FaServer,
+  FaCalendarCheck
 } from 'react-icons/fa';
 import NotificationDropdown from './NotificationDropdown';
+import ServerStatusIndicator from './ServerStatusIndicator';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout, isAuthenticated, isSuperAdmin, loading } = useAuth();
+  const {
+    user,
+    logout,
+    isAuthenticated,
+    isSuperAdmin,
+    canAccessAccounting,
+    canAccessHRModule,
+    canAccessCMS,
+    loading
+  } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
@@ -61,6 +77,7 @@ const AdminLayout = ({ children }) => {
   const getInitialExpandedGroups = () => {
     const groups = {
       overview: true, // Always expanded
+      portal: false,
       content: false,
       communication: false,
       projects: false,
@@ -71,6 +88,10 @@ const AdminLayout = ({ children }) => {
       accounting: false,
       system: false
     };
+
+    if (pathname.startsWith('/system/dashboard/portal')) {
+      groups.portal = true;
+    }
 
     // Auto-expand HR if any HR route is active
     if (pathname.startsWith('/system/dashboard/hr')) {
@@ -91,7 +112,8 @@ const AdminLayout = ({ children }) => {
     // Auto-expand System if any System route is active
     if (pathname.startsWith('/system/dashboard/staff') ||
         pathname.startsWith('/system/dashboard/sitemap') ||
-        pathname.startsWith('/system/dashboard/settings')) {
+        pathname.startsWith('/system/dashboard/settings') ||
+        pathname.startsWith('/system/dashboard/pdf-editor')) {
       groups.system = true;
     }
 
@@ -104,6 +126,10 @@ const AdminLayout = ({ children }) => {
   useEffect(() => {
     setExpandedGroups(prev => {
       const updated = { ...prev };
+
+      if (pathname.startsWith('/system/dashboard/portal')) {
+        updated.portal = true;
+      }
       
       // Auto-expand HR if any HR route is active
       if (pathname.startsWith('/system/dashboard/hr')) {
@@ -124,7 +150,8 @@ const AdminLayout = ({ children }) => {
       // Auto-expand System if any System route is active
       if (pathname.startsWith('/system/dashboard/staff') ||
           pathname.startsWith('/system/dashboard/sitemap') ||
-          pathname.startsWith('/system/dashboard/settings')) {
+          pathname.startsWith('/system/dashboard/settings') ||
+          pathname.startsWith('/system/dashboard/pdf-editor')) {
         updated.system = true;
       }
 
@@ -160,6 +187,24 @@ const AdminLayout = ({ children }) => {
       items: [
         { name: 'Dashboard', href: '/system/dashboard', icon: FaTachometerAlt, current: pathname === '/system/dashboard' },
         { name: 'Analytics', href: '/system/dashboard/analytics', icon: FaChartBar, current: pathname === '/system/dashboard/analytics' },
+      ]
+    },
+    {
+      id: 'portal',
+      name: 'Employee Portal',
+      icon: FaUsersCog,
+      items: [
+        { name: 'Portal home', href: '/system/dashboard/portal', icon: FaTachometerAlt, current: pathname === '/system/dashboard/portal' },
+        { name: 'Directory', href: '/system/dashboard/portal/directory', icon: FaUsers, current: pathname.startsWith('/system/dashboard/portal/directory') },
+        { name: 'Org chart', href: '/system/dashboard/portal/org-chart', icon: FaSitemap, current: pathname.startsWith('/system/dashboard/portal/org-chart') },
+        { name: 'Leave', href: '/system/dashboard/portal/leave', icon: FaClock, current: pathname.startsWith('/system/dashboard/portal/leave') },
+        { name: 'My attendance', href: '/system/dashboard/portal/attendance', icon: FaCalendarCheck, current: pathname.startsWith('/system/dashboard/portal/attendance') },
+        { name: 'Announcements', href: '/system/dashboard/portal/announcements', icon: FaBell, current: pathname.startsWith('/system/dashboard/portal/announcements') },
+        { name: 'Knowledge base', href: '/system/dashboard/portal/wiki', icon: FaBookOpen, current: pathname.startsWith('/system/dashboard/portal/wiki') },
+        { name: 'Performance', href: '/system/dashboard/portal/performance', icon: FaChartLine, current: pathname.startsWith('/system/dashboard/portal/performance') },
+        { name: 'IT & support', href: '/system/dashboard/portal/it', icon: FaServer, current: pathname.startsWith('/system/dashboard/portal/it') },
+        { name: 'Onboarding', href: '/system/dashboard/portal/onboarding', icon: FaClipboardList, current: pathname.startsWith('/system/dashboard/portal/onboarding') },
+        { name: 'Integrations', href: '/system/dashboard/portal/integrations', icon: FaCog, current: pathname.startsWith('/system/dashboard/portal/integrations') },
       ]
     },
     {
@@ -260,6 +305,7 @@ const AdminLayout = ({ children }) => {
       items: [
         { name: 'Staff Management', href: '/system/dashboard/staff', icon: FaUsers, current: pathname.startsWith('/system/dashboard/staff') },
         { name: 'Sitemap Manager', href: '/system/dashboard/sitemap', icon: FaSitemap, current: pathname === '/system/dashboard/sitemap' },
+        { name: 'PDF Editor', href: '/system/dashboard/pdf-editor', icon: FaFilePdf, current: pathname.startsWith('/system/dashboard/pdf-editor') },
         { name: 'Settings', href: '/system/dashboard/settings', icon: FaCog, current: pathname === '/system/dashboard/settings' },
       ]
     },
@@ -320,6 +366,9 @@ const AdminLayout = ({ children }) => {
                 user={user} 
                 onLogout={handleLogout}
                 isSuperAdmin={isSuperAdmin}
+                canAccessAccounting={canAccessAccounting}
+                canAccessHRModule={canAccessHRModule}
+                canAccessCMS={canAccessCMS}
               />
             </motion.div>
           </motion.div>
@@ -336,6 +385,9 @@ const AdminLayout = ({ children }) => {
             user={user} 
             onLogout={handleLogout}
             isSuperAdmin={isSuperAdmin}
+            canAccessAccounting={canAccessAccounting}
+            canAccessHRModule={canAccessHRModule}
+            canAccessCMS={canAccessCMS}
           />
         </div>
       </div>
@@ -376,6 +428,8 @@ const AdminLayout = ({ children }) => {
                 {isDarkMode ? <FaSun className="h-5 w-5" /> : <FaMoon className="h-5 w-5" />}
               </button>
 
+              <ServerStatusIndicator />
+
               {/* Notifications */}
               <NotificationDropdown />
 
@@ -411,36 +465,88 @@ const AdminLayout = ({ children }) => {
   );
 };
 
-const SidebarContent = ({ navigationGroups, expandedGroups, toggleGroup, user, onLogout, isSuperAdmin }) => {
-  // Filter navigation groups based on user role
-  // Ensure isSuperAdmin is a function and navigationGroups is an array
-  const checkIsSuperAdmin = () => {
-    if (typeof isSuperAdmin === 'function') {
-      return isSuperAdmin();
+const SidebarContent = ({
+  navigationGroups,
+  expandedGroups,
+  toggleGroup,
+  user,
+  onLogout,
+  isSuperAdmin,
+  canAccessAccounting,
+  canAccessHRModule,
+  canAccessCMS
+}) => {
+  const checkIsSuperAdmin = () =>
+    typeof isSuperAdmin === 'function' ? isSuperAdmin() : false;
+
+  const checkAccountingAccess = () =>
+    typeof canAccessAccounting === 'function' ? canAccessAccounting() : false;
+
+  const checkHRAccess = () =>
+    typeof canAccessHRModule === 'function' ? canAccessHRModule() : false;
+
+  const checkCMSAccess = () =>
+    typeof canAccessCMS === 'function' ? canAccessCMS() : false;
+
+  /** Role-based group visibility (rest uses per-group rules below) */
+  const roleAllowsGroup = (groupId) => {
+    const role = user?.role;
+    if (!role) return true;
+    if (role === 'employee') {
+      return groupId === 'portal' || groupId === 'projects';
     }
-    return false;
+    if (role === 'accounts' || role === 'finance') {
+      return ['overview', 'portal', 'accounting', 'projects'].includes(groupId);
+    }
+    if (role === 'editor') {
+      return groupId !== 'hr' && groupId !== 'accounting';
+    }
+    if (role === 'hr') {
+      return groupId !== 'accounting';
+    }
+    return true;
   };
 
-  const filteredNavigationGroups = (navigationGroups || []).map(group => {
-    // Only show HR Management and Accounting & Finance to super admins
-    if (group.id === 'hr' || group.id === 'accounting') {
-      if (!checkIsSuperAdmin()) {
+  const filteredNavigationGroups = (navigationGroups || [])
+    .map((group) => {
+      if (!roleAllowsGroup(group.id)) {
         return null;
       }
-    }
-    // Filter Staff Management from System group for non-super admins
-    if (group.id === 'system') {
-      if (!checkIsSuperAdmin()) {
-        // For non-super admins, remove Staff Management from items
-        return {
-          ...group,
-          items: group.items.filter(item => item.href !== '/system/dashboard/staff')
-        };
+      if (group.id === 'hr') {
+        if (!checkHRAccess()) {
+          return null;
+        }
       }
-      // For super admins, show all items including Staff Management
-    }
-    return group;
-  }).filter(group => group !== null);
+      if (group.id === 'accounting') {
+        if (!checkAccountingAccess()) {
+          return null;
+        }
+      }
+      if (group.id === 'content' || group.id === 'communication') {
+        if (!checkCMSAccess() && user?.role === 'employee') {
+          return null;
+        }
+      }
+      if (group.id === 'portal') {
+        const items = group.items.filter((item) => {
+          if (item.href === '/system/dashboard/portal/integrations' && !checkIsSuperAdmin()) {
+            return false;
+          }
+          return true;
+        });
+        return { ...group, items };
+      }
+      if (group.id === 'system') {
+        if (!checkIsSuperAdmin()) {
+          return {
+            ...group,
+            items: group.items.filter((item) => item.href !== '/system/dashboard/staff')
+          };
+        }
+      }
+      return group;
+    })
+    .filter((group) => group !== null);
 
   return (
   <div className="flex flex-col h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">

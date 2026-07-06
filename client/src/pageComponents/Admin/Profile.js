@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaUser, FaEnvelope, FaLock, FaSave, FaSpinner, FaCamera, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
-import api from '../../utils/api';
+import api, { apiPost } from '../../utils/api';
+import RichTextEditor from '../../components/RichTextEditor';
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -14,8 +15,16 @@ const Profile = () => {
   // Profile form state
   const [profileForm, setProfileForm] = useState({
     name: '',
-    email: ''
+    email: '',
+    authorProfile: {
+      name: '',
+      role: '',
+      bio: '',
+      avatar: '',
+      linkedin: ''
+    }
   });
+  const [uploadingAuthorImage, setUploadingAuthorImage] = useState(false);
 
   // Password change form state
   const [passwordForm, setPasswordForm] = useState({
@@ -24,19 +33,68 @@ const Profile = () => {
     confirmPassword: ''
   });
 
+  const getPlainTextLength = (html = '') =>
+    html
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim().length;
+
   useEffect(() => {
     if (user) {
       setProfileForm({
         name: user.name || '',
-        email: user.email || ''
+        email: user.email || '',
+        authorProfile: {
+          name: user.authorProfile?.name || user.name || '',
+          role: user.authorProfile?.role || '',
+          bio: user.authorProfile?.bio || '',
+          avatar: user.authorProfile?.avatar || user.avatar || '',
+          linkedin: user.authorProfile?.linkedin || ''
+        }
       });
     }
   }, [user]);
+
+  const handleAuthorImageUpload = async (file) => {
+    if (!file) return;
+    setUploadingAuthorImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const response = await apiPost('/api/blogs/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (!response.data?.image?.url) {
+        throw new Error('Invalid image upload response');
+      }
+      setProfileForm((prev) => ({
+        ...prev,
+        authorProfile: {
+          ...prev.authorProfile,
+          avatar: response.data.image.url
+        }
+      }));
+    } catch (error) {
+      console.error('Author image upload error:', error);
+      setMessage({ type: 'error', text: 'Failed to upload author image' });
+    } finally {
+      setUploadingAuthorImage(false);
+    }
+  };
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: '', text: '' });
+
+    const bioTextLength = getPlainTextLength(profileForm.authorProfile.bio);
+    if (bioTextLength > 2000) {
+      setMessage({ type: 'error', text: 'Author bio must be 2000 characters or less (plain text).' });
+      setLoading(false);
+      return;
+    }
 
     try {
       const result = await updateProfile(profileForm);
@@ -199,6 +257,107 @@ const Profile = () => {
                 disabled
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
               />
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Blog Author Profile</h4>
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Author Display Name</label>
+                    <input
+                      type="text"
+                      value={profileForm.authorProfile.name}
+                      onChange={(e) => setProfileForm({
+                        ...profileForm,
+                        authorProfile: { ...profileForm.authorProfile, name: e.target.value }
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role / Title</label>
+                    <input
+                      type="text"
+                      value={profileForm.authorProfile.role}
+                      onChange={(e) => setProfileForm({
+                        ...profileForm,
+                        authorProfile: { ...profileForm.authorProfile, role: e.target.value }
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Author Bio</label>
+                  <RichTextEditor
+                    value={profileForm.authorProfile.bio}
+                    onChange={(html) => setProfileForm({
+                      ...profileForm,
+                      authorProfile: { ...profileForm.authorProfile, bio: html }
+                    })}
+                    placeholder="Write a detailed author bio..."
+                    style={{ minHeight: '220px' }}
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    {getPlainTextLength(profileForm.authorProfile.bio)}/2000 characters
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">LinkedIn URL</label>
+                    <input
+                      type="url"
+                      value={profileForm.authorProfile.linkedin}
+                      onChange={(e) => setProfileForm({
+                        ...profileForm,
+                        authorProfile: { ...profileForm.authorProfile, linkedin: e.target.value }
+                      })}
+                      placeholder="https://linkedin.com/in/..."
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Profile Image</label>
+                    <div className="flex items-center gap-3">
+                      <label className="w-24 h-24 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer flex items-center justify-center hover:border-primary-500 transition-colors">
+                        {uploadingAuthorImage ? (
+                          <FaSpinner className="animate-spin text-gray-500" />
+                        ) : (
+                          <FaCamera className="text-gray-500" />
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadingAuthorImage}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleAuthorImageUpload(file);
+                          }}
+                        />
+                      </label>
+                      {profileForm.authorProfile.avatar ? (
+                        <div className="relative">
+                          <img src={profileForm.authorProfile.avatar} alt="Author preview" className="w-16 h-16 rounded-full object-cover border border-gray-300 dark:border-gray-600" />
+                          <button
+                            type="button"
+                            onClick={() => setProfileForm({
+                              ...profileForm,
+                              authorProfile: { ...profileForm.authorProfile, avatar: '' }
+                            })}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs"
+                          >
+                            x
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Submit Button */}

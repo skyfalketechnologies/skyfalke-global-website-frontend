@@ -33,7 +33,7 @@ const CriticalCSS = () => {
       
       /* Typography critical styles */
       h1, h2, h3, h4, h5, h6 {
-        font-family: 'Nexa', 'Inter', sans-serif;
+        font-family: 'Nexa', sans-serif;
         font-weight: 800;
         line-height: 1.2;
         margin: 0;

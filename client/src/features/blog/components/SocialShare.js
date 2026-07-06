@@ -38,11 +38,11 @@ const SocialShare = ({ url, title }) => {
   if (!isVisible) return null;
 
   return (
-    <aside 
-      className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 transition-all duration-300"
+    <aside
+      className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 transition-all duration-300 md:bottom-auto md:left-4 md:top-1/2 md:translate-x-0 md:-translate-y-1/2"
       aria-label="Share this article"
     >
-      <div className="flex flex-col gap-3 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg border border-gray-200">
+      <div className="flex flex-row items-center gap-3 rounded-full border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm md:flex-col">
         <a
           href={shareLinks.twitter}
           target="_blank"

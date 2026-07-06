@@ -8,7 +8,7 @@ export const internalLinkingSuggestions = {
   // Homepage links
   homepage: [
     { url: '/services', text: 'Our Services', context: 'comprehensive digital marketing solutions' },
-    { url: '/about', text: 'About Skyfalke', context: 'learn more about our company' },
+    { url: '/about-us', text: 'About Skyfalke', context: 'learn more about our company' },
     { url: '/case-studies', text: 'Case Studies', context: 'see our success stories' },
     { url: '/blog', text: 'Latest Insights', context: 'read our latest articles' },
     { url: '/contact', text: 'Get Started', context: 'contact us today' }
@@ -178,22 +178,22 @@ export const getRelatedContentSuggestions = (currentPage, category) => {
   const relatedContent = {
     'digital-marketing': [
       { url: '/blog/digital-marketing-trends-2024', title: 'Digital Marketing Trends 2024' },
-      { url: '/case-studies/social-media-success', title: 'Social Media Success Story' },
+      { url: '/how-we-work/case-studies/social-media-success', title: 'Social Media Success Story' },
       { url: '/services/paid-media', title: 'Paid Media Services' }
     ],
     'cloud-solutions': [
       { url: '/blog/cloud-migration-guide', title: 'Cloud Migration Guide' },
-      { url: '/case-studies/cloud-transformation', title: 'Cloud Transformation Case Study' },
+      { url: '/how-we-work/case-studies/cloud-transformation', title: 'Cloud Transformation Case Study' },
       { url: '/services/cloud-solutions', title: 'Cloud Solutions' }
     ],
     'creative-services': [
       { url: '/blog/ui-ux-design-principles', title: 'UI/UX Design Principles' },
-      { url: '/case-studies/brand-redesign', title: 'Brand Redesign Success' },
+      { url: '/how-we-work/case-studies/brand-redesign', title: 'Brand Redesign Success' },
       { url: '/services/creative', title: 'Creative Services' }
     ],
     'business-tools': [
       { url: '/blog/automation-tools-guide', title: 'Business Automation Tools' },
-      { url: '/case-studies/process-optimization', title: 'Process Optimization Success' },
+      { url: '/how-we-work/case-studies/process-optimization', title: 'Process Optimization Success' },
       { url: '/services/business-tools', title: 'Business Tools' }
     ]
   };

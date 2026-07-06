@@ -1,9 +1,18 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 
 const AuthContext = createContext();
+
+/** True when the request never reached the server (API down, DNS, CORS preflight failure, etc.) */
+const isUnreachableError = (error) => {
+  if (!error || error.response) return false;
+  const code = error.code;
+  if (code === 'ERR_NETWORK' || code === 'ECONNABORTED') return true;
+  const msg = typeof error.message === 'string' ? error.message : '';
+  return msg.includes('Network Error');
+};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -50,9 +59,25 @@ export const AuthProvider = ({ children }) => {
         const response = await api.get('/api/auth/me');
         setUser(response.data);
       } catch (error) {
-        console.error('Auth check failed:', error);
-        localStorage.removeItem('token');
-        setToken(null);
+        const status = error.response?.status;
+
+        if (status === 401 || status === 403) {
+          localStorage.removeItem('token');
+          setToken(null);
+        } else if (isUnreachableError(error) || (status >= 500 && status < 600)) {
+          // API unreachable or server error: keep token so a valid session resumes when API is back
+          if (process.env.NODE_ENV === 'development') {
+            console.debug(
+              '[Auth] Session not validated (API unavailable or server error).'
+            );
+          }
+        } else {
+          localStorage.removeItem('token');
+          setToken(null);
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('[Auth] Session invalid:', status ?? error.code);
+          }
+        }
       } finally {
         setLoading(false);
       }
@@ -177,6 +202,54 @@ export const AuthProvider = ({ children }) => {
     return user?.role === 'super_admin' || user?.email === 'mronald@skyfalke.com';
   };
 
+  /** Any staff role that may open /system/dashboard (CMS + Employee Portal) */
+  const canAccessSystemDashboard = useCallback(() => {
+    if (!user) return false;
+    const staff = [
+      'super_admin',
+      'admin',
+      'editor',
+      'accounts',
+      'hr',
+      'employee',
+      'finance'
+    ];
+    return staff.includes(user.role) || user.email === 'mronald@skyfalke.com';
+  }, [user]);
+
+  /** CMS content areas: admins + editors */
+  const canAccessCMS = useCallback(() => {
+    if (!user) return false;
+    return (
+      user.role === 'super_admin' ||
+      user.role === 'admin' ||
+      user.role === 'editor' ||
+      user.email === 'mronald@skyfalke.com'
+    );
+  }, [user]);
+
+  /** HR Management sidebar (employees, attendance) — HR, Admin, Super Admin */
+  const canAccessHRModule = useCallback(() => {
+    if (!user) return false;
+    return (
+      user.role === 'super_admin' ||
+      user.role === 'admin' ||
+      user.role === 'hr' ||
+      user.email === 'mronald@skyfalke.com'
+    );
+  }, [user]);
+
+  /** Accounting & Finance module: Super Admin, Finance, or Accounts */
+  const canAccessAccounting = useCallback(() => {
+    if (!user) return false;
+    return (
+      user.role === 'super_admin' ||
+      user.role === 'accounts' ||
+      user.role === 'finance' ||
+      user.email === 'mronald@skyfalke.com'
+    );
+  }, [user]);
+
   const getToken = () => {
     return token;
   };
@@ -191,6 +264,10 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isAdmin,
     isSuperAdmin,
+    canAccessSystemDashboard,
+    canAccessCMS,
+    canAccessHRModule,
+    canAccessAccounting,
     getToken
   };
 

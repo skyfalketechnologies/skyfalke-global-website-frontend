@@ -1,36 +1,39 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
+import {
   FaBuilding,
   FaLightbulb,
   FaHandsHelping,
-  FaBriefcase,
-  FaCheckCircle
+  FaBriefcase
 } from 'react-icons/fa';
 
 const WhoWeWorkWith = () => {
   const clients = [
     {
       icon: FaBuilding,
-      text: "SMEs & growing businesses",
+      title: "SMEs & Growing Businesses",
+      description: "Scale your operations without scaling your headcount",
       color: "text-blue-500",
       bgColor: "bg-blue-50"
     },
     {
       icon: FaLightbulb,
-      text: "Startups & founders",
+      title: "Startups & Founders",
+      description: "Build the right systems from day one",
       color: "text-purple-500",
       bgColor: "bg-purple-50"
     },
     {
       icon: FaHandsHelping,
-      text: "NGOs & development organizations",
+      title: "NGOs & Development Organizations",
+      description: "Maximize impact with leaner, smarter digital infrastructure",
       color: "text-green-500",
       bgColor: "bg-green-50"
     },
     {
       icon: FaBriefcase,
-      text: "Consulting & professional services firms",
+      title: "Consulting & Professional Services Firms",
+      description: "Deliver more value to clients with better internal systems",
       color: "text-orange-500",
       bgColor: "bg-orange-50"
     }
@@ -53,14 +56,11 @@ const WhoWeWorkWith = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 sm:mb-16"
         >
-          <div className="inline-flex items-center px-4 py-2 bg-[#303661]/10 text-[#303661] uppercase text-xs sm:text-sm font-bold mb-4 sm:mb-6 rounded-sm border border-[#303661]/20">
-            Who This Is For
-          </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#303661] mb-6 sm:mb-8 px-4 max-w-4xl mx-auto leading-tight">
-            Who We Work With
+            Built for Organizations Ready to Grow
           </h2>
           <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-            We partner with forward-thinking organizations ready to transform their digital operations
+            We partner with forward-thinking leaders who know their operations need to evolve, and want a trusted systems partner to make it happen.
           </p>
         </motion.div>
 
@@ -86,8 +86,11 @@ const WhoWeWorkWith = () => {
                   <div className={`w-16 h-16 sm:w-20 sm:h-20 ${client.bgColor} rounded-2xl flex items-center justify-center mb-4 sm:mb-6 mx-auto group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-md group-hover:shadow-lg`}>
                     <IconComponent className={`text-2xl sm:text-3xl ${client.color} group-hover:scale-110 transition-transform duration-300`} />
                   </div>
-                  <p className="text-base sm:text-lg text-gray-800 font-semibold leading-relaxed group-hover:text-[#303661] transition-colors duration-300">
-                    {client.text}
+                  <p className="text-base sm:text-lg text-gray-800 font-semibold leading-relaxed group-hover:text-[#303661] transition-colors duration-300 mb-2">
+                    {client.title}
+                  </p>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    {client.description}
                   </p>
                 </div>
 
@@ -107,10 +110,9 @@ const WhoWeWorkWith = () => {
           className="text-center"
         >
           <div className="bg-gradient-to-r from-[#303661] to-[#1e2440] rounded-2xl p-6 sm:p-8 lg:p-10 text-white shadow-xl max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-3 mb-4">
-            </div>
             <p className="text-lg sm:text-xl md:text-2xl font-medium leading-relaxed text-gray-100">
-              If your organization relies on digital tools, data, or manual processes-<span className="text-white font-semibold">we can help.</span>
+              If your organization depends on digital tools, data, or manual processes -{' '}
+              <span className="text-white font-semibold">there&apos;s room for Skyfalke to help.</span>
             </p>
           </div>
         </motion.div>

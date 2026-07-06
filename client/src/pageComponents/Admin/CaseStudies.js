@@ -435,7 +435,7 @@ const CaseStudies = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex items-center justify-end gap-2">
-                              <Link href={`/case-studies/${caseStudy.slug}`}
+                              <Link href={`/how-we-work/case-studies/${caseStudy.slug}`}
                                 target="_blank"
                                 className="text-primary-600 hover:text-primary-700 p-1"
                                 title="View"
