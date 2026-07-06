@@ -84,30 +84,40 @@ const Footer = () => {
 
   const footerSections = [
     {
+      title: 'What We Do',
+      links: [
+        { name: 'Capabilities', href: '/capabilities' },
+        { name: 'Industries', href: '/industries' },
+        { name: 'How We Work', href: '/how-we-work' },
+        { name: 'Services', href: '/services' },
+        { name: 'Academy', href: '/academy' },
+      ],
+    },
+    {
       title: 'Company',
       links: [
         { name: 'About', href: '/about-us' },
-        { name: 'Services', href: '/services' },
+        { name: 'Sustainability', href: '/sustainability' },
         { name: 'Careers', href: '/careers' },
+        { name: 'Partners', href: '/partners' },
         { name: 'Shop', href: '/shop' },
       ],
     },
     {
-      title: 'Resources',
+      title: 'Insights',
       links: [
         { name: 'Blog', href: '/blog' },
-        { name: 'Insights', href: '/resources' },
+        { name: 'Resources', href: '/resources' },
         { name: 'Case Studies', href: '/how-we-work/case-studies' },
-        { name: 'Support', href: '/support' },
+        { name: 'Events', href: '/events' },
       ],
     },
     {
       title: 'Connect',
       links: [
         { name: 'Contact', href: '/contact' },
-        { name: 'Schedule consultation', href: '/schedule-consultation' },
-        { name: 'Partners', href: '/partners' },
-        { name: 'Academy', href: '/academy' },
+        { name: 'Schedule Consultation', href: '/schedule-consultation' },
+        { name: 'Support', href: '/support' },
       ],
     },
   ];
@@ -147,10 +157,25 @@ const Footer = () => {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e0ae00]/80 to-transparent" aria-hidden />
 
       <div className="relative z-10">
+        {/* CTA strip */}
+        <div className="border-b border-white/10">
+          <div className="container-custom flex flex-col gap-5 py-10 md:flex-row md:items-center md:justify-between">
+            <p className="max-w-xl font-nexa-heavy text-xl tracking-tight text-white sm:text-2xl">
+              Ready to reinvent what&apos;s possible for your business?
+            </p>
+            <Link
+              href="/schedule-consultation"
+              className="inline-flex shrink-0 items-center justify-center gap-2 self-start bg-[#e0ae00] px-7 py-3.5 text-sm font-semibold tracking-tight text-[#0c0f14] transition-colors hover:bg-[#c99a00] md:self-auto"
+            >
+              Talk to Our Team
+            </Link>
+          </div>
+        </div>
+
         <div className="container-custom pt-14 pb-10">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10 xl:gap-14">
             {/* Brand + contact */}
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-3">
               <Link href="/" className="inline-flex items-center gap-3">
                 <img
                   src="/images/logos/logo.svg"
@@ -161,7 +186,10 @@ const Footer = () => {
                 />
               </Link>
               <p className="mt-5 max-w-sm text-sm leading-relaxed text-zinc-400">
-                Technology and marketing partner for teams that want clarity, execution, and measurable growth.
+                One accountable partner across strategy, technology, and marketing.
+              </p>
+              <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">
+                Serving clients across 8+ countries
               </p>
               <ul className="mt-8 space-y-3 border-t border-white/10 pt-8">
                 {contactLines.map((item) => (
@@ -184,7 +212,7 @@ const Footer = () => {
             </div>
 
             {/* Link columns */}
-            <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-5 lg:gap-8">
+            <div className="grid grid-cols-2 gap-10 sm:grid-cols-4 lg:col-span-6 lg:gap-8">
               {footerSections.map((section) => (
                 <div key={section.title}>
                   <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
@@ -213,7 +241,7 @@ const Footer = () => {
 
             {/* Newsletter */}
             <div className="lg:col-span-3">
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
                 <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
                   Newsletter
                 </h2>

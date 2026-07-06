@@ -1,10 +1,9 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
-import { FaFileContract, FaEnvelope, FaPhone, FaExclamationTriangle } from 'react-icons/fa';
+import LegalPage from '../components/legal/LegalPage';
 
 const Terms = () => {
-  const lastUpdated = "December 15, 2024";
+  const lastUpdated = "July 6, 2026";
 
   const sections = [
     {
@@ -96,6 +95,14 @@ const Terms = () => {
         "If arbitration is not enforceable, disputes will be heard in Kenyan courts",
         "The prevailing party in any dispute is entitled to reasonable attorney fees"
       ]
+    },
+    {
+      title: "Changes to These Terms",
+      content: [
+        "We may modify these Terms of Service from time to time",
+        "When we make material changes, we will provide at least 30 days notice via email or through our services",
+        "Your continued use of our services after the effective date constitutes acceptance of the modified terms"
+      ]
     }
   ];
 
@@ -106,159 +113,18 @@ const Terms = () => {
         <meta name="description" content="Skyfalke's Terms of Service - Legal terms and conditions for using our digital marketing, cloud solutions, and business tools." />
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <section className="bg-gray-900 text-white py-20">
-          <div className="container-custom">
-            <div className="text-center max-w-3xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
-              >
-                <FaFileContract className="text-5xl mx-auto mb-4" />
-              </motion.div>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-4xl md:text-5xl font-bold mb-6"
-              >
-                Terms of Service
-              </motion.h1>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-xl text-gray-300 max-w-2xl mx-auto space-y-4"
-              >
-                <p>Legal terms and conditions governing the use of Skyfalke&apos;s website, digital services, cloud offerings, academy programs, and consulting engagements.</p>
-                <p className="text-lg text-gray-400">
-                  Please read these terms carefully before purchasing or subscribing. Specific project or enterprise agreements may include additional statements of work that prevail where they conflict with this general policy.
-                </p>
-              </motion.div>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-sm text-gray-400 mt-4"
-              >
-                Last updated: {lastUpdated}
-              </motion.p>
-            </div>
-          </div>
-        </section>
-
-        {/* Content */}
-        <section className="py-16">
-          <div className="container-custom">
-            <div className="max-w-4xl mx-auto">
-              {/* Introduction */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl p-8 shadow-lg mb-8"
-              >
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Introduction</h2>
-                <p className="text-gray-600 leading-relaxed">
-                  These Terms of Service ("Terms") govern your use of Skyfalke's digital marketing solutions, 
-                  cloud services, business tools, and related services. By using our services, you agree to 
-                  these terms. Please read them carefully as they contain important information about your 
-                  rights and obligations, as well as limitations and exclusions that may apply to you.
-                </p>
-              </motion.div>
-
-              {/* Important Notice */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border border-red-200 rounded-xl p-6 mb-8"
-              >
-                <div className="flex items-start space-x-3">
-                  <FaExclamationTriangle className="text-red-600 mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-lg font-semibold text-red-800 mb-2">Important Notice</h3>
-                    <p className="text-red-700">
-                      These terms include important limitations of liability and dispute resolution provisions. 
-                      By using our services, you agree to resolve disputes through binding arbitration rather 
-                      than court proceedings, except where prohibited by law.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Terms Sections */}
-              {sections.map((section, index) => (
-                <motion.div
-                  key={section.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-xl p-8 shadow-lg mb-8"
-                >
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">{section.title}</h2>
-                  <ul className="space-y-4">
-                    {section.content.map((item, itemIndex) => (
-                      <li key={itemIndex} className="flex items-start space-x-3">
-                        <div className="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <p className="text-gray-600 leading-relaxed">{item}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              ))}
-
-              {/* Contact Information */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="bg-primary-50 rounded-xl p-8 border border-primary-200"
-              >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Us About These Terms</h2>
-                <p className="text-gray-600 mb-6">
-                  If you have questions about these Terms of Service or need clarification on any provision, 
-                  please contact our legal team:
-                </p>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <FaEnvelope className="text-primary-600" />
-                    <span className="text-gray-700">legal@skyfalke.com</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <FaPhone className="text-primary-600" />
-                    <span className="text-gray-700">+254 (0) 717 797 238</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Updates Notice */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="bg-blue-50 border border-blue-200 rounded-xl p-6 mt-8"
-              >
-                <h3 className="text-lg font-semibold text-blue-800 mb-2">Terms Updates</h3>
-                <p className="text-blue-700">
-                  We may modify these Terms of Service from time to time. When we make material changes, 
-                  we will provide at least 30 days notice via email or through our services. Your continued 
-                  use of our services after the effective date constitutes acceptance of the modified terms.
-                </p>
-              </motion.div>
-
-              {/* Effective Date */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="text-center mt-12 py-8 border-t border-gray-200"
-              >
-                <p className="text-gray-500">
-                  These Terms of Service are effective as of {lastUpdated} and remain in effect until modified or terminated.
-                </p>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-      </div>
+      <LegalPage
+        eyebrow="Legal"
+        title="Terms of Service"
+        intro="Legal terms and conditions governing the use of Skyfalke's website, digital services, cloud offerings, academy programs, and consulting engagements. Specific project or enterprise agreements may include statements of work that prevail where they conflict with these general terms."
+        lastUpdated={lastUpdated}
+        sections={sections}
+        notice="These terms include important limitations of liability and dispute resolution provisions. By using our services, you agree to resolve disputes through binding arbitration rather than court proceedings, except where prohibited by law."
+        contactHeading="Contact us about these terms"
+        contactText="If you have questions about these Terms of Service or need clarification on any provision, please contact our legal team:"
+        contactEmail="legal@skyfalke.com"
+        footNote={`These Terms of Service are effective as of ${lastUpdated} and remain in effect until modified or terminated.`}
+      />
     </>
   );
 };

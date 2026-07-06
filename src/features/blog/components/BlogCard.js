@@ -9,6 +9,14 @@ import { formatBlogDate, getReadingTime } from '../utils/formatters';
  * Blog Card Component - Displays blog post preview
  * SEO-friendly with proper semantic HTML
  */
+// Request a right-sized, auto-format rendition from ImageKit instead of the
+// full-resolution original; non-ImageKit URLs pass through untouched.
+const optimizeImageUrl = (url, width) => {
+  if (!url || !url.includes('ik.imagekit.io') || url.includes('tr=')) return url;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}tr=w-${width},f-auto,q-auto:good`;
+};
+
 const BlogCard = ({ post, featured = false }) => {
   if (!post) return null;
 
@@ -30,10 +38,11 @@ const BlogCard = ({ post, featured = false }) => {
       {post.featuredImage?.url && (
         <Link href={`/blog/${post.slug}`} className={imageWrapperClasses}>
           <img
-            src={post.featuredImage.url}
+            src={optimizeImageUrl(post.featuredImage.url, featured ? 1200 : 600)}
             alt={post.title}
             className={`${imageClasses} ${imageHoverClasses}`}
             loading="lazy"
+            decoding="async"
             itemProp="image"
           />
         </Link>

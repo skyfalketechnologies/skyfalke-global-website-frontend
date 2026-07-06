@@ -2,9 +2,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-
-const DIFFERENTIATION_IMAGE =
-  'https://ik.imagekit.io/g3nahgeeu/why-customers-choose-skyfalke.jpg';
+import Link from 'next/link';
+import { FaArrowRight } from 'react-icons/fa';
 
 const points = [
   {
@@ -42,116 +41,110 @@ const fadeUp = {
 export default function HomeDifferentiation() {
   return (
     <section
-      className="bg-white border-y border-slate-200/80"
+      className="bg-[#F8FAFC] border-y border-slate-200/80 py-20 lg:py-28"
       aria-labelledby="why-heading"
     >
-      <div className="container-custom max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-
-          {/* ── Left: content ── */}
-          <motion.div
-            className="py-16 lg:py-24 lg:pr-16 xl:pr-24"
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.15 }}
-          >
-            {/* Section label */}
-            <motion.div variants={fadeUp} className="flex items-center gap-3 mb-6">
-              <span className="block h-px w-8 bg-[#e0ae00]" />
+      <div className="container-custom">
+        {/* ── Header row ── */}
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-14 lg:mb-16"
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <div className="lg:col-span-7">
+            <motion.div variants={fadeUp} className="flex items-center gap-3 mb-5">
               <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-primary-600">
                 Why Skyfalke
               </span>
             </motion.div>
 
-            {/* Headline */}
             <motion.h2
               id="why-heading"
               variants={fadeUp}
-              className="font-nexa-heavy text-[1.9rem] sm:text-[2.2rem] lg:text-[2.5rem] leading-[1.1] tracking-tight text-[#0B1220] mb-5"
+              className="font-nexa-heavy text-[1.9rem] sm:text-[2.2rem] lg:text-[2.5rem] leading-[1.1] tracking-tight text-[#0B1220]"
             >
               The difference that shows
               <br className="hidden sm:block" />
               {' '}up in your results
             </motion.h2>
+          </div>
 
-            <motion.p
-              variants={fadeUp}
-              className="text-base text-slate-500 leading-relaxed max-w-md mb-12"
-            >
-              Most firms hand you a report. We hand you a running system — built, integrated,
-              and accountable from strategy through to delivery.
-            </motion.p>
-
-            {/* Points */}
-            <div className="space-y-0 divide-y divide-slate-100">
-              {points.map(({ num, title, body }) => (
-                <motion.div
-                  key={num}
-                  variants={fadeUp}
-                  className="group flex gap-6 py-6 first:pt-0 last:pb-0"
-                >
-                  {/* Number */}
-                  <span className="shrink-0 pt-0.5 text-[11px] font-semibold text-[#e0ae00] tracking-widest font-nexa-heavy">
-                    {num}
-                  </span>
-
-                  {/* Text */}
-                  <div>
-                    <p className="font-semibold text-[#0B1220] text-base mb-1.5 group-hover:text-primary-600 transition-colors">
-                      {title}
-                    </p>
-                    <p className="text-sm text-slate-500 leading-relaxed">{body}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ── Right: image ── */}
           <motion.div
-            className="relative hidden lg:flex items-stretch"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            variants={fadeUp}
+            className="lg:col-span-5 flex flex-col justify-end gap-6"
           >
-            {/* Vertical divider */}
-            <div className="absolute left-0 top-0 bottom-0 w-px bg-slate-200/80" aria-hidden />
-
-            <div className="relative w-full overflow-hidden">
-              <img
-                src={DIFFERENTIATION_IMAGE}
-                alt="Strategic leadership in business — a chess king on a board"
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-                width={800}
-                height={800}
-              />
-              {/* Subtle overlay so the image doesn't compete with the text */}
-              <div className="absolute inset-0 bg-[#0B1220]/20" aria-hidden />
-
-              {/* Floating stat card */}
-              <div className="absolute bottom-8 left-8 right-8">
-                <div className="inline-flex items-center gap-4 bg-white/95 backdrop-blur-sm border border-slate-200/80 shadow-lg px-5 py-4">
-                  <div className="h-10 w-10 flex items-center justify-center bg-[#303661] shrink-0">
-                    <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5 text-white" aria-hidden>
-                      <path d="M3 13l4-4 3 3 4-5 3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-slate-500 uppercase tracking-widest font-medium">Average client outcome</p>
-                    <p className="text-base font-nexa-heavy text-[#0B1220] mt-0.5">
-                      3× faster go-to-market vs. multi-vendor model
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <p className="text-base text-slate-500 leading-relaxed">
+              Most firms hand you a report. We hand you a running system — built,
+              integrated, and accountable from strategy through to delivery.
+            </p>
+            <Link
+              href="/how-we-work"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[#0B1220] hover:text-primary-600 transition-colors self-start"
+            >
+              How we work
+              <FaArrowRight className="text-[10px]" aria-hidden />
+            </Link>
           </motion.div>
+        </motion.div>
 
-        </div>
+        {/* ── Points grid ── */}
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 border-t border-l border-slate-200/80 bg-white"
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.15 }}
+        >
+          {points.map(({ num, title, body }) => (
+            <motion.div
+              key={num}
+              variants={fadeUp}
+              className="group relative border-b border-r border-slate-200/80 p-8 lg:p-9 hover:bg-[#0B1220] transition-colors duration-300"
+            >
+              {/* Gold accent bar */}
+              <span
+                className="absolute top-0 left-0 h-0.5 w-0 bg-[#e0ae00] group-hover:w-full transition-all duration-500"
+                aria-hidden
+              />
+
+              <p className="font-nexa-heavy text-3xl text-slate-200 group-hover:text-[#e0ae00]/40 transition-colors mb-8">
+                {num}
+              </p>
+
+              <p className="font-semibold text-[#0B1220] group-hover:text-white text-base leading-snug mb-3 transition-colors">
+                {title}
+              </p>
+              <p className="text-sm text-slate-500 group-hover:text-slate-300 leading-relaxed transition-colors">
+                {body}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* ── Outcome strip ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, delay: 0.15 }}
+          className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 border border-t-0 border-slate-200/80 bg-white px-8 py-6"
+        >
+          <div className="h-10 w-10 flex items-center justify-center bg-[#303661] shrink-0">
+            <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5 text-white" aria-hidden>
+              <path d="M3 13l4-4 3 3 4-5 3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-[11px] text-slate-500 uppercase tracking-widest font-medium">
+              Average client outcome
+            </p>
+            <p className="text-base font-nexa-heavy text-[#0B1220] mt-0.5">
+              3× faster go-to-market vs. multi-vendor model
+            </p>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

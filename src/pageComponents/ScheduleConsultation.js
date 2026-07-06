@@ -1,17 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
-import { motion } from 'framer-motion';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { apiPost } from '../utils/api';
-import { 
-  FaCalendarAlt, 
-  FaClock, 
-  FaUser, 
-  FaEnvelope, 
-  FaPhone,
-  FaBuilding,
+import {
+  FaUser,
+  FaClock,
   FaComments,
   FaCheckCircle,
   FaArrowRight,
@@ -34,6 +29,11 @@ function ServiceQueryPrefill({ onService }) {
 
   return null;
 }
+
+const inputClasses =
+  'w-full px-4 py-3 border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0B1220] focus:ring-1 focus:ring-[#0B1220] transition-colors';
+
+const labelClasses = 'block text-sm font-semibold text-[#0B1220] mb-2';
 
 const ScheduleConsultation = () => {
   const router = useRouter();
@@ -114,20 +114,20 @@ const ScheduleConsultation = () => {
     try {
       // Format data for API
       const name = `${formData.firstName} ${formData.lastName}`.trim();
-      const subject = formData.service 
+      const subject = formData.service
         ? `Consultation Request - ${formData.service}`
         : 'Consultation Request';
-      
+
       // Build message with consultation details
       let message = formData.message || '';
       if (formData.preferredDate || formData.preferredTime) {
         message += '\n\n--- Consultation Preferences ---\n';
         if (formData.preferredDate) {
-          message += `Preferred Date: ${new Date(formData.preferredDate).toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+          message += `Preferred Date: ${new Date(formData.preferredDate).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
           })}\n`;
         }
         if (formData.preferredTime) {
@@ -155,11 +155,11 @@ const ScheduleConsultation = () => {
         // Store submitted data for success message
         setSubmittedData({ ...formData });
         setIsSubmitted(true);
-        
+
         // Track analytics events
         trackContactFormSubmission('consultation');
         trackLeadGeneration('consultation', null);
-        
+
         // Reset form after successful submission
         setFormData({
           firstName: '',
@@ -175,7 +175,7 @@ const ScheduleConsultation = () => {
       }
     } catch (error) {
       console.error('Consultation submission error:', error);
-      
+
       // Handle rate limiting specifically
       if (error.response?.status === 429) {
         setError('Too many attempts. Please wait a few minutes before trying again.');
@@ -193,85 +193,79 @@ const ScheduleConsultation = () => {
     }
   };
 
-  const benefits = [
+  const expectations = [
     {
-      icon: FaUser,
-      title: "Expert Consultation",
-      description: "Speak with practitioners who work on live strategy, platform, and growth programs — not generic account handoffs."
+      title: 'Expert consultation',
+      description: 'Speak with practitioners who work on live strategy, platform, and growth programs — not generic account handoffs.'
     },
     {
-      icon: FaClock,
-      title: "Flexible Scheduling",
-      description: "Choose a time that works across time zones. We confirm by email and send a calendar invite with video link details."
+      title: 'Flexible scheduling',
+      description: 'Choose a time that works across time zones. We confirm by email and send a calendar invite with video link details.'
     },
     {
-      icon: FaComments,
-      title: "Free Assessment",
-      description: "Receive a structured review of your goals, current stack, and realistic options — including quick wins and longer-term investments."
+      title: 'Structured assessment',
+      description: 'Receive a review of your goals, current stack, and realistic options — including quick wins and longer-term investments.'
     },
     {
-      icon: FaCheckCircle,
-      title: "No Obligation",
-      description: "The session is complimentary. You decide whether to proceed with a proposal, pilot, or internal follow-up on your own."
+      title: 'No obligation',
+      description: 'The session is complimentary. You decide whether to proceed with a proposal, pilot, or internal follow-up on your own.'
     }
   ];
 
   if (isSubmitted) {
+    const formatDate = (d) =>
+      d
+        ? new Date(d).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        : 'Not specified';
+
     return (
-      <section className="section-padding bg-gradient-to-br from-primary-600 to-primary-800 text-white pt-32 pb-16">
-          <div className="container-custom">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center max-w-4xl mx-auto"
-            >
-              <div className="text-6xl text-secondary-500 mb-6">
-                <FaCheckCircle />
-              </div>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
-                Consultation Scheduled!
-              </h2>
-              <p className="text-lg sm:text-xl md:text-2xl mb-8 text-primary-100 leading-relaxed">
-                Thank you for scheduling a consultation with us. We'll be in touch within 24 hours to confirm your appointment.
-              </p>
-              {submittedData && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-8">
-                  <h3 className="text-2xl font-semibold mb-6">Consultation Details</h3>
-                  <div className="grid md:grid-cols-2 gap-6 text-left">
-                    <div className="space-y-3">
-                      <p className="text-lg"><strong>Name:</strong> {submittedData.firstName} {submittedData.lastName}</p>
-                      <p className="text-lg"><strong>Service:</strong> {submittedData.service || 'Not specified'}</p>
-                      <p className="text-lg"><strong>Date:</strong> {
-                        submittedData.preferredDate 
-                          ? new Date(submittedData.preferredDate).toLocaleDateString('en-US', { 
-                              weekday: 'long', 
-                              year: 'numeric', 
-                              month: 'long', 
-                              day: 'numeric' 
-                            })
-                          : 'Not specified'
-                      }</p>
-                    </div>
-                    <div className="space-y-3">
-                      <p className="text-lg"><strong>Time:</strong> {submittedData.preferredTime || 'Not specified'}</p>
-                      <p className="text-lg"><strong>Email:</strong> {submittedData.email}</p>
-                      <p className="text-lg"><strong>Phone:</strong> {submittedData.phone || 'Not provided'}</p>
-                    </div>
+      <section className="bg-[#F8FAFC] py-20 lg:py-28">
+        <div className="container-custom max-w-3xl">
+          <div className="border border-slate-200/80 bg-white p-8 sm:p-12 text-center">
+            <FaCheckCircle className="mx-auto text-4xl text-emerald-500 mb-5" aria-hidden />
+            <h2 className="font-nexa-heavy text-2xl sm:text-3xl tracking-tight text-[#0B1220] mb-3">
+              Consultation request received
+            </h2>
+            <p className="text-slate-600 leading-relaxed mb-10 max-w-xl mx-auto">
+              Thank you for scheduling a consultation with us. We&apos;ll be in touch within
+              one business day to confirm your appointment or suggest an alternative time.
+            </p>
+
+            {submittedData && (
+              <dl className="mb-10 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 border-y border-slate-200/80 py-8 text-left">
+                {[
+                  ['Name', `${submittedData.firstName} ${submittedData.lastName}`],
+                  ['Service', submittedData.service || 'Not specified'],
+                  ['Preferred date', formatDate(submittedData.preferredDate)],
+                  ['Preferred time', submittedData.preferredTime || 'Not specified'],
+                  ['Email', submittedData.email],
+                  ['Phone', submittedData.phone || 'Not provided'],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      {label}
+                    </dt>
+                    <dd className="mt-1 font-medium text-[#0B1220] break-words">{value}</dd>
                   </div>
-                </div>
-              )}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/')}
-                className="bg-secondary-500 text-primary-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-secondary-400 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-              >
-                Return to Home
-              </motion.button>
-            </motion.div>
+                ))}
+              </dl>
+            )}
+
+            <button
+              type="button"
+              onClick={() => router.push('/')}
+              className="inline-flex items-center justify-center px-8 py-3.5 bg-[#0B1220] text-white font-semibold text-sm tracking-tight hover:bg-primary-800 transition-colors"
+            >
+              Return to Home
+            </button>
           </div>
-        </section>
+        </div>
+      </section>
     );
   }
 
@@ -281,298 +275,222 @@ const ScheduleConsultation = () => {
         <ServiceQueryPrefill onService={applyServiceFromUrl} />
       </Suspense>
 
-      {/* Hero Section — primary H1 is server-rendered in ServerPageIntro */}
-      <section className="section-padding bg-gradient-to-br from-primary-500 to-primary-800 text-white pt-32 pb-16">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Schedule a Consultation
-            </h2>
-            <div className="text-lg sm:text-xl md:text-2xl mb-8 text-primary-100 leading-relaxed max-w-3xl mx-auto space-y-4">
-              <p>Get expert advice and discover how we can help transform your business.</p>
-              <p className="text-base sm:text-lg text-primary-100/90">
-                Consultations are free, confidential, and focused on your priorities — growth, platforms, automation, or AI. We will ask about goals, constraints, and timeline, then suggest practical next steps whether or not we work together.
-              </p>
-            </div>
-            {formData.service && (
-              <div className="inline-block bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 mb-4">
-                <p className="text-lg">
-                  <span className="font-semibold">Service:</span> {formData.service}
-                </p>
+      <section className="bg-[#F8FAFC] py-16 lg:py-24">
+        <div className="container-custom max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
+
+            {/* Left: what to expect */}
+            <aside className="lg:col-span-4">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="block h-px w-8 bg-[#e0ae00]" />
+                <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-primary-600">
+                  What to Expect
+                </span>
               </div>
-            )}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="section-padding bg-gray-50">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Why Schedule a Consultation?
-            </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Get personalized insights and expert guidance on digital growth, cloud and data platforms, automation, and AI — tailored to your industry, team size, and timeline.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="text-center bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2"
-              >
-                <div className="text-secondary-500 text-4xl mb-4">
-                  <benefit.icon />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  {benefit.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {benefit.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Consultation Form Section */}
-      <section className="section-padding bg-white">
-        <div className="container-custom">
-          <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-12"
-            >
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Book Your Free Consultation
+              <h2 className="font-nexa-heavy text-2xl tracking-tight text-[#0B1220] mb-8">
+                A working session, not a sales pitch
               </h2>
-              <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
-                Fill out the form below and we'll get back to you within 24 hours to confirm your appointment.
-              </p>
-            </motion.div>
 
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg flex items-start"
-              >
-                <FaTimesCircle className="text-red-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold">Error</p>
-                  <p className="text-sm">{error}</p>
-                </div>
-              </motion.div>
-            )}
+              <ul className="divide-y divide-slate-200/80 border-y border-slate-200/80">
+                {expectations.map((item) => (
+                  <li key={item.title} className="py-5">
+                    <p className="flex items-center gap-2.5 font-semibold text-[#0B1220] text-sm mb-1.5">
+                      <FaCheckCircle className="text-[#e0ae00] shrink-0" aria-hidden />
+                      {item.title}
+                    </p>
+                    <p className="text-sm text-slate-500 leading-relaxed pl-6">{item.description}</p>
+                  </li>
+                ))}
+              </ul>
 
-            <motion.form
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              onSubmit={handleSubmit}
-              className="bg-gray-50 rounded-2xl p-8 shadow-lg"
-            >
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaUser className="inline mr-2" />
-                    First Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white"
-                    placeholder="Enter your first name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaUser className="inline mr-2" />
-                    Last Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white"
-                    placeholder="Enter your last name"
-                  />
+              <div className="mt-8 border border-slate-200/80 bg-white p-6">
+                <div className="flex items-start gap-3">
+                  <FaClock className="mt-1 text-[#e0ae00] shrink-0" aria-hidden />
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Sessions run 30–45 minutes by video or phone. We confirm every
+                    request within one business day.
+                  </p>
                 </div>
               </div>
+            </aside>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaEnvelope className="inline mr-2" />
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white"
-                    placeholder="Enter your email address"
-                  />
+            {/* Right: booking form */}
+            <div className="lg:col-span-8">
+              <div className="border border-slate-200/80 bg-white">
+                <div className="border-b border-slate-200/80 px-6 pt-6 pb-5 sm:px-8">
+                  <h2 className="font-nexa-heavy text-xl tracking-tight text-[#0B1220]">
+                    Book your free consultation
+                  </h2>
+                  {formData.service ? (
+                    <p className="mt-2 inline-flex items-center gap-2 border border-[#e0ae00]/50 bg-[#e0ae00]/10 px-3 py-1 text-xs font-semibold text-[#0B1220]">
+                      Service: {formData.service}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-slate-500">
+                      Tell us when works for you — we&apos;ll confirm within one business day.
+                    </p>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaPhone className="inline mr-2" />
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
+
+                <form onSubmit={handleSubmit} className="px-6 py-8 sm:px-8">
+                  {error && (
+                    <div className="mb-8 flex items-start gap-3 border border-red-200 bg-red-50 p-4">
+                      <FaTimesCircle className="mt-0.5 text-red-600 shrink-0" aria-hidden />
+                      <div>
+                        <p className="font-semibold text-red-800">Something went wrong</p>
+                        <p className="text-sm text-red-700">{error}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className={labelClasses}>First Name *</label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        required
+                        className={inputClasses}
+                        placeholder="First name"
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClasses}>Last Name *</label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        required
+                        className={inputClasses}
+                        placeholder="Last name"
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClasses}>Work Email *</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className={inputClasses}
+                        placeholder="you@company.com"
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClasses}>Phone Number</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className={inputClasses}
+                        placeholder="+254 712 345 678"
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClasses}>Company Name</label>
+                      <input
+                        type="text"
+                        name="company"
+                        value={formData.company}
+                        onChange={handleInputChange}
+                        className={inputClasses}
+                        placeholder="Your company name"
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClasses}>Service of Interest *</label>
+                      <select
+                        name="service"
+                        value={formData.service}
+                        onChange={handleInputChange}
+                        required
+                        className={inputClasses}
+                      >
+                        <option value="">Select a service</option>
+                        {services.map((service) => (
+                          <option key={service} value={service}>
+                            {service}
+                          </option>
+                        ))}
+                        {/* Allow custom service from URL if not in list (set via ServiceQueryPrefill) */}
+                        {formData.service && !services.includes(formData.service) && (
+                          <option value={formData.service}>{formData.service}</option>
+                        )}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClasses}>Preferred Date *</label>
+                      <input
+                        type="date"
+                        name="preferredDate"
+                        value={formData.preferredDate}
+                        onChange={handleInputChange}
+                        required
+                        min={new Date().toISOString().split('T')[0]}
+                        className={inputClasses}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClasses}>Preferred Time (EAT) *</label>
+                      <select
+                        name="preferredTime"
+                        value={formData.preferredTime}
+                        onChange={handleInputChange}
+                        required
+                        className={inputClasses}
+                      >
+                        <option value="">Select a time slot</option>
+                        {timeSlots.map((time) => (
+                          <option key={time} value={time}>
+                            {time}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mb-8">
+                    <label className={labelClasses}>Additional Information</label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      rows="4"
+                      className={`${inputClasses} resize-none`}
+                      placeholder="Tell us about your business needs, challenges, or any specific questions you have..."
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#e0ae00] text-[#0B1220] font-semibold text-sm tracking-tight hover:bg-[#c99d00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <FaSpinner className="animate-spin" aria-hidden />
+                          Scheduling...
+                        </>
+                      ) : (
+                        <>
+                          Schedule Consultation
+                          <FaArrowRight className="text-xs" aria-hidden />
+                        </>
+                      )}
+                    </button>
+                    <p className="text-xs text-slate-500">
+                      Free and confidential. Your details are only used to arrange this session.
+                    </p>
+                  </div>
+                </form>
               </div>
-
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaBuilding className="inline mr-2" />
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white"
-                    placeholder="Enter your company name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaComments className="inline mr-2" />
-                    Service of Interest *
-                  </label>
-                  <select
-                    name="service"
-                    value={formData.service}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
-                  >
-                    <option value="">Select a service</option>
-                    {services.map((service, index) => (
-                      <option key={index} value={service}>
-                        {service}
-                      </option>
-                    ))}
-                    {/* Allow custom service from URL if not in list (set via ServiceQueryPrefill) */}
-                    {formData.service && !services.includes(formData.service) && (
-                      <option value={formData.service}>{formData.service}</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaCalendarAlt className="inline mr-2" />
-                    Preferred Date *
-                  </label>
-                  <input
-                    type="date"
-                    name="preferredDate"
-                    value={formData.preferredDate}
-                    onChange={handleInputChange}
-                    required
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaClock className="inline mr-2" />
-                    Preferred Time *
-                  </label>
-                  <select
-                    name="preferredTime"
-                    value={formData.preferredTime}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white"
-                  >
-                    <option value="">Select a time slot</option>
-                    {timeSlots.map((time, index) => (
-                      <option key={index} value={time}>
-                        {time}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-gray-700 font-semibold mb-2">
-                  <FaComments className="inline mr-2" />
-                  Additional Information
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  rows="4"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white resize-none"
-                  placeholder="Tell us about your business needs, challenges, or any specific questions you have..."
-                />
-              </div>
-
-              <motion.button
-                type="submit"
-                disabled={isSubmitting}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center">
-                    <FaSpinner className="animate-spin mr-3 h-5 w-5 text-white" />
-                    Scheduling Consultation...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center">
-                    Schedule Consultation
-                    <FaArrowRight className="ml-2" />
-                  </span>
-                )}
-              </motion.button>
-            </motion.form>
+            </div>
           </div>
         </div>
       </section>

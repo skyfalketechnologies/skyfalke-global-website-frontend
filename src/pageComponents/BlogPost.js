@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { FaArrowLeft, FaClock, FaUser, FaTag } from 'react-icons/fa';
+import { FaArrowLeft, FaTag } from 'react-icons/fa';
 import { usePublicBlog } from '../features/blog/hooks/usePublicBlog';
 import {
   BlogCard,
@@ -41,6 +41,17 @@ import '../styles/blog-content.css';
  * 4. Removed `backgroundAttachment: fixed` — caused repaint jank and blocked FCP.
  * 5. Added charset, viewport and lang attributes via Helmet for proper crawler parsing.
  */
+/**
+ * Request an appropriately sized, auto-format (WebP/AVIF) rendition from
+ * ImageKit instead of the full-resolution original. Non-ImageKit URLs are
+ * returned untouched.
+ */
+const optimizeImageUrl = (url, width = 1200) => {
+  if (!url || !url.includes('ik.imagekit.io') || url.includes('tr=')) return url;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}tr=w-${width},f-auto,q-auto:good`;
+};
+
 const BlogPost = ({ slug: propSlug, initialServerData }) => {
   const params = useParams();
   const slug = propSlug || params?.slug;
@@ -79,9 +90,15 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
   useEffect(() => {
     if (slug && slug !== 'index' && !hasFetchedRef.current) {
       hasFetchedRef.current = true;
+      // PERF: if the server already rendered this post, seed the hook's SSR
+      // fast-path so it skips the redundant post refetch and only loads
+      // comments / related posts / view tracking in the background.
+      if (initialServerData?.post && initialServerData.post.slug === slug) {
+        window.__INITIAL_DATA__ = initialServerData;
+      }
       fetchBlogBySlug(slug);
     }
-  }, [slug, fetchBlogBySlug]);
+  }, [slug, fetchBlogBySlug, initialServerData]);
   // ─────────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -220,50 +237,45 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
         <SocialShare url={currentUrl} title={blog?.title || ''} />
 
         {/* Hero Section
-            ─── FIX 4 ────────────────────────────────────────────────────────────
-            Removed `backgroundAttachment: 'fixed'` (parallax scroll). It forces the
-            browser to repaint the entire viewport on every scroll frame, blocks FCP,
-            and can stall Googlebot's rendering budget. Replaced with `scroll` which
-            is GPU-composited and has no performance penalty.
-            ──────────────────────────────────────────────────────────────────── */}
-        <header
-          className="relative overflow-hidden border-b border-slate-200/80 bg-[#0B1220] py-12 sm:py-16 md:py-20"
-          style={{
-            backgroundImage: blog?.featuredImage?.url
-              ? `url(${blog.featuredImage.url})`
-              : 'linear-gradient(to bottom right, #0B1220, #1e293b)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center center',
-            backgroundRepeat: 'no-repeat',
-            backgroundAttachment: 'scroll', // FIX 4: was 'fixed'
-            minHeight: '360px'
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-[#020617]/94 via-[#0B1220]/92 to-[#020617]/94"></div>
-          <div className="absolute inset-0 bg-black/35"></div>
+            PERF: the featured image is no longer used as a CSS background here —
+            it forced a second full-resolution download that couldn't be resized
+            or lazy-optimized, and it was usually the page's LCP element. The
+            header now renders a flat gradient (instant paint) and the featured
+            image appears once, optimized, at the top of the article. */}
+        <header className="relative overflow-hidden border-b border-slate-200/80 bg-[#0B1220] py-12 sm:py-16 md:py-20">
+          <div
+            className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_20%_40%,rgba(48,54,97,0.6)_0%,transparent_70%)]"
+            aria-hidden
+          />
+          <div
+            className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#e0ae00]/30 to-transparent"
+            aria-hidden
+          />
 
-          <div className="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div className="flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-6">
+          <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap items-center gap-3 mb-5 sm:mb-6">
               {blog?.category && (
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-white">
+                <span className="rounded-full border border-[#e0ae00]/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#e0ae00]">
                   {blog.category}
                 </span>
               )}
               {blog?.publishedAt && (
-                <time
-                  className="text-sm text-white/85 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]"
-                  dateTime={blog.publishedAt}
-                >
+                <time className="text-sm text-white/70" dateTime={blog.publishedAt}>
                   {formatBlogDate(blog.publishedAt)}
                 </time>
               )}
+              {blog?.readingTime && (
+                <span className="text-sm text-white/50">· {blog.readingTime}</span>
+              )}
             </div>
-            <h1 className="px-2 text-3xl font-nexa-heavy leading-[1.14] tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.65)] sm:text-4xl md:text-5xl lg:text-[3.3rem]">
+            <h1 className="text-3xl font-nexa-heavy leading-[1.14] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.3rem]">
               {blog?.title}
             </h1>
-            <div className="mt-6 flex justify-center sm:mt-8">
-              <div className="h-1 w-20 rounded-full bg-white/55 sm:w-24"></div>
-            </div>
+            {blog?.author?.name && (
+              <p className="mt-6 text-sm font-medium text-white/70">
+                By {blog.author.name}
+              </p>
+            )}
           </div>
         </header>
 
@@ -284,31 +296,17 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
               {blog?.featuredImage?.url && (
                 <div className="relative w-full">
                   <img
-                    src={blog.featuredImage.url}
+                    src={optimizeImageUrl(blog.featuredImage.url, 1200)}
                     alt={blog.featuredImage.alt || blog.title || 'Blog post featured image'}
                     className="w-full h-auto object-contain blog-featured-image"
                     loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                   />
                 </div>
               )}
 
               <div className="px-6 py-8 sm:px-8 md:py-10 lg:px-10">
-                {/* Post Meta Information */}
-                <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-slate-100 pb-6 text-sm text-slate-500">
-                  {blog?.readingTime && (
-                    <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">
-                      <FaClock className="w-4 h-4" />
-                      <span>{blog.readingTime}</span>
-                    </div>
-                  )}
-                  {blog?.author?.name && (
-                    <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">
-                      <FaUser className="w-4 h-4" />
-                      <span>By {blog.author.name}</span>
-                    </div>
-                  )}
-                </div>
-
                 {/* Content */}
                 {!hasContent && (
                   <div className="text-center py-12 sm:py-16">

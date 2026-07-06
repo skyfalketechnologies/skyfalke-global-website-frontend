@@ -1,10 +1,9 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
-import { FaShieldAlt, FaEnvelope, FaPhone } from 'react-icons/fa';
+import LegalPage from '../components/legal/LegalPage';
 
 const Privacy = () => {
-  const lastUpdated = "December 15, 2024";
+  const lastUpdated = "July 6, 2026";
 
   const sections = [
     {
@@ -77,6 +76,14 @@ const Privacy = () => {
         "If we become aware of such collection, we will delete the information promptly",
         "Parents can contact us to request deletion of their child's information"
       ]
+    },
+    {
+      title: "Policy Updates",
+      content: [
+        "We may update this Privacy Policy from time to time",
+        "We will notify you of changes by posting the new policy on this page and updating the \"Last updated\" date",
+        "We encourage you to review this Privacy Policy periodically for any changes"
+      ]
     }
   ];
 
@@ -87,130 +94,16 @@ const Privacy = () => {
         <meta name="description" content="Skyfalke's Privacy Policy - Learn how we collect, use, and protect your personal information." />
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <section className="bg-gray-900 text-white py-20">
-          <div className="container-custom">
-            <div className="text-center max-w-3xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
-              >
-                <FaShieldAlt className="text-5xl mx-auto mb-4" />
-              </motion.div>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-4xl md:text-5xl font-bold mb-6"
-              >
-                Privacy Policy
-              </motion.h1>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-xl text-gray-300 max-w-2xl mx-auto space-y-4"
-              >
-                <p>Your privacy is important to us. This policy explains how we collect, use, and protect your information when you use skyfalke.com, our academy, client portals, and related services.</p>
-                <p className="text-lg text-gray-400">
-                  We process data to deliver services, improve our website, and communicate with you about projects or marketing (where permitted). You can exercise access, correction, or deletion rights as described below.
-                </p>
-              </motion.div>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-sm text-gray-400 mt-4"
-              >
-                Last updated: {lastUpdated}
-              </motion.p>
-            </div>
-          </div>
-        </section>
-
-        {/* Content */}
-        <section className="py-16">
-          <div className="container-custom">
-            <div className="max-w-4xl mx-auto">
-              {/* Introduction */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl p-8 shadow-lg mb-8"
-              >
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Introduction</h2>
-                <p className="text-gray-600 leading-relaxed">
-                  Skyfalke ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains 
-                  how we collect, use, disclose, and safeguard your information when you visit our website or use our 
-                  services, including digital marketing solutions, cloud services, and business tools. Please read this 
-                  privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not 
-                  access our services.
-                </p>
-              </motion.div>
-
-              {/* Policy Sections */}
-              {sections.map((section, index) => (
-                <motion.div
-                  key={section.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-xl p-8 shadow-lg mb-8"
-                >
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">{section.title}</h2>
-                  <ul className="space-y-4">
-                    {section.content.map((item, itemIndex) => (
-                      <li key={itemIndex} className="flex items-start space-x-3">
-                        <div className="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <p className="text-gray-600 leading-relaxed">{item}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              ))}
-
-              {/* Contact Information */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="bg-primary-50 rounded-xl p-8 border border-primary-200"
-              >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Us About Privacy</h2>
-                <p className="text-gray-600 mb-6">
-                  If you have questions or concerns about this Privacy Policy or our data practices, 
-                  please contact us using the information below:
-                </p>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <FaEnvelope className="text-primary-600" />
-                    <span className="text-gray-700">privacy@skyfalke.com</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <FaPhone className="text-primary-600" />
-                    <span className="text-gray-700">+254 (0) 717 797 238</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Updates Notice */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mt-8"
-              >
-                <h3 className="text-lg font-semibold text-yellow-800 mb-2">Policy Updates</h3>
-                <p className="text-yellow-700">
-                  We may update this Privacy Policy from time to time. We will notify you of any changes by 
-                  posting the new Privacy Policy on this page and updating the "Last updated" date. 
-                  We encourage you to review this Privacy Policy periodically for any changes.
-                </p>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-      </div>
+      <LegalPage
+        eyebrow="Legal"
+        title="Privacy Policy"
+        intro="This policy explains how Skyfalke collects, uses, and protects your information when you use skyfalke.com, our academy, client portals, and related services. You can exercise access, correction, or deletion rights as described below."
+        lastUpdated={lastUpdated}
+        sections={sections}
+        contactHeading="Contact us about privacy"
+        contactText="If you have questions or concerns about this Privacy Policy or our data practices, please contact us:"
+        contactEmail="privacy@skyfalke.com"
+      />
     </>
   );
 };

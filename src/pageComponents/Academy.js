@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import SEOHead from '../components/SEO/SEOHead';
+import { apiGet } from '../utils/api';
 
 // Components
 import AcademyHero from '../components/Academy/AcademyHero';
@@ -18,11 +19,11 @@ const Academy = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch('/api/academy/courses?featured=true&limit=6');
-        const data = await response.json();
-        setCourses(data.courses || []);
+        const response = await apiGet('/api/academy/courses?featured=true&limit=6');
+        setCourses(response.data?.courses || []);
       } catch (error) {
         console.error('Error fetching courses:', error);
+        setCourses([]);
       } finally {
         setLoading(false);
       }

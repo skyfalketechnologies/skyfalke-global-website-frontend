@@ -1,7 +1,4 @@
-'use client';
-
 import React from 'react';
-import { motion } from 'framer-motion';
 import { FaUserTimes, FaUnlink, FaCompass, FaChartLine } from 'react-icons/fa';
 
 const cards = [
@@ -50,27 +47,25 @@ export default function HomeProblemSection() {
       </div>
 
       <div className="container-custom">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 max-w-6xl mx-auto">
           {cards.map((card, index) => {
             const Icon = card.icon;
             return (
-              <motion.article
+              <article
                 key={card.title}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="border border-white/20 bg-white/10 backdrop-blur-sm p-6 text-center hover:border-white/40 transition-colors"
+                data-aos="fade-up"
+                data-aos-delay={index * 50}
+                className="border border-white/20 bg-white/10 p-4 sm:p-6 text-center hover:border-white/40 transition-colors"
               >
                 <div
-                  className="w-12 h-12 mx-auto mb-4 flex items-center justify-center rounded-sm bg-white border border-white/30 text-[#011BE0]"
+                  className="w-11 h-11 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 flex items-center justify-center rounded-sm bg-white border border-white/30 text-[#011BE0]"
                   role="img"
                   aria-label={card.alt}
                 >
                   <Icon className="text-lg" aria-hidden />
                 </div>
                 <h3 className="text-sm sm:text-base font-semibold text-white leading-snug">{card.title}</h3>
-              </motion.article>
+              </article>
             );
           })}
         </div>
