@@ -11,6 +11,7 @@ import HomeHowItWorks from '../components/Home/HomeHowItWorks';
 import HomeServicesGrid from '../components/Home/HomeServicesGrid';
 import HomeDifferentiation from '../components/Home/HomeDifferentiation';
 import HomeSocialProof from '../components/Home/HomeSocialProof';
+import HomeReportHighlight from '../components/Home/HomeReportHighlight';
 import HomeFeaturedArticles from '../components/Home/HomeFeaturedArticles';
 import HomeLeadMagnet from '../components/Home/HomeLeadMagnet';
 import CreativeVideoSection from '@/components/Home/CreativeVideoSection';
@@ -47,6 +48,7 @@ const Home = () => {
       <HomeServicesGrid />
       <HomeDifferentiation />
       <HomeSocialProof />
+      <HomeReportHighlight />
       <HomeFeaturedArticles />
       <CreativeVideoSection />
       <HomeLeadMagnet />
