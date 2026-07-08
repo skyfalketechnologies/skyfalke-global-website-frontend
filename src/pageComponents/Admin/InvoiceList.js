@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { apiGet, apiDelete } from '../../utils/api';
+import { apiGet, apiPost, apiDelete } from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   FaPlus,
@@ -159,7 +159,7 @@ const InvoiceList = () => {
   const sendEmail = async (id) => {
     try {
       setSendingEmails(prev => new Set(prev).add(id));
-      const response = await apiGet(`/api/invoices/${id}/send`);
+      const response = await apiPost(`/api/invoices/${id}/send`);
       if (response.data.success) {
         setSuccess('Invoice sent successfully');
         fetchInvoices();

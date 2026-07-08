@@ -2,7 +2,44 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FaTimes, FaDownload, FaPaperPlane } from 'react-icons/fa';
 
+const BRANDS = {
+  standard: {
+    companyName: 'SKYFALKE',
+    tagline: 'Digital Solutions Partner',
+    logoSrc: '/images/logos/logo.png',
+    primaryColor: '#303661',
+    accentColor: '#e0ae00'
+  },
+  'google-cloud': {
+    companyName: 'SKYFALKE',
+    tagline: 'Google Cloud Partner',
+    logoSrc: '/images/logos/google-cloud-logo.png',
+    primaryColor: '#1a73e8',
+    accentColor: '#34a853'
+  }
+};
+
+const PAYMENT_OPTIONS = {
+  mpesa: { paybill: '4567109' },
+  bank: {
+    accountNumber: '1350719986',
+    name: 'KCB Bank Limited',
+    branch: 'Westlands, Nairobi',
+    currency: 'KES',
+    swiftCode: 'KCBLKENX'
+  },
+  financeEmail: 'billing@skyfalke.com'
+};
+
 const InvoicePreview = ({ formData, subtotal, taxAmount, total, onClose, onDownload, onSendEmail }) => {
+  const brand = BRANDS[formData.invoiceType] || BRANDS.standard;
+  const currencySymbol = formData.currency === 'KES' ? 'KSh ' : '$';
+  const formatMoney = (amount) =>
+    `${currencySymbol}${new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount || 0)}`;
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -67,17 +104,21 @@ const InvoicePreview = ({ formData, subtotal, taxAmount, total, onClose, onDownl
             <div className="flex justify-between items-start mb-8">
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-xl">S</span>
-                  </div>
+                  <img
+                    src={brand.logoSrc}
+                    alt={`${brand.companyName} logo`}
+                    className="h-12 w-auto object-contain"
+                  />
                   <div>
-                    <h1 className="text-3xl font-bold text-primary-500">SKYFALKE</h1>
-                    <p className="text-gray-600 dark:text-gray-400">Digital Solutions Partner</p>
+                    <h1 className="text-3xl font-bold" style={{ color: brand.primaryColor }}>
+                      {brand.companyName}
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400">{brand.tagline}</p>
                   </div>
                 </div>
                 
                 <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  <p>info@skyfalke.com</p>
+                  <p>billing@skyfalke.com</p>
                   <p>+254 700 000 000</p>
                   <p>Nairobi, Kenya</p>
                 </div>
@@ -138,7 +179,7 @@ const InvoicePreview = ({ formData, subtotal, taxAmount, total, onClose, onDownl
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-primary-500 text-white">
+                    <tr className="text-white" style={{ backgroundColor: brand.primaryColor }}>
                       <th className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-left font-medium">
                         Description
                       </th>
@@ -163,10 +204,10 @@ const InvoicePreview = ({ formData, subtotal, taxAmount, total, onClose, onDownl
                           {item.quantity}
                         </td>
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right">
-                          ${item.unitPrice.toFixed(2)}
+                          {formatMoney(item.unitPrice)}
                         </td>
                         <td className="border border-gray-300 dark:border-gray-600 px-4 py-3 text-right font-medium">
-                          ${item.total.toFixed(2)}
+                          {formatMoney(item.total)}
                         </td>
                       </tr>
                     ))}
@@ -181,13 +222,13 @@ const InvoicePreview = ({ formData, subtotal, taxAmount, total, onClose, onDownl
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    <span className="font-medium">{formatMoney(subtotal)}</span>
                   </div>
                   
                   {formData.discount > 0 && (
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Discount:</span>
-                      <span className="font-medium">-${formData.discount.toFixed(2)}</span>
+                      <span className="font-medium">-{formatMoney(formData.discount)}</span>
                     </div>
                   )}
                   
@@ -196,17 +237,42 @@ const InvoicePreview = ({ formData, subtotal, taxAmount, total, onClose, onDownl
                       <span className="text-gray-600 dark:text-gray-400">
                         Tax ({formData.taxRate}%):
                       </span>
-                      <span className="font-medium">${taxAmount.toFixed(2)}</span>
+                      <span className="font-medium">{formatMoney(taxAmount)}</span>
                     </div>
                   )}
                   
                   <div className="border-t pt-2">
                     <div className="flex justify-between text-lg font-bold">
                       <span className="text-gray-900 dark:text-white">Total:</span>
-                      <span className="text-primary-500">${total.toFixed(2)}</span>
+                      <span style={{ color: brand.primaryColor }}>{formatMoney(total)}</span>
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Payment Options */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Payment Options:
+              </h3>
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white mb-1">M-Pesa</p>
+                  <p className="text-gray-600 dark:text-gray-400">Paybill: {PAYMENT_OPTIONS.mpesa.paybill}</p>
+                  <p className="text-gray-600 dark:text-gray-400">Account No.: the invoice number</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white mb-1">Bank Transfer</p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {PAYMENT_OPTIONS.bank.name}, {PAYMENT_OPTIONS.bank.branch}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Account No.: {PAYMENT_OPTIONS.bank.accountNumber}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Currency: {PAYMENT_OPTIONS.bank.currency} | Swift Code: {PAYMENT_OPTIONS.bank.swiftCode}
+                  </p>                </div>
               </div>
             </div>
 
@@ -239,7 +305,7 @@ const InvoicePreview = ({ formData, subtotal, taxAmount, total, onClose, onDownl
               <div className="text-center text-sm text-gray-500 dark:text-gray-400">
                 <p>Thank you for your business!</p>
                 <p className="mt-2">
-                  For questions about this invoice, please contact us at info@skyfalke.com
+                  For questions about this invoice, please contact us at billing@skyfalke.com
                 </p>
               </div>
             </div>
