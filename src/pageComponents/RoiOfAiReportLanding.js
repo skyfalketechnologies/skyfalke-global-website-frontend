@@ -139,7 +139,7 @@ const RoiOfAiReportLanding = () => {
       {/* Hero */}
       <section className="bg-primary-500 text-white">
         <div className="container-custom">
-          <div className="max-w-3xl py-16 lg:py-24">
+          <div className="max-w-3xl pt-32 pb-16 lg:pt-40 lg:pb-24">
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}

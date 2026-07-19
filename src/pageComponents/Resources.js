@@ -20,6 +20,18 @@ const PUBLISHED_REPORTS = [
       'https://ik.imagekit.io/g3nahgeeu/Campaign%20Tile-PSZD-501-92b7956c-867c-460f-be69-da41ce466955.png',
     href: '/resources/roi-of-ai-customer-experience',
   },
+  {
+    id: 'gemini-enterprise-guide',
+    eyebrow: 'Guide',
+    title: 'Your guide to the Gemini Enterprise app, an advanced agentic AI Platform',
+    tagline: 'Build, use, and govern custom AI agents connected to your data and systems',
+    description:
+      'The shift from chatbots to AI agents will redefine productivity. This guide shows you how the Gemini Enterprise app helps you connect data, find information, and use and create agents to automate workflows across your organization.',
+    partner: 'In partnership with Google Cloud',
+    image:
+      'https://ik.imagekit.io/g3nahgeeu/A%20guide%20to%20workspace%20transformation%20with%20Gemini%20enterprise.png',
+    href: '/resources/gemini-enterprise-guide',
+  },
 ];
 
 const Resources = () => {
@@ -58,7 +70,7 @@ const Resources = () => {
                   <img
                     src={report.image}
                     alt={report.title}
-                    className="w-full h-auto transition-transform duration-500 group-hover:scale-[1.03]"
+                    className="w-full h-auto max-h-[440px] object-contain object-left transition-transform duration-500 group-hover:scale-[1.03]"
                   />
                 </Link>
 

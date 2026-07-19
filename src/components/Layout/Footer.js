@@ -319,11 +319,14 @@ const Footer = () => {
                 © {currentYear} Skyfalke Limited. All rights reserved.
               </p>
               <img
-                src="/pci.svg"
-                alt="PCI DSS compliant"
+                src="https://ik.imagekit.io/g3nahgeeu/meta-tech-provider-small.png"
+                alt="Meta Tech Provider"
                 className="h-9 w-auto opacity-90"
-                width={68}
-                height={54}
+              />
+              <img
+                src="/images/logos/google-cloud-partner.svg"
+                alt="Google Cloud Partner"
+                className="h-9 w-auto opacity-90"
               />
             </div>
 
