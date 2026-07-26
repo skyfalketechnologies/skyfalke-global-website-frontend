@@ -32,6 +32,7 @@ import {
   HiOutlineTruck,
   HiOutlineUsers,
   HiOutlineWrenchScrewdriver,
+  HiOutlinePencilSquare,
   HiXMark,
 } from 'react-icons/hi2';
 import { useStrategyCallModal } from '@/contexts/StrategyCallModalContext';
@@ -86,6 +87,16 @@ const aboutUs = [
   { name: 'Social Responsibility', href: '/about-us/social-responsibility', description: 'Communities and stakeholders.', Icon: HiOutlineGlobeAmericas },
   { name: 'Environmental Sustainability', href: '/about-us/environmental-sustainability', description: 'Climate and resource stewardship.', Icon: HiOutlineCloud },
   { name: 'All About Us', href: '/about-us', description: 'Explore our mission, culture, and values.', Icon: HiOutlineArrowRight },
+];
+
+const products = [
+  {
+    name: 'Skyfalke Sign',
+    href: '/products/skyfalke-sign',
+    description: 'Legally binding electronic signatures for teams and enterprises.',
+    badge: 'New',
+    Icon: HiOutlinePencilSquare,
+  },
 ];
 
 function Badge({ children, tone = 'neutral', inverted = false }) {
@@ -446,6 +457,31 @@ const Header = () => {
                   {simplePanel('about', aboutUs)}
                 </div>
 
+                {/* Products */}
+                <div
+                  className="relative"
+                  onMouseEnter={() => openDesktop('products')}
+                  onMouseLeave={scheduleCloseDesktop}
+                >
+                  <button
+                    type="button"
+                    className={dropdownTriggerClass('products')}
+                    aria-haspopup="true"
+                    aria-expanded={activeDesktop === 'products'}
+                    aria-controls={`${baseId}-panel-products`}
+                    id={`${baseId}-btn-products`}
+                    onFocus={() => openDesktop('products')}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.parentElement?.contains(e.relatedTarget)) scheduleCloseDesktop();
+                    }}
+                    onClick={() => setActiveDesktop((p) => (p === 'products' ? null : 'products'))}
+                  >
+                    Products
+                    <HiChevronDown className={chevronNavClass(activeDesktop === 'products')} aria-hidden />
+                  </button>
+                  {simplePanel('products', products)}
+                </div>
+
                 <span
                   className={`mx-1 hidden h-5 w-px shrink-0 self-center lg:block ${isScrolled ? 'bg-white/15' : 'bg-slate-200/90'}`}
                   aria-hidden
@@ -473,20 +509,6 @@ const Header = () => {
                   Sustainability
                 </Link>
 
-                <Link
-                  href="/blog"
-                  className={`rounded-md px-2.5 py-2 text-[13px] font-medium tracking-tight underline-offset-[10px] ${TRANSITION} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                    isScrolled
-                      ? isActiveHref('/blog')
-                        ? 'text-white underline decoration-white/60 hover:decoration-white focus-visible:outline-white'
-                        : 'text-white decoration-white/40 hover:underline hover:decoration-white focus-visible:outline-white'
-                      : isActiveHref('/blog')
-                        ? 'text-primary-700 underline decoration-primary-400/50 hover:text-primary-800 focus-visible:outline-primary-600'
-                        : 'text-slate-700 decoration-slate-300/80 hover:text-primary-700 hover:underline hover:decoration-primary-400/60 focus-visible:outline-primary-600'
-                  }`}
-                >
-                  Skyfalke Blog
-                </Link>
             </div>
 
           <div className="flex shrink-0 items-center gap-3">
@@ -881,6 +903,53 @@ const Header = () => {
                   ) : null}
                 </div>
 
+                <div className="rounded-lg border border-slate-200/80 bg-white/90">
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between px-4 py-3.5 text-left text-sm font-semibold text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                    aria-expanded={mobileSection === 'products'}
+                    onClick={() => toggleMobileSection('products')}
+                  >
+                    Products
+                    <HiChevronDown
+                      className={`h-4 w-4 text-slate-500 ${TRANSITION} ${mobileSection === 'products' ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  {mobileSection === 'products' ? (
+                    <div className="border-t border-slate-100 px-2 py-2">
+                      {products.map((item) => {
+                        const Icon = item.Icon;
+                        return (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            className="flex items-start gap-3 rounded-md px-3 py-2.5 text-sm text-slate-800 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            {Icon ? (
+                              <span
+                                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border border-slate-200/90 bg-slate-50 text-slate-500"
+                                aria-hidden
+                              >
+                                <Icon className="h-3.5 w-3.5" />
+                              </span>
+                            ) : null}
+                            <span className="min-w-0">
+                              <span className="font-semibold text-slate-900">
+                                {item.name}
+                                {item.badge === 'New' ? <Badge tone="accent">New</Badge> : null}
+                              </span>
+                              {item.description ? (
+                                <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">{item.description}</span>
+                              ) : null}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+
                 <Link
                   href="/services/ict-strategy"
                   className="block rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3.5 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
@@ -897,13 +966,6 @@ const Header = () => {
                   Sustainability
                 </Link>
 
-                <Link
-                  href="/blog"
-                  className="block rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3.5 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Skyfalke Blog
-                </Link>
               </div>
             </div>
 

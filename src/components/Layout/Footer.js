@@ -84,6 +84,12 @@ const Footer = () => {
 
   const footerSections = [
     {
+      title: 'Products',
+      links: [
+        { name: 'Skyfalke Sign', href: '/products/skyfalke-sign' },
+      ],
+    },
+    {
       title: 'What We Do',
       links: [
         { name: 'Capabilities', href: '/capabilities' },
@@ -212,7 +218,7 @@ const Footer = () => {
             </div>
 
             {/* Link columns */}
-            <div className="grid grid-cols-2 gap-10 sm:grid-cols-4 lg:col-span-6 lg:gap-8">
+            <div className="grid grid-cols-2 gap-10 sm:grid-cols-5 lg:col-span-6 lg:gap-8">
               {footerSections.map((section) => (
                 <div key={section.title}>
                   <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
