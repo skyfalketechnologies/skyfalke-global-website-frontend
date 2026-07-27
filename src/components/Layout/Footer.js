@@ -29,6 +29,12 @@ const Footer = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const currentYear = new Date().getFullYear();
 
+  const contactLines = [
+    { icon: FaPhone, text: '+254 (0) 717 797 238', href: 'tel:+254717797238' },
+    { icon: FaEnvelope, text: 'info@skyfalke.com', href: 'mailto:info@skyfalke.com' },
+    { icon: FaMapMarkerAlt, text: 'Nairobi, Kenya', href: 'https://maps.google.com/?q=Nairobi,Kenya', external: true },
+  ];
+
   const handleSubscribe = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -87,6 +93,7 @@ const Footer = () => {
       title: 'Products',
       links: [
         { name: 'Skyfalke Sign', href: '/products/skyfalke-sign' },
+        { name: 'Skyfalke Cloud', href: 'https://skyfalke.co.ke/', external: true },
       ],
     },
     {
@@ -139,25 +146,6 @@ const Footer = () => {
     // { name: 'Reddit', icon: FaReddit, href: 'https://www.reddit.com/user/skyfalke_limited' },
   ];
 
-  const contactLines = [
-    {
-      icon: FaPhone,
-      text: '+254 (0) 717 797 238',
-      href: 'tel:+254717797238',
-    },
-    {
-      icon: FaEnvelope,
-      text: 'info@skyfalke.com',
-      href: 'mailto:info@skyfalke.com',
-    },
-    {
-      icon: FaMapMarkerAlt,
-      text: 'Nairobi, Kenya',
-      href: 'https://maps.google.com/?q=Nairobi,Kenya',
-      external: true,
-    },
-  ];
-
   return (
     <footer className="relative border-t border-white/10 bg-[#0c0f14] text-white">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e0ae00]/80 to-transparent" aria-hidden />
@@ -180,45 +168,8 @@ const Footer = () => {
 
         <div className="container-custom pt-14 pb-10">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10 xl:gap-14">
-            {/* Brand + contact */}
-            <div className="lg:col-span-3">
-              <Link href="/" className="inline-flex items-center gap-3">
-                <img
-                  src="/images/logos/logo.svg"
-                  alt="Skyfalke — return to homepage"
-                  className="h-9 w-auto brightness-0 invert"
-                  width={160}
-                  height={36}
-                />
-              </Link>
-              <p className="mt-5 max-w-sm text-sm leading-relaxed text-zinc-400">
-                One accountable partner across strategy, technology, and marketing.
-              </p>
-              <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">
-                Serving clients across 8+ countries
-              </p>
-              <ul className="mt-8 space-y-3 border-t border-white/10 pt-8">
-                {contactLines.map((item) => (
-                  <li key={item.text}>
-                    <a
-                      href={item.href}
-                      target={item.external ? '_blank' : undefined}
-                      rel={item.external ? 'noopener noreferrer' : undefined}
-                      className="group inline-flex max-w-full items-start gap-3 text-sm text-zinc-300 transition-colors hover:text-white"
-                    >
-                      <item.icon
-                        className="mt-0.5 h-4 w-4 shrink-0 text-[#e0ae00]/90 transition-colors group-hover:text-[#e0ae00]"
-                        aria-hidden
-                      />
-                      <span className="break-words">{item.text}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
             {/* Link columns */}
-            <div className="grid grid-cols-2 gap-10 sm:grid-cols-5 lg:col-span-6 lg:gap-8">
+            <div className="grid grid-cols-2 gap-10 sm:grid-cols-5 lg:col-span-8 lg:gap-8">
               {footerSections.map((section) => (
                 <div key={section.title}>
                   <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
@@ -246,62 +197,64 @@ const Footer = () => {
             </div>
 
             {/* Newsletter */}
-            <div className="lg:col-span-3">
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
-                <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+            <div className="lg:col-span-4">
+              <div className="border border-[#e0ae00]/30 bg-[#e0ae00]/[0.06] p-7">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#e0ae00]/80">
                   Newsletter
-                </h2>
-                <p className="mt-3 text-sm leading-relaxed text-zinc-400">
-                  Short updates on strategy, technology, and how we work with clients.
                 </p>
-                <form onSubmit={handleSubscribe} className="mt-5 space-y-3">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-                    <label htmlFor="footer-newsletter-email" className="sr-only">
-                      Email address
-                    </label>
-                    <input
-                      id="footer-newsletter-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Work email"
-                      className="min-h-[44px] flex-1 rounded-lg border border-white/10 bg-[#0c0f14]/80 px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:border-[#e0ae00]/50 focus:outline-none focus:ring-1 focus:ring-[#e0ae00]/40"
-                      required
-                      disabled={isSubmitting}
-                      autoComplete="email"
-                    />
-                    <button
-                      type="submit"
-                      className={`inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${
-                        submitStatus === 'success'
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-[#e0ae00] text-[#0c0f14] hover:bg-[#c99a00]'
-                      }`}
-                      disabled={isSubmitting || submitStatus === 'success'}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <FaSpinner className="animate-spin" aria-hidden />
-                          <span>Sending</span>
-                        </>
-                      ) : submitStatus === 'success' ? (
-                        <>
-                          <FaCheckCircle aria-hidden />
-                          <span>Done</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Subscribe</span>
-                          <FaPaperPlane className="opacity-90" size={14} aria-hidden />
-                        </>
-                      )}
-                    </button>
-                  </div>
+                <h2 className="mt-2 text-base font-semibold leading-snug tracking-tight text-white">
+                  Stay ahead of what matters
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                  Concise updates on strategy, technology, and client work — delivered to your inbox.
+                </p>
+
+                <form onSubmit={handleSubscribe} className="mt-6 space-y-3">
+                  <label htmlFor="footer-newsletter-email" className="block text-xs font-medium text-zinc-400">
+                    Work email address
+                  </label>
+                  <input
+                    id="footer-newsletter-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    className="w-full border border-white/15 bg-[#0c0f14] px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-[#e0ae00]/60 focus:outline-none focus:ring-1 focus:ring-[#e0ae00]/40"
+                    required
+                    disabled={isSubmitting}
+                    autoComplete="email"
+                  />
+                  <button
+                    type="submit"
+                    className={`inline-flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold tracking-tight transition-colors ${
+                      submitStatus === 'success'
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-[#e0ae00] text-[#0c0f14] hover:bg-[#c99a00]'
+                    }`}
+                    disabled={isSubmitting || submitStatus === 'success'}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <FaSpinner className="animate-spin" aria-hidden />
+                        <span>Sending…</span>
+                      </>
+                    ) : submitStatus === 'success' ? (
+                      <>
+                        <FaCheckCircle aria-hidden />
+                        <span>You&apos;re subscribed</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Subscribe</span>
+                        <FaPaperPlane className="opacity-90" size={13} aria-hidden />
+                      </>
+                    )}
+                  </button>
 
                   {submitStatus === 'success' && (
                     <p className="flex items-start gap-2 text-xs text-emerald-400/95">
                       <FaCheckCircle className="mt-0.5 shrink-0" aria-hidden />
-                      <span>Thank you! You are on the list.</span>
+                      <span>Thank you — we&apos;ll be in touch.</span>
                     </p>
                   )}
 
@@ -313,6 +266,22 @@ const Footer = () => {
                   )}
                 </form>
               </div>
+
+              <ul className="mt-6 space-y-3 border-t border-white/10 pt-6">
+                {contactLines.map((item) => (
+                  <li key={item.text}>
+                    <a
+                      href={item.href}
+                      target={item.external ? '_blank' : undefined}
+                      rel={item.external ? 'noopener noreferrer' : undefined}
+                      className="group inline-flex max-w-full items-start gap-3 text-sm text-zinc-300 transition-colors hover:text-white"
+                    >
+                      <item.icon className="mt-0.5 h-4 w-4 shrink-0 text-[#e0ae00]/90 transition-colors group-hover:text-[#e0ae00]" aria-hidden />
+                      <span className="break-words">{item.text}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>

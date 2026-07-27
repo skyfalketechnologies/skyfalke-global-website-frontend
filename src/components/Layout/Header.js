@@ -97,6 +97,13 @@ const products = [
     badge: 'New',
     Icon: HiOutlinePencilSquare,
   },
+  {
+    name: 'Skyfalke Cloud',
+    href: 'https://skyfalke.co.ke/',
+    description: 'Cloud infrastructure and managed hosting solutions.',
+    Icon: HiOutlineCloud,
+    external: true,
+  },
 ];
 
 function Badge({ children, tone = 'neutral', inverted = false }) {
@@ -263,6 +270,8 @@ const Header = () => {
                 key={item.name}
                 href={item.href}
                 role="menuitem"
+                target={item.external ? '_blank' : undefined}
+                rel={item.external ? 'noopener noreferrer' : undefined}
                 className={`group flex items-start gap-3 px-3.5 py-3 ${TRANSITION} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 ${
                   isActiveHref(item.href)
                     ? 'bg-slate-50 text-primary-800'
@@ -923,6 +932,8 @@ const Header = () => {
                           <Link
                             key={item.name}
                             href={item.href}
+                            target={item.external ? '_blank' : undefined}
+                            rel={item.external ? 'noopener noreferrer' : undefined}
                             className="flex items-start gap-3 rounded-md px-3 py-2.5 text-sm text-slate-800 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                             onClick={() => setMobileOpen(false)}
                           >
