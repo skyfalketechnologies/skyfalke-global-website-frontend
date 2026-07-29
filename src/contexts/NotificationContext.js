@@ -403,6 +403,7 @@ export const NotificationProvider = ({ children }) => {
     totalCount,
     loading,
     connected,
+    socket,
     fetchNotifications,
     markAsRead,
     markAllAsRead,
