@@ -145,26 +145,46 @@ const WindowBanner = ({ messages }) => {
   );
 };
 
+// Approved Meta templates — add new ones here as they get approved
+const META_TEMPLATES = [
+  {
+    name: 'welcome_skyfalke',
+    label: 'Welcome — Skyfalke',
+    preview: 'Hello {{customer_name}}\n\nWelcome to Skyfalke!\nReinvent What\'s Possible for Your Business\n\nHow can we assist you today?',
+    params: ['Customer name']
+  },
+  {
+    name: 'invoice_ready',
+    label: 'Invoice Ready',
+    preview: 'Hello {{customer_name}},\n\nYour invoice for {{invoice}} has been generated.\n\nAmount: {{amount}}\n\nIf you have any questions regarding your invoice, we\'re happy to help.',
+    params: ['Customer name', 'Invoice number (e.g. INV-001)', 'Amount (e.g. KSh 5,000.00 KES)']
+  }
+];
+
 // Template send modal
 const TemplateSendModal = ({ phone, onClose, onSent }) => {
-  const [templateName, setTemplateName] = useState('');
-  const [language, setLanguage] = useState('en');
-  const [params, setParams] = useState('');
+  const [selected, setSelected] = useState(null);
+  const [paramValues, setParamValues] = useState([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
+  const handleSelect = (tpl) => {
+    setSelected(tpl);
+    setParamValues(tpl.params.map(() => ''));
+    setError('');
+  };
+
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!templateName.trim()) return;
-    const templateParams = params.split('\n').map(p => p.trim()).filter(Boolean);
+    if (!selected) return;
     try {
       setSending(true);
       setError('');
       await apiPost('/api/whatsapp/admin/send/template', {
         to: phone,
-        templateName: templateName.trim(),
-        templateParams,
-        language
+        templateName: selected.name,
+        templateParams: paramValues.map(v => v.trim()).filter(Boolean),
+        language: 'en'
       });
       onSent();
       onClose();
@@ -175,6 +195,8 @@ const TemplateSendModal = ({ phone, onClose, onSent }) => {
     }
   };
 
+  const canSend = selected && paramValues.every(v => v.trim());
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
@@ -184,45 +206,62 @@ const TemplateSendModal = ({ phone, onClose, onSent }) => {
         </div>
         <form onSubmit={handleSend} className="p-5 space-y-4">
           <p className="text-xs text-gray-500 dark:text-gray-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2">
-            Use this when the 24-hour window is closed. The template must be pre-approved in Meta Business Manager.
+            Use this when the 24-hour window is closed. Only Meta-approved templates can be sent.
           </p>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Template name</label>
-            <input
-              type="text"
-              value={templateName}
-              onChange={e => setTemplateName(e.target.value)}
-              placeholder="e.g. hello_world"
-              className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
-              required
-            />
+
+          {/* Template picker */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Choose a template</label>
+            {META_TEMPLATES.map(tpl => (
+              <button
+                key={tpl.name}
+                type="button"
+                onClick={() => handleSelect(tpl)}
+                className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
+                  selected?.name === tpl.name
+                    ? 'border-[#25D366] bg-green-50 dark:bg-green-900/20 text-gray-900 dark:text-white'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-[#25D366] text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                <p className="font-medium">{tpl.label}</p>
+                <p className="text-xs text-gray-400 mt-0.5 font-mono">{tpl.name}</p>
+              </button>
+            ))}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Language code</label>
-            <input
-              type="text"
-              value={language}
-              onChange={e => setLanguage(e.target.value)}
-              placeholder="en"
-              className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Parameters <span className="font-normal text-gray-400">(one per line, optional)</span>
-            </label>
-            <textarea
-              value={params}
-              onChange={e => setParams(e.target.value)}
-              placeholder={"John\nSkyfalke AI Solutions"}
-              rows={3}
-              className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
-            />
-          </div>
+
+          {/* Template preview + param inputs */}
+          {selected && (
+            <>
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg px-4 py-3">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Preview</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selected.preview}</p>
+              </div>
+              <div className="space-y-3">
+                {selected.params.map((label, i) => (
+                  <div key={i}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{label}</label>
+                    <input
+                      type="text"
+                      value={paramValues[i]}
+                      onChange={e => {
+                        const next = [...paramValues];
+                        next[i] = e.target.value;
+                        setParamValues(next);
+                      }}
+                      placeholder={label}
+                      className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
           {error && <p className="text-xs text-red-500 flex items-center gap-1"><FaExclamationCircle /> {error}</p>}
           <button
             type="submit"
-            disabled={sending || !templateName.trim()}
+            disabled={sending || !canSend}
             className="w-full py-2.5 rounded-lg bg-[#25D366] text-white text-sm font-medium hover:bg-[#1fb355] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
           >
             {sending ? <FaSpinner className="animate-spin" /> : <FaPaperPlane className="text-xs" />}
@@ -250,6 +289,9 @@ const WhatsApp = () => {
   const [showNewChat, setShowNewChat] = useState(false);
   const [showTemplate, setShowTemplate] = useState(false);
   const [newChat, setNewChat] = useState({ phone: '', message: '' });
+  const [newChatMode, setNewChatMode] = useState('text'); // 'text' | 'template'
+  const [newChatTemplate, setNewChatTemplate] = useState(null);
+  const [newChatParamValues, setNewChatParamValues] = useState([]);
   const messagesEndRef = useRef(null);
   const selectedPhoneRef = useRef(null);
   selectedPhoneRef.current = selectedPhone;
@@ -389,18 +431,33 @@ const WhatsApp = () => {
 
   const handleStartNewChat = async (e) => {
     e.preventDefault();
-    if (!newChat.phone.trim() || !newChat.message.trim() || sending) return;
+    const phone = newChat.phone.trim();
+    if (!phone || sending) return;
+    if (newChatMode === 'text' && !newChat.message.trim()) return;
+    if (newChatMode === 'template' && (!newChatTemplate || newChatParamValues.some(v => !v.trim()))) return;
     try {
       setSending(true);
       setSendError('');
-      await apiPost('/api/whatsapp/admin/send/text', {
-        to: newChat.phone.trim(),
-        message: newChat.message.trim()
-      });
-      const digits = newChat.phone.replace(/\D/g, '');
+      if (newChatMode === 'template') {
+        await apiPost('/api/whatsapp/admin/send/template', {
+          to: phone,
+          templateName: newChatTemplate.name,
+          templateParams: newChatParamValues.map(v => v.trim()),
+          language: 'en'
+        });
+      } else {
+        await apiPost('/api/whatsapp/admin/send/text', {
+          to: phone,
+          message: newChat.message.trim()
+        });
+      }
+      const digits = phone.replace(/\D/g, '');
       const normalized = digits.startsWith('254') ? digits : `254${digits.replace(/^0/, '')}`;
       setShowNewChat(false);
       setNewChat({ phone: '', message: '' });
+      setNewChatMode('text');
+      setNewChatTemplate(null);
+      setNewChatParamValues([]);
       await fetchConversations(true);
       setSelectedPhone(normalized);
     } catch (error) {
@@ -728,30 +785,99 @@ const WhatsApp = () => {
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Message</label>
-                <textarea
-                  value={newChat.message}
-                  onChange={(e) => setNewChat({ ...newChat, message: e.target.value })}
-                  placeholder="Type your message..."
-                  rows={4}
-                  className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
-                  required
-                />
-                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  Note: if this number hasn&apos;t messaged you in the last 24 hours, WhatsApp requires an approved template message.
-                </p>
+
+              {/* Mode toggle */}
+              <div className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-sm">
+                <button
+                  type="button"
+                  onClick={() => { setNewChatMode('text'); setNewChatTemplate(null); setNewChatParamValues([]); }}
+                  className={`flex-1 py-2 font-medium transition-colors ${newChatMode === 'text' ? 'bg-[#25D366] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                >
+                  Free text
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNewChatMode('template')}
+                  className={`flex-1 py-2 font-medium transition-colors flex items-center justify-center gap-1.5 ${newChatMode === 'template' ? 'bg-[#25D366] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                >
+                  <FaLayerGroup className="text-xs" /> Template
+                </button>
               </div>
+
+              {newChatMode === 'text' ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Message</label>
+                  <textarea
+                    value={newChat.message}
+                    onChange={(e) => setNewChat({ ...newChat, message: e.target.value })}
+                    placeholder="Type your message..."
+                    rows={4}
+                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                  <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    If this number hasn&apos;t messaged you in the last 24 hours, switch to Template mode.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {META_TEMPLATES.map(tpl => (
+                    <button
+                      key={tpl.name}
+                      type="button"
+                      onClick={() => { setNewChatTemplate(tpl); setNewChatParamValues(tpl.params.map(() => '')); }}
+                      className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
+                        newChatTemplate?.name === tpl.name
+                          ? 'border-[#25D366] bg-green-50 dark:bg-green-900/20 text-gray-900 dark:text-white'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-[#25D366] text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <p className="font-medium">{tpl.label}</p>
+                      <p className="text-xs text-gray-400 mt-0.5 font-mono">{tpl.name}</p>
+                    </button>
+                  ))}
+                  {newChatTemplate && (
+                    <div className="space-y-3 pt-1">
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg px-4 py-3">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Preview</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{newChatTemplate.preview}</p>
+                      </div>
+                      {newChatTemplate.params.map((label, i) => (
+                        <div key={i}>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{label}</label>
+                          <input
+                            type="text"
+                            value={newChatParamValues[i] || ''}
+                            onChange={e => {
+                              const next = [...newChatParamValues];
+                              next[i] = e.target.value;
+                              setNewChatParamValues(next);
+                            }}
+                            placeholder={label}
+                            className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
+                            required
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {sendError && (
                 <p className="text-xs text-red-500 flex items-center gap-1"><FaExclamationCircle /> {sendError}</p>
               )}
               <button
                 type="submit"
-                disabled={sending || !newChat.phone.trim() || !newChat.message.trim()}
+                disabled={
+                  sending || !newChat.phone.trim() ||
+                  (newChatMode === 'text' && !newChat.message.trim()) ||
+                  (newChatMode === 'template' && (!newChatTemplate || newChatParamValues.some(v => !v.trim())))
+                }
                 className="w-full py-2.5 rounded-lg bg-[#25D366] text-white text-sm font-medium hover:bg-[#1fb355] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               >
                 {sending ? <FaSpinner className="animate-spin" /> : <FaPaperPlane className="text-xs" />}
-                Send Message
+                {newChatMode === 'template' ? 'Send Template' : 'Send Message'}
               </button>
             </form>
           </div>
