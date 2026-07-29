@@ -150,12 +150,14 @@ const META_TEMPLATES = [
   {
     name: 'welcome_skyfalke',
     label: 'Welcome — Skyfalke',
+    language: 'en_US',
     preview: 'Hello {{customer_name}}\n\nWelcome to Skyfalke!\nReinvent What\'s Possible for Your Business\n\nHow can we assist you today?',
     params: ['Customer name']
   },
   {
     name: 'invoice_ready',
     label: 'Invoice Ready',
+    language: 'en_US',
     preview: 'Hello {{customer_name}},\n\nYour invoice for {{invoice}} has been generated.\n\nAmount: {{amount}}\n\nIf you have any questions regarding your invoice, we\'re happy to help.',
     params: ['Customer name', 'Invoice number (e.g. INV-001)', 'Amount (e.g. KSh 5,000.00 KES)']
   }
@@ -184,7 +186,7 @@ const TemplateSendModal = ({ phone, onClose, onSent }) => {
         to: phone,
         templateName: selected.name,
         templateParams: paramValues.map(v => v.trim()).filter(Boolean),
-        language: 'en'
+        language: selected.language || 'en_US'
       });
       onSent();
       onClose();
@@ -443,7 +445,7 @@ const WhatsApp = () => {
           to: phone,
           templateName: newChatTemplate.name,
           templateParams: newChatParamValues.map(v => v.trim()),
-          language: 'en'
+          language: newChatTemplate.language || 'en_US'
         });
       } else {
         await apiPost('/api/whatsapp/admin/send/text', {
