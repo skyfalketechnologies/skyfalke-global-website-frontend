@@ -630,7 +630,9 @@ const InvoiceList = () => {
                 required
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                The PDF invoice will be sent as a document with payment details.
+                {whatsAppModal?.client?.phone && whatsAppPhone === whatsAppModal.client.phone
+                  ? 'Auto-filled from invoice — edit if needed.'
+                  : 'Enter the client\'s WhatsApp number.'}
               </p>
             </div>
             {error && (
