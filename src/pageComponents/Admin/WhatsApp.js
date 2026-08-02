@@ -146,33 +146,90 @@ const WindowBanner = ({ messages }) => {
 };
 
 // Approved Meta templates — add new ones here as they get approved
+// Language codes must exactly match Meta (English = 'en', English US = 'en_US')
 const META_TEMPLATES = [
   {
     name: 'welcome_skyfalke',
     label: 'Welcome — Skyfalke',
-    language: 'en_US',
+    language: 'en',
     preview: 'Hello {{customer_name}}\n\nWelcome to Skyfalke!\nReinvent What\'s Possible for Your Business\n\nHow can we assist you today?',
     params: ['Customer name']
   },
   {
     name: 'invoice_ready',
     label: 'Invoice Ready',
-    language: 'en_US',
+    language: 'en',
     preview: 'Hello {{customer_name}},\n\nYour invoice for {{invoice}} has been generated.\n\nAmount: {{amount}}\n\nIf you have any questions regarding your invoice, we\'re happy to help.',
     params: ['Customer name', 'Invoice number (e.g. INV-001)', 'Amount (e.g. KSh 5,000.00 KES)']
+  },
+  {
+    name: 'thank_you',
+    label: 'Thank You',
+    language: 'en',
+    preview: 'Hello {{customer_name}}, Thank you for choosing Skyfalke. We appreciate your trust in us and look forward to supporting your business. If you ever need assistance, we\'re only a message away.',
+    params: ['Customer name']
+  },
+  {
+    name: 'lead_followup',
+    label: 'Lead Follow-up',
+    language: 'en',
+    preview: 'Hi {{customer_name}}, Thank you for your interest in Skyfalke. We\'d love to learn more about your business and recommend the best solution for your needs. Reply to this message, and one of our specialists will be happy to assist you.',
+    params: ['Customer name']
+  },
+  {
+    name: 'meeting_confirmation',
+    label: 'Meeting Confirmation',
+    language: 'en',
+    preview: 'Hello {{customer_name}}, Your meeting with Skyfalke has been confirmed.\n📅 Date: {{date}}\n🕒 Time: {{time}}\n\nIf you need to reschedule, simply reply to this message.',
+    params: ['Customer name', 'Date (e.g. Monday, Aug 4)', 'Time (e.g. 10:00 AM EAT)']
   }
 ];
 
+// Extract body text and variable info from Meta template components
+// Handles both {{1}} positional and {{customer_name}} named variables
+const parseTemplate = (tpl) => {
+  const body = tpl.components?.find(c => c.type === 'BODY');
+  const preview = body?.text || tpl.name;
+  const vars = preview.match(/\{\{[\w\d]+\}\}/g) || [];
+  const paramDefs = vars.map(v => {
+    const inner = v.replace(/\{\{|\}\}/g, '');
+    const isNamed = isNaN(inner);
+    return {
+      name: inner,
+      label: isNamed ? inner.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : `Variable ${inner}`
+    };
+  });
+  return { ...tpl, preview, paramDefs, label: tpl.name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
+};
+
 // Template send modal
 const TemplateSendModal = ({ phone, onClose, onSent }) => {
+  const [step, setStep] = useState('pick'); // 'pick' | 'fill'
+  const [templates, setTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [selected, setSelected] = useState(null);
   const [paramValues, setParamValues] = useState([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    apiGet('/api/whatsapp/admin/templates')
+      .then(res => setTemplates(((res.data || res).templates || []).map(parseTemplate)))
+      .catch(() => setTemplates(META_TEMPLATES))
+      .finally(() => setLoadingTemplates(false));
+  }, []);
+
   const handleSelect = (tpl) => {
     setSelected(tpl);
-    setParamValues(tpl.params.map(() => ''));
+    setParamValues((tpl.paramDefs || []).map(() => ''));
+    setError('');
+    setStep('fill');
+  };
+
+  const handleBack = () => {
+    setStep('pick');
+    setSelected(null);
+    setParamValues([]);
     setError('');
   };
 
@@ -185,8 +242,8 @@ const TemplateSendModal = ({ phone, onClose, onSent }) => {
       await apiPost('/api/whatsapp/admin/send/template', {
         to: phone,
         templateName: selected.name,
-        templateParams: paramValues.map(v => v.trim()).filter(Boolean),
-        language: selected.language || 'en_US'
+        templateParams: (selected.paramDefs || []).map((def, i) => ({ name: def.name, value: paramValues[i]?.trim() || '' })),
+        language: selected.language
       });
       onSent();
       onClose();
@@ -197,79 +254,90 @@ const TemplateSendModal = ({ phone, onClose, onSent }) => {
     }
   };
 
-  const canSend = selected && paramValues.every(v => v.trim());
+  const canSend = selected && paramValues.every(v => v?.trim());
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="px-5 py-4 bg-[#25D366] text-white flex items-center justify-between rounded-t-xl">
-          <h3 className="font-semibold flex items-center gap-2"><FaLayerGroup /> Send Template Message</h3>
-          <button onClick={onClose} className="p-1 hover:bg-white/20 rounded"><FaTimes /></button>
+        {/* Header */}
+        <div className="px-5 py-4 bg-[#25D366] text-white flex items-center gap-3 rounded-t-xl">
+          {step === 'fill' && (
+            <button type="button" onClick={handleBack} className="p-1 hover:bg-white/20 rounded shrink-0">
+              <FaArrowLeft />
+            </button>
+          )}
+          <h3 className="font-semibold flex items-center gap-2 flex-1">
+            <FaLayerGroup />
+            {step === 'pick' ? 'Choose a Template' : selected?.label}
+          </h3>
+          <button onClick={onClose} className="p-1 hover:bg-white/20 rounded shrink-0"><FaTimes /></button>
         </div>
-        <form onSubmit={handleSend} className="p-5 space-y-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2">
-            Use this when the 24-hour window is closed. Only Meta-approved templates can be sent.
-          </p>
 
-          {/* Template picker */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Choose a template</label>
-            {META_TEMPLATES.map(tpl => (
+        {/* Step 1 — pick */}
+        {step === 'pick' && (
+          <div className="p-5 space-y-3 max-h-[70vh] overflow-y-auto">
+            <p className="text-xs text-gray-500 dark:text-gray-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2">
+              Only Meta-approved templates can be sent outside the 24-hour window.
+            </p>
+            {loadingTemplates ? (
+              <div className="flex items-center justify-center py-8 text-gray-400">
+                <FaSpinner className="animate-spin mr-2" /> Loading templates…
+              </div>
+            ) : templates.length === 0 ? (
+              <p className="text-sm text-center text-gray-500 py-6">No approved templates found.</p>
+            ) : templates.map(tpl => (
               <button
-                key={tpl.name}
+                key={`${tpl.name}_${tpl.language}`}
                 type="button"
                 onClick={() => handleSelect(tpl)}
-                className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
-                  selected?.name === tpl.name
-                    ? 'border-[#25D366] bg-green-50 dark:bg-green-900/20 text-gray-900 dark:text-white'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-[#25D366] text-gray-700 dark:text-gray-300'
-                }`}
+                className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-[#25D366] hover:bg-green-50 dark:hover:bg-green-900/20 text-sm transition-colors group"
               >
-                <p className="font-medium">{tpl.label}</p>
-                <p className="text-xs text-gray-400 mt-0.5 font-mono">{tpl.name}</p>
+                <p className="font-medium text-gray-900 dark:text-white group-hover:text-[#128C7E]">{tpl.label}</p>
+                <p className="text-xs text-gray-400 mt-0.5 font-mono">{tpl.name} · {tpl.language}</p>
               </button>
             ))}
           </div>
+        )}
 
-          {/* Template preview + param inputs */}
-          {selected && (
-            <>
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg px-4 py-3">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Preview</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selected.preview}</p>
-              </div>
+        {/* Step 2 — fill params */}
+        {step === 'fill' && selected && (
+          <form onSubmit={handleSend} className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg px-4 py-3">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Preview</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selected.preview}</p>
+            </div>
+            {(selected.paramDefs || []).length > 0 && (
               <div className="space-y-3">
-                {selected.params.map((label, i) => (
+                {(selected.paramDefs || []).map((def, i) => (
                   <div key={i}>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{label}</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{def.label}</label>
                     <input
                       type="text"
-                      value={paramValues[i]}
+                      value={paramValues[i] || ''}
                       onChange={e => {
                         const next = [...paramValues];
                         next[i] = e.target.value;
                         setParamValues(next);
                       }}
-                      placeholder={label}
+                      placeholder={def.label}
                       className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
                       required
                     />
                   </div>
                 ))}
               </div>
-            </>
-          )}
-
-          {error && <p className="text-xs text-red-500 flex items-center gap-1"><FaExclamationCircle /> {error}</p>}
-          <button
-            type="submit"
-            disabled={sending || !canSend}
-            className="w-full py-2.5 rounded-lg bg-[#25D366] text-white text-sm font-medium hover:bg-[#1fb355] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-          >
-            {sending ? <FaSpinner className="animate-spin" /> : <FaPaperPlane className="text-xs" />}
-            Send Template
-          </button>
-        </form>
+            )}
+            {error && <p className="text-xs text-red-500 flex items-center gap-1"><FaExclamationCircle /> {error}</p>}
+            <button
+              type="submit"
+              disabled={sending || !canSend}
+              className="w-full py-2.5 rounded-lg bg-[#25D366] text-white text-sm font-medium hover:bg-[#1fb355] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            >
+              {sending ? <FaSpinner className="animate-spin" /> : <FaPaperPlane className="text-xs" />}
+              Send Template
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
@@ -288,12 +356,14 @@ const WhatsApp = () => {
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
   const [stats, setStats] = useState({});
+  const [liveTemplates, setLiveTemplates] = useState(null); // null = not loaded yet
   const [showNewChat, setShowNewChat] = useState(false);
   const [showTemplate, setShowTemplate] = useState(false);
   const [newChat, setNewChat] = useState({ phone: '', message: '' });
   const [newChatMode, setNewChatMode] = useState('text'); // 'text' | 'template'
   const [newChatTemplate, setNewChatTemplate] = useState(null);
   const [newChatParamValues, setNewChatParamValues] = useState([]);
+  const [newChatTemplateStep, setNewChatTemplateStep] = useState('pick'); // 'pick' | 'fill'
   const messagesEndRef = useRef(null);
   const selectedPhoneRef = useRef(null);
   selectedPhoneRef.current = selectedPhone;
@@ -368,6 +438,13 @@ const WhatsApp = () => {
     socket.on('new-notification', handleNotification);
     return () => socket.off('new-notification', handleNotification);
   }, [socket, fetchConversations, fetchStats, fetchConversation, markConversationRead]);
+
+  // Load approved templates once on mount
+  useEffect(() => {
+    apiGet('/api/whatsapp/admin/templates')
+      .then(res => setLiveTemplates(((res.data || res).templates || []).map(parseTemplate)))
+      .catch(() => setLiveTemplates(META_TEMPLATES));
+  }, []);
 
   // Fallback polling (slower since websocket handles real-time)
   useEffect(() => {
@@ -444,8 +521,8 @@ const WhatsApp = () => {
         await apiPost('/api/whatsapp/admin/send/template', {
           to: phone,
           templateName: newChatTemplate.name,
-          templateParams: newChatParamValues.map(v => v.trim()),
-          language: newChatTemplate.language || 'en_US'
+          templateParams: (newChatTemplate.paramDefs || []).map((def, i) => ({ name: def.name, value: newChatParamValues[i]?.trim() || '' })),
+          language: newChatTemplate.language || 'en'
         });
       } else {
         await apiPost('/api/whatsapp/admin/send/text', {
@@ -460,6 +537,7 @@ const WhatsApp = () => {
       setNewChatMode('text');
       setNewChatTemplate(null);
       setNewChatParamValues([]);
+      setNewChatTemplateStep('pick');
       await fetchConversations(true);
       setSelectedPhone(normalized);
     } catch (error) {
@@ -788,23 +866,25 @@ const WhatsApp = () => {
                 />
               </div>
 
-              {/* Mode toggle */}
-              <div className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-sm">
-                <button
-                  type="button"
-                  onClick={() => { setNewChatMode('text'); setNewChatTemplate(null); setNewChatParamValues([]); }}
-                  className={`flex-1 py-2 font-medium transition-colors ${newChatMode === 'text' ? 'bg-[#25D366] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-                >
-                  Free text
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setNewChatMode('template')}
-                  className={`flex-1 py-2 font-medium transition-colors flex items-center justify-center gap-1.5 ${newChatMode === 'template' ? 'bg-[#25D366] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-                >
-                  <FaLayerGroup className="text-xs" /> Template
-                </button>
-              </div>
+              {/* Mode toggle — hidden once a template is picked (fill step) */}
+              {!(newChatMode === 'template' && newChatTemplateStep === 'fill') && (
+                <div className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-sm">
+                  <button
+                    type="button"
+                    onClick={() => { setNewChatMode('text'); setNewChatTemplate(null); setNewChatParamValues([]); setNewChatTemplateStep('pick'); }}
+                    className={`flex-1 py-2 font-medium transition-colors ${newChatMode === 'text' ? 'bg-[#25D366] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                  >
+                    Free text
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewChatMode('template')}
+                    className={`flex-1 py-2 font-medium transition-colors flex items-center justify-center gap-1.5 ${newChatMode === 'template' ? 'bg-[#25D366] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                  >
+                    <FaLayerGroup className="text-xs" /> Template
+                  </button>
+                </div>
+              )}
 
               {newChatMode === 'text' ? (
                 <div>
@@ -821,48 +901,60 @@ const WhatsApp = () => {
                     If this number hasn&apos;t messaged you in the last 24 hours, switch to Template mode.
                   </p>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {META_TEMPLATES.map(tpl => (
+              ) : newChatTemplateStep === 'pick' ? (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {liveTemplates === null ? (
+                    <div className="flex items-center justify-center py-6 text-gray-400 text-sm">
+                      <FaSpinner className="animate-spin mr-2" /> Loading templates…
+                    </div>
+                  ) : liveTemplates.length === 0 ? (
+                    <p className="text-sm text-center text-gray-500 py-6">No approved templates found.</p>
+                  ) : liveTemplates.map(tpl => (
                     <button
-                      key={tpl.name}
+                      key={`${tpl.name}_${tpl.language}`}
                       type="button"
-                      onClick={() => { setNewChatTemplate(tpl); setNewChatParamValues(tpl.params.map(() => '')); }}
-                      className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
-                        newChatTemplate?.name === tpl.name
-                          ? 'border-[#25D366] bg-green-50 dark:bg-green-900/20 text-gray-900 dark:text-white'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-[#25D366] text-gray-700 dark:text-gray-300'
-                      }`}
+                      onClick={() => { setNewChatTemplate(tpl); setNewChatParamValues((tpl.paramDefs || []).map(() => '')); setNewChatTemplateStep('fill'); }}
+                      className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-[#25D366] hover:bg-green-50 dark:hover:bg-green-900/20 text-sm transition-colors group"
                     >
-                      <p className="font-medium">{tpl.label}</p>
-                      <p className="text-xs text-gray-400 mt-0.5 font-mono">{tpl.name}</p>
+                      <p className="font-medium text-gray-900 dark:text-white group-hover:text-[#128C7E]">{tpl.label}</p>
+                      <p className="text-xs text-gray-400 mt-0.5 font-mono">{tpl.name} · {tpl.language}</p>
                     </button>
                   ))}
-                  {newChatTemplate && (
-                    <div className="space-y-3 pt-1">
-                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg px-4 py-3">
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Preview</p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{newChatTemplate.preview}</p>
-                      </div>
-                      {newChatTemplate.params.map((label, i) => (
-                        <div key={i}>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{label}</label>
-                          <input
-                            type="text"
-                            value={newChatParamValues[i] || ''}
-                            onChange={e => {
-                              const next = [...newChatParamValues];
-                              next[i] = e.target.value;
-                              setNewChatParamValues(next);
-                            }}
-                            placeholder={label}
-                            className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
-                            required
-                          />
-                        </div>
-                      ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Selected template header with back */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setNewChatTemplate(null); setNewChatParamValues([]); setNewChatTemplateStep('pick'); }}
+                      className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 shrink-0"
+                    >
+                      <FaArrowLeft className="text-xs" />
+                    </button>
+                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{newChatTemplate?.label}</span>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg px-4 py-3">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Preview</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{newChatTemplate?.preview}</p>
+                  </div>
+                  {(newChatTemplate?.paramDefs || []).map((def, i) => (
+                    <div key={i}>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{def.label}</label>
+                      <input
+                        type="text"
+                        value={newChatParamValues[i] || ''}
+                        onChange={e => {
+                          const next = [...newChatParamValues];
+                          next[i] = e.target.value;
+                          setNewChatParamValues(next);
+                        }}
+                        placeholder={label}
+                        className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
+                        required
+                      />
                     </div>
-                  )}
+                  ))}
                 </div>
               )}
 
