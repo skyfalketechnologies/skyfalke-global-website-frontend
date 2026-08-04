@@ -7,13 +7,10 @@ import { useRouter } from 'next/navigation';
 import { fetchDashboardData, handleAdminApiError } from '../../utils/adminApi';
 import { apiGet } from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  FaUsers,
+import { useNotifications } from '../../contexts/NotificationContext';
+import {
   FaBlog,
   FaEnvelope,
-  FaEye,
-  FaArrowUp,
-  FaArrowDown,
   FaPlus,
   FaEdit,
   FaTrash,
@@ -24,19 +21,21 @@ import {
   FaShoppingCart,
   FaUserTie,
   FaHandshake,
-  FaProjectDiagram,
   FaCheckCircle,
   FaClock,
   FaBell,
   FaFileInvoice,
   FaGraduationCap,
   FaExclamationTriangle,
-  FaTimes
+  FaTimes,
+  FaWhatsapp,
+  FaExternalLinkAlt
 } from 'react-icons/fa';
 
 const Dashboard = () => {
   const router = useRouter();
   const { canAccessAccounting, user } = useAuth();
+  const { socket } = useNotifications();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,6 +64,8 @@ const Dashboard = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [recentBlogs, setRecentBlogs] = useState([]);
   const [recentContacts, setRecentContacts] = useState([]);
+  const [waConversations, setWaConversations] = useState([]);
+  const [waLoading, setWaLoading] = useState(true);
   const [changes, setChanges] = useState({
     contacts: { value: 0, type: 'increase' },
     visitors: { value: 0, type: 'increase' }
@@ -72,7 +73,34 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardDataHandler();
+    fetchWhatsAppConversations();
+    // Fallback poll in case the websocket connection drops
+    const waInterval = setInterval(() => fetchWhatsAppConversations(true), 30000);
+    return () => clearInterval(waInterval);
   }, [canAccessAccounting]);
+
+  // Real-time refresh via websocket when a new WhatsApp message arrives
+  useEffect(() => {
+    if (!socket) return;
+    const handleNotification = (data) => {
+      if (data?.notification?.type !== 'whatsapp') return;
+      fetchWhatsAppConversations(true);
+    };
+    socket.on('new-notification', handleNotification);
+    return () => socket.off('new-notification', handleNotification);
+  }, [socket]);
+
+  const fetchWhatsAppConversations = async (silent = false) => {
+    try {
+      if (!silent) setWaLoading(true);
+      const response = await apiGet('/api/whatsapp/admin/conversations?limit=5');
+      setWaConversations(response.data.conversations || []);
+    } catch (error) {
+      console.warn('Error fetching WhatsApp conversations:', error);
+    } finally {
+      if (!silent) setWaLoading(false);
+    }
+  };
 
   const fetchDashboardDataHandler = async () => {
     try {
@@ -191,77 +219,24 @@ const Dashboard = () => {
     }
   };
 
-  // Primary stats cards - Most important metrics
-  const primaryStats = [
-    {
-      title: 'Total Orders',
-      value: stats.totalOrders,
-      icon: FaShoppingCart,
-      change: `${stats.totalOrders} orders`,
-      changeType: 'increase',
-      color: 'from-indigo-500 to-indigo-600',
-      bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
-      iconColor: 'text-indigo-600 dark:text-indigo-400',
-      link: '/system/dashboard/orders',
-      description: 'Total orders received'
-    },
-    {
-      title: 'Active Projects',
-      value: stats.activeProjects,
-      icon: FaProjectDiagram,
-      change: `${stats.totalProjects} total`,
-      changeType: 'increase',
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-      iconColor: 'text-blue-600 dark:text-blue-400',
-      link: '/system/dashboard/projects',
-      description: 'Projects currently in progress'
-    },
+  // Unified stats row - consistent card sizing for a cleaner, professional layout
+  const statCards = [
     {
       title: 'Pending Actions',
       value: stats.pendingContacts + stats.pendingApplications,
       icon: FaBell,
       change: `${stats.pendingContacts} contacts, ${stats.pendingApplications} applications`,
-      changeType: 'increase',
       color: 'from-orange-500 to-orange-600',
       bgColor: 'bg-orange-50 dark:bg-orange-900/20',
       iconColor: 'text-orange-600 dark:text-orange-400',
       link: '/system/dashboard/contacts',
-      description: 'Items requiring attention'
-    },
-    {
-      title: 'Total Visitors',
-      value: stats.totalVisitors.toLocaleString(),
-      icon: FaUsers,
-      change: `${changes.visitors.value}%`,
-      changeType: changes.visitors.type,
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-      iconColor: 'text-purple-600 dark:text-purple-400',
-      link: '/system/dashboard/analytics',
-      description: 'Last 30 days'
-    }
-  ];
-
-  // Secondary stats cards
-  const secondaryStats = [
-    {
-      title: 'Blog Posts',
-      value: stats.totalBlogs,
-      icon: FaBlog,
-      change: `${stats.totalBlogs} published`,
-      changeType: 'increase',
-      color: 'from-green-500 to-green-600',
-      bgColor: 'bg-green-50 dark:bg-green-900/20',
-      iconColor: 'text-green-600 dark:text-green-400',
-      link: '/system/dashboard/blogs'
+      highlight: true
     },
     {
       title: 'Total Orders',
       value: stats.totalOrders,
       icon: FaShoppingCart,
       change: `KES ${stats.totalRevenue.toLocaleString()} revenue`,
-      changeType: 'increase',
       color: 'from-indigo-500 to-indigo-600',
       bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
       iconColor: 'text-indigo-600 dark:text-indigo-400',
@@ -272,7 +247,6 @@ const Dashboard = () => {
       value: stats.totalApplications,
       icon: FaUserTie,
       change: `${stats.pendingApplications} pending`,
-      changeType: 'increase',
       color: 'from-teal-500 to-teal-600',
       bgColor: 'bg-teal-50 dark:bg-teal-900/20',
       iconColor: 'text-teal-600 dark:text-teal-400',
@@ -282,8 +256,7 @@ const Dashboard = () => {
       title: 'Contact Inquiries',
       value: stats.totalContacts,
       icon: FaEnvelope,
-      change: `${changes.contacts.value}%`,
-      changeType: changes.contacts.type,
+      change: `${changes.contacts.value}% vs last period`,
       color: 'from-pink-500 to-pink-600',
       bgColor: 'bg-pink-50 dark:bg-pink-900/20',
       iconColor: 'text-pink-600 dark:text-pink-400',
@@ -294,22 +267,10 @@ const Dashboard = () => {
       value: stats.totalSubscriptions,
       icon: FaRss,
       change: `${stats.totalSubscriptions} active`,
-      changeType: 'increase',
       color: 'from-cyan-500 to-cyan-600',
       bgColor: 'bg-cyan-50 dark:bg-cyan-900/20',
       iconColor: 'text-cyan-600 dark:text-cyan-400',
       link: '/system/dashboard/subscriptions'
-    },
-    {
-      title: 'Page Views',
-      value: stats.totalViews.toLocaleString(),
-      icon: FaEye,
-      change: 'Last 30 days',
-      changeType: 'increase',
-      color: 'from-amber-500 to-amber-600',
-      bgColor: 'bg-amber-50 dark:bg-amber-900/20',
-      iconColor: 'text-amber-600 dark:text-amber-400',
-      link: '/system/dashboard/analytics'
     }
   ];
 
@@ -416,50 +377,36 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Primary Stats Cards - Most Important */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {primaryStats.map((stat, index) => {
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
             <motion.div
               key={stat.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className={`${stat.bgColor} rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${stat.link ? 'cursor-pointer' : ''}`}
+              transition={{ delay: index * 0.06 }}
+              className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border ${
+                stat.highlight ? 'border-orange-200 dark:border-orange-900/50' : 'border-gray-100 dark:border-gray-700'
+              } ${stat.link ? 'cursor-pointer' : ''}`}
               onClick={stat.link ? () => router.push(stat.link) : undefined}
             >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`h-6 w-6 ${stat.iconColor}`} />
-                  </div>
-                  {stat.change && (
-                    <div className={`flex items-center text-xs font-medium ${
-                      stat.changeType === 'increase' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      {stat.changeType === 'increase' ? (
-                        <FaArrowUp className="mr-1 h-3 w-3" />
-                      ) : (
-                        <FaArrowDown className="mr-1 h-3 w-3" />
-                      )}
-                      {stat.change}
-                    </div>
-                  )}
+              <div className="p-5">
+                <div className={`inline-flex p-2.5 rounded-lg ${stat.bgColor} mb-3`}>
+                  <Icon className={`h-5 w-5 ${stat.iconColor}`} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                    {stat.title}
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  {stat.title}
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {stat.value}
+                </p>
+                {stat.change && (
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1.5 truncate">
+                    {stat.change}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stat.value}
-                  </p>
-                  {stat.description && (
-                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                      {stat.description}
-                    </p>
-                  )}
-                </div>
+                )}
               </div>
               <div className={`h-1 bg-gradient-to-r ${stat.color}`} />
             </motion.div>
@@ -467,44 +414,73 @@ const Dashboard = () => {
         })}
       </div>
 
-      {/* Secondary Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {secondaryStats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 + index * 0.05 }}
-              className={`${stat.bgColor} rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 ${stat.link ? 'cursor-pointer' : ''}`}
-              onClick={stat.link ? () => router.push(stat.link) : undefined}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                  <Icon className={`h-5 w-5 ${stat.iconColor}`} />
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                  {stat.title}
-                </p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">
-                  {stat.value}
-                </p>
-                {stat.change && (
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                    {stat.change}
-                  </p>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* WhatsApp */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden flex flex-col"
+        >
+          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <FaWhatsapp className="text-[#25D366]" /> WhatsApp
+            </h3>
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+            {waLoading ? (
+              <div className="flex justify-center py-10">
+                <FaSpinner className="animate-spin text-xl text-[#25D366]" />
+              </div>
+            ) : waConversations.length > 0 ? (
+              waConversations.map((conv) => {
+                const msg = conv.lastMessage || {};
+                const preview = msg.body || msg.caption || (msg.type && msg.type !== 'text' ? `[${msg.type}]` : '');
+                const time = msg.timestamp
+                  ? new Date(msg.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                  : '';
+                return (
+                  <Link
+                    key={conv._id}
+                    href={`/system/dashboard/whatsapp?phone=${encodeURIComponent(conv._id)}`}
+                    className="flex items-center justify-between gap-3 px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {conv.contactName || conv._id}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {msg.direction === 'outbound' ? 'You: ' : ''}{preview || 'No messages'}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-[11px] text-gray-400 whitespace-nowrap">{time}</span>
+                      {conv.unreadCount > 0 && (
+                        <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-[#25D366] text-white text-[10px] font-semibold">
+                          {conv.unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center py-10 text-gray-500 dark:text-gray-400">
+                <FaWhatsapp className="text-3xl mb-2 opacity-40" />
+                <p className="text-sm">No conversations yet</p>
+              </div>
+            )}
+          </div>
+          <div className="p-5 pt-4 mt-auto">
+            <Link href="/system/dashboard/whatsapp"
+              className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+            >
+              View more <FaExternalLinkAlt className="ml-2 text-[10px]" />
+            </Link>
+          </div>
+        </motion.div>
+
         {/* Recent Activity */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -517,10 +493,10 @@ const Dashboard = () => {
               Recent Activity
             </h3>
           </div>
-          <div className="p-6">
+          <div className="p-5">
             <div className="flow-root">
-              <ul className="-mb-8">
-                {recentActivity.length > 0 ? recentActivity.map((activity, index) => {
+              <ul className="-mb-6">
+                {recentActivity.length > 0 ? recentActivity.slice(0, 5).map((activity, index, arr) => {
                   const Icon = getActivityIcon(activity.type);
                   const timeAgo = new Date(activity.time).toLocaleDateString('en-US', {
                     month: 'short',
@@ -528,11 +504,11 @@ const Dashboard = () => {
                     hour: '2-digit',
                     minute: '2-digit'
                   });
-                  
+
                   return (
                     <li key={activity.id || index}>
-                      <div className="relative pb-8">
-                        {index !== recentActivity.length - 1 && (
+                      <div className="relative pb-6">
+                        {index !== arr.length - 1 && (
                           <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700" />
                         )}
                         <div className="relative flex space-x-3">
@@ -542,11 +518,11 @@ const Dashboard = () => {
                             </div>
                           </div>
                           <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                            <div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">{activity.action || 'Activity'}</p>
-                              <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.title || 'No details available'}</p>
+                            <div className="min-w-0">
+                              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{activity.action || 'Activity'}</p>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{activity.title || 'No details available'}</p>
                             </div>
-                            <div className="text-right text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
+                            <div className="text-right text-xs whitespace-nowrap text-gray-500 dark:text-gray-400">
                               {timeAgo}
                             </div>
                           </div>
@@ -561,11 +537,11 @@ const Dashboard = () => {
                 )}
               </ul>
             </div>
-            <div className="mt-6">
+            <div className="mt-4">
               <Link href="/system/dashboard/analytics"
                 className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
               >
-                View all activity
+                View more
               </Link>
             </div>
           </div>
@@ -578,27 +554,22 @@ const Dashboard = () => {
           transition={{ delay: 0.7 }}
           className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden"
         >
-          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Recent Blog Posts
             </h3>
-            <Link href="/system/dashboard/blogs"
-              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500"
-            >
-              View all
-            </Link>
           </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {recentBlogs.length > 0 ? recentBlogs.map((blog) => {
+          <div className="p-5">
+            <div className="space-y-3">
+              {recentBlogs.length > 0 ? recentBlogs.slice(0, 5).map((blog) => {
                 const blogDate = new Date(blog.createdAt).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric'
                 });
-                
+
                 return (
-                  <div key={blog._id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div className="flex-1">
+                  <div key={blog._id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
                         {blog.title}
                       </h4>
@@ -614,7 +585,7 @@ const Dashboard = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 ml-4">
+                    <div className="flex items-center space-x-2 ml-4 shrink-0">
                       <Link href={`/system/dashboard/blogs/${blog._id}/edit`} className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
                         <FaEdit className="h-4 w-4" />
                       </Link>
@@ -627,6 +598,13 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
+            <div className="mt-4">
+              <Link href="/system/dashboard/blogs"
+                className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
+                View more
+              </Link>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -638,15 +616,10 @@ const Dashboard = () => {
         transition={{ delay: 0.8 }}
         className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden"
       >
-        <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Recent Contact Inquiries
           </h3>
-          <Link href="/system/dashboard/contacts"
-            className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500"
-          >
-            View all
-          </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -667,7 +640,7 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {recentContacts.length > 0 ? recentContacts.map((contact) => {
+              {recentContacts.length > 0 ? recentContacts.slice(0, 5).map((contact) => {
                 const contactDate = new Date(contact.createdAt).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric'
@@ -707,6 +680,13 @@ const Dashboard = () => {
               )}
             </tbody>
           </table>
+        </div>
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <Link href="/system/dashboard/contacts"
+            className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          >
+            View more
+          </Link>
         </div>
       </motion.div>
     </div>

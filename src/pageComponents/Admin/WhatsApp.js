@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   FaWhatsapp,
   FaSearch,
@@ -21,12 +22,22 @@ import {
   FaComments,
   FaArrowLeft,
   FaClock,
-  FaLayerGroup
+  FaLayerGroup,
+  FaSmile,
+  FaPaperclip,
+  FaDownload,
+  FaFileAlt
 } from 'react-icons/fa';
 import { apiGet, apiPost, apiPatch } from '../../utils/api';
 import { useNotifications } from '../../contexts/NotificationContext';
 
 const POLL_INTERVAL = 30000;
+
+const EMOJI_GROUPS = [
+  { label: 'Smileys', emojis: ['😀', '😁', '😂', '🤣', '😊', '😉', '😍', '😘', '😎', '🤔', '😐', '😴', '😢', '😭', '😡', '😱', '🥳', '🙏', '👍', '👎'] },
+  { label: 'Gestures', emojis: ['👋', '🙌', '👏', '🤝', '💪', '✌️', '🤞', '👌', '✋', '🤙'] },
+  { label: 'Objects', emojis: ['❤️', '🔥', '✅', '❌', '⭐', '🎉', '📌', '📎', '📅', '⏰', '💰', '📈', '📞', '✉️'] }
+];
 
 // ---------- helpers ----------
 
@@ -346,6 +357,7 @@ const TemplateSendModal = ({ phone, onClose, onSent }) => {
 // ---------- component ----------
 
 const WhatsApp = () => {
+  const searchParams = useSearchParams();
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [selectedPhone, setSelectedPhone] = useState(null);
@@ -364,8 +376,12 @@ const WhatsApp = () => {
   const [newChatTemplate, setNewChatTemplate] = useState(null);
   const [newChatParamValues, setNewChatParamValues] = useState([]);
   const [newChatTemplateStep, setNewChatTemplateStep] = useState('pick'); // 'pick' | 'fill'
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
   const messagesEndRef = useRef(null);
   const selectedPhoneRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const emojiPickerRef = useRef(null);
   selectedPhoneRef.current = selectedPhone;
 
   const { socket } = useNotifications();
@@ -446,6 +462,13 @@ const WhatsApp = () => {
       .catch(() => setLiveTemplates(META_TEMPLATES));
   }, []);
 
+  // Auto-select the conversation passed via ?phone= (e.g. from a notification or dashboard link)
+  useEffect(() => {
+    const phone = searchParams.get('phone');
+    if (phone) setSelectedPhone(phone);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fallback polling (slower since websocket handles real-time)
   useEffect(() => {
     fetchConversations();
@@ -507,6 +530,53 @@ const WhatsApp = () => {
       setSending(false);
     }
   };
+
+  const handleFileSelected = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !selectedPhone) return;
+
+    try {
+      setUploadingMedia(true);
+      setSendError('');
+
+      const formData = new FormData();
+      formData.append('file', file);
+      const uploadRes = await apiPost('/api/whatsapp/admin/upload-media', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      await apiPost('/api/whatsapp/admin/send/media', {
+        to: selectedPhone,
+        mediaType: uploadRes.data.mediaType,
+        mediaUrl: uploadRes.data.url,
+        caption: uploadRes.data.mediaType === 'document' ? file.name : ''
+      });
+
+      await fetchConversation(selectedPhone, true);
+      fetchConversations(true);
+    } catch (error) {
+      console.error('Error sending media:', error);
+      setSendError(error.response?.data?.message || 'Failed to send media');
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const insertEmoji = (emoji) => {
+    setDraft((prev) => prev + emoji);
+  };
+
+  useEffect(() => {
+    if (!showEmoji) return;
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setShowEmoji(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmoji]);
 
   const handleStartNewChat = async (e) => {
     e.preventDefault();
@@ -754,17 +824,37 @@ const WhatsApp = () => {
                                   : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-tl-none'
                               }`}
                             >
+                              {msg.type === 'image' && msg.mediaUrl && (
+                                <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="block mb-1 -mx-1 -mt-1">
+                                  <img src={msg.mediaUrl} alt={msg.caption || 'Image'} className="rounded-md max-h-64 w-auto object-contain" />
+                                </a>
+                              )}
+                              {msg.type === 'video' && msg.mediaUrl && (
+                                <video src={msg.mediaUrl} controls className="rounded-md max-h-64 w-auto mb-1 -mx-1 -mt-1" />
+                              )}
+                              {msg.type === 'audio' && msg.mediaUrl && (
+                                <audio src={msg.mediaUrl} controls className="mb-1 max-w-full" />
+                              )}
+                              {msg.type === 'document' && msg.mediaUrl && (
+                                <a
+                                  href={msg.mediaUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2 px-2 py-2 mb-1 rounded-md bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                                >
+                                  <FaFileAlt className="text-lg text-gray-500 dark:text-gray-400 shrink-0" />
+                                  <span className="text-sm truncate flex-1">{msg.caption || 'Document'}</span>
+                                  <FaDownload className="text-xs text-gray-400 shrink-0" />
+                                </a>
+                              )}
                               {msg.type === 'template' && (
                                 <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wide">Template</p>
                               )}
-                              {msg.type !== 'text' && msg.type !== 'template' && (
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 capitalize">
-                                  {typeIcon(msg.type)}{msg.type}
+                              {(msg.body || msg.caption || msg.templateName) && (
+                                <p className="whitespace-pre-wrap break-words">
+                                  {msg.body || (msg.type === 'document' ? '' : msg.caption) || msg.templateName}
                                 </p>
                               )}
-                              <p className="whitespace-pre-wrap break-words">
-                                {msg.body || msg.caption || msg.templateName || (msg.type !== 'text' ? 'Media message' : '')}
-                              </p>
                               <div className="flex items-center justify-end gap-1 mt-1 -mb-0.5">
                                 <span className="text-[10px] text-gray-500 dark:text-gray-400">{timeOf(msg.timestamp)}</span>
                                 {outbound && <span className="text-[11px]"><StatusTicks status={msg.status} /></span>}
@@ -783,10 +873,49 @@ const WhatsApp = () => {
               </div>
 
               {/* Composer */}
-              <div className="px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+              <div className="relative px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                 {sendError && (
                   <p className="text-xs text-red-500 mb-1.5 flex items-center gap-1"><FaExclamationCircle /> {sendError}</p>
                 )}
+                {uploadingMedia && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+                    <FaSpinner className="animate-spin" /> Uploading media...
+                  </p>
+                )}
+
+                {showEmoji && (
+                  <div
+                    ref={emojiPickerRef}
+                    className="absolute bottom-full left-3 mb-2 w-72 max-h-72 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-3 z-20"
+                  >
+                    {EMOJI_GROUPS.map((group) => (
+                      <div key={group.label} className="mb-2 last:mb-0">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-1">{group.label}</p>
+                        <div className="grid grid-cols-8 gap-1">
+                          {group.emojis.map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => insertEmoji(emoji)}
+                              className="text-xl hover:bg-gray-100 dark:hover:bg-gray-700 rounded p-1"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
+                  onChange={handleFileSelected}
+                />
+
                 <form onSubmit={handleSend} className="flex items-end gap-2">
                   <button
                     type="button"
@@ -795,6 +924,27 @@ const WhatsApp = () => {
                     className="w-9 h-9 shrink-0 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center hover:bg-amber-100 hover:text-amber-600 dark:hover:bg-amber-900/40 dark:hover:text-amber-400 transition-colors"
                   >
                     <FaLayerGroup className="text-xs" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingMedia || (!windowOpen && messages.length > 0)}
+                    title="Attach media"
+                    className="w-9 h-9 shrink-0 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {uploadingMedia ? <FaSpinner className="text-xs animate-spin" /> : <FaPaperclip className="text-xs" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEmoji((prev) => !prev)}
+                    title="Emoji"
+                    className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-colors ${
+                      showEmoji
+                        ? 'bg-[#25D366]/20 text-[#25D366]'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-yellow-100 hover:text-yellow-600 dark:hover:bg-yellow-900/40 dark:hover:text-yellow-400'
+                    }`}
+                  >
+                    <FaSmile className="text-sm" />
                   </button>
                   <textarea
                     value={draft}

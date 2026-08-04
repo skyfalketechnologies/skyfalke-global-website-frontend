@@ -38,6 +38,7 @@ const InvoiceList = () => {
   const [sendingWhatsApp, setSendingWhatsApp] = useState(new Set());
   const [whatsAppModal, setWhatsAppModal] = useState(null); // { invoice }
   const [whatsAppPhone, setWhatsAppPhone] = useState('');
+  const [whatsAppTemplate, setWhatsAppTemplate] = useState('invoice_ready');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -183,6 +184,7 @@ const InvoiceList = () => {
 
   const openWhatsAppModal = (invoice) => {
     setWhatsAppPhone(invoice.client?.phone || '');
+    setWhatsAppTemplate(invoice.invoiceType === 'google-cloud' ? 'google_workspace_payment_reminder' : 'invoice_ready');
     setWhatsAppModal(invoice);
     setError('');
   };
@@ -195,7 +197,8 @@ const InvoiceList = () => {
       setSendingWhatsApp(prev => new Set(prev).add(invoice._id));
       setError('');
       const response = await apiPost(`/api/invoices/${invoice._id}/send-whatsapp`, {
-        phone: whatsAppPhone.trim()
+        phone: whatsAppPhone.trim(),
+        template: whatsAppTemplate
       });
       if (response.data.success) {
         setSuccess('Invoice sent via WhatsApp successfully');
@@ -634,6 +637,19 @@ const InvoiceList = () => {
                   ? 'Auto-filled from invoice — edit if needed.'
                   : 'Enter the client\'s WhatsApp number.'}
               </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Message template
+              </label>
+              <select
+                value={whatsAppTemplate}
+                onChange={e => setWhatsAppTemplate(e.target.value)}
+                className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
+              >
+                <option value="invoice_ready">Invoice Ready</option>
+                <option value="google_workspace_payment_reminder">Google Workspace Payment Reminder</option>
+              </select>
             </div>
             {error && (
               <p className="text-xs text-red-500 flex items-center gap-1">

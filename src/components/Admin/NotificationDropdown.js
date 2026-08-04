@@ -13,7 +13,8 @@ import {
   FaExclamationTriangle,
   FaInfoCircle,
   FaCheckCircle,
-  FaClock
+  FaClock,
+  FaWhatsapp
 } from 'react-icons/fa';
 import { useNotifications } from '../../contexts/NotificationContext';
 
@@ -57,6 +58,8 @@ const NotificationDropdown = () => {
         return FaFileAlt;
       case 'application':
         return FaUser;
+      case 'whatsapp':
+        return FaWhatsapp;
       case 'warning':
         return FaExclamationTriangle;
       case 'success':
@@ -78,6 +81,8 @@ const NotificationDropdown = () => {
         return 'text-purple-500 bg-purple-100';
       case 'application':
         return 'text-orange-500 bg-orange-100';
+      case 'whatsapp':
+        return 'text-[#25D366] bg-green-100';
       case 'warning':
         return 'text-yellow-500 bg-yellow-100';
       case 'success':
