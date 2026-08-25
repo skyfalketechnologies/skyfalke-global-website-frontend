@@ -12,8 +12,8 @@ import ChristmasDecorations from '@/components/Christmas/ChristmasDecorations';
 import SkyfalkeChatbot from '@/components/SkyfalkeChatbot';
 import { StrategyCallModalProvider } from '@/contexts/StrategyCallModalContext';
 
-/** Floating assistant chat — off until we turn it back on. */
-const ENABLE_SKYFALKE_CHAT_WIDGET = false;
+/** Floating assistant chat. */
+const ENABLE_SKYFALKE_CHAT_WIDGET = true;
 
 export default function Providers({ children }) {
   return (
