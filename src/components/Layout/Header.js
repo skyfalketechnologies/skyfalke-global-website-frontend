@@ -104,6 +104,12 @@ const products = [
     Icon: HiOutlineCloud,
     external: true,
   },
+  {
+    name: 'Skyfalke Connect',
+    href: '/products/skyfalke-connect',
+    description: 'Unified connectivity and communication platform.',
+    Icon: HiOutlineGlobeAmericas,
+  },
 ];
 
 function Badge({ children, tone = 'neutral', inverted = false }) {

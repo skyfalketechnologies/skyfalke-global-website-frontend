@@ -94,6 +94,7 @@ const Footer = () => {
       links: [
         { name: 'Skyfalke Sign', href: '/products/skyfalke-sign' },
         { name: 'Skyfalke Cloud', href: 'https://skyfalke.co.ke/', external: true },
+        { name: 'Skyfalke Connect', href: '/products/skyfalke-connect' },
       ],
     },
     {
