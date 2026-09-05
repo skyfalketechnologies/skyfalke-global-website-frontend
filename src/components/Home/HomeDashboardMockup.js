@@ -160,45 +160,6 @@ export default function HomeDashboardMockup() {
         </div>
       </div>
 
-      {/* ── Floating metric card (bottom-left) ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12, x: -8 }}
-        whileInView={{ opacity: 1, y: 0, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.9 }}
-        className="absolute -bottom-5 -left-6 sm:-left-10 z-10 rounded-sm border border-white/[0.1] bg-[#0d1526]/95 backdrop-blur-sm shadow-xl px-4 py-3 min-w-[140px]"
-      >
-        <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1 font-medium">
-          Client Growth
-        </p>
-        <div className="flex items-end gap-1.5">
-          <span className="text-2xl font-nexa-heavy text-white leading-none">+34%</span>
-          <span className="text-emerald-400 text-sm pb-0.5">↑ YoY</span>
-        </div>
-      </motion.div>
-
-      {/* ── Floating engagement badge (top-right) ── */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 1.0 }}
-        className="absolute -top-4 -right-4 sm:-right-6 z-10 rounded-sm border border-white/[0.1] bg-[#0d1526]/95 backdrop-blur-sm shadow-xl px-3.5 py-2.5"
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-7 h-7 rounded-sm bg-[#e0ae00]/15">
-            <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-[#e0ae00]" aria-hidden>
-              <path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.1l-3.7 2.2.7-4.1-3-2.9 4.2-.7L8 1z"
-                stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <div>
-            <p className="text-white text-xs font-semibold leading-none">Verified Partner</p>
-            <p className="text-slate-500 text-[10px] mt-0.5">ISO-aligned delivery</p>
-          </div>
-        </div>
-      </motion.div>
-
     </div>
   );
 }
