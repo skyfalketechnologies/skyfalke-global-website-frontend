@@ -1,0 +1,451 @@
+/**
+ * SEO Metadata utility for Next.js App Router
+ * Provides consistent metadata generation across all pages
+ */
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
+const DEFAULT_IMAGE = `${BASE_URL}/favicon-512x512.png`;
+
+// Blocklist for images that must never be used as OG/Twitter images
+const BLOCKED_IMAGE_PREFIXES = [
+  'https://ik.imagekit.io/g3nahgeeu/customers/cfao.png',
+];
+
+const isBlockedImage = (url) => {
+  if (!url) return false;
+  return BLOCKED_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix));
+};
+
+const SEO_TITLE_MIN = 30;
+const SEO_TITLE_MAX = 60;
+const BRAND = 'Skyfalke';
+
+export const SITE_META_DESCRIPTION =
+  'Skyfalke partners with businesses across Africa to drive digital growth through technology, cloud solutions, branding, automation, and sustainable innovation.';
+
+/** Public URL path for a case study detail page. */
+export function getCaseStudyPublicPath(slug) {
+  return `/how-we-work/case-studies/${slug}`;
+}
+
+export function getCaseStudyPublicUrl(slug, baseUrl = BASE_URL) {
+  return `${baseUrl}${getCaseStudyPublicPath(slug)}`;
+}
+
+/** Max length for `title` before root layout adds ` | Skyfalke`. */
+export const TEMPLATE_TITLE_MAX = SEO_TITLE_MAX - ` | ${BRAND}`.length;
+
+/**
+ * Pick the first title pattern within the recommended 30–60 character range.
+ */
+function pickSeoTitle(candidates) {
+  const inRange = candidates.filter(
+    (t) => t && t.length >= SEO_TITLE_MIN && t.length <= SEO_TITLE_MAX
+  );
+  if (inRange.length) return inRange[0];
+  const underMax = candidates.filter((t) => t && t.length <= SEO_TITLE_MAX);
+  if (underMax.length) {
+    return underMax.reduce((a, b) => (a.length >= b.length ? a : b));
+  }
+  const first = candidates.find(Boolean) || BRAND;
+  if (first.length <= SEO_TITLE_MAX) return first;
+  const trimmed = first.slice(0, SEO_TITLE_MAX);
+  return trimmed.replace(/\s+\S*$/, '').trim() || trimmed;
+}
+
+/**
+ * Absolute document title for marketing section detail pages (slug routes).
+ */
+export function buildSectionSeoTitle(primary, section, seoTitle) {
+  if (seoTitle && seoTitle.length >= SEO_TITLE_MIN && seoTitle.length <= SEO_TITLE_MAX) {
+    return seoTitle;
+  }
+  return pickSeoTitle([
+    seoTitle,
+    `${primary} | ${section} | ${BRAND}`,
+    `${primary} — ${section} at ${BRAND}`,
+    `${primary} | ${BRAND} ${section}`,
+    `${section}: ${primary} | ${BRAND}`,
+    `${primary}: ${section} Solutions | ${BRAND}`,
+  ]);
+}
+
+/**
+ * Absolute document title for shop product pages.
+ */
+export function buildProductSeoTitle(productName, metaTitle) {
+  if (metaTitle && metaTitle.length >= SEO_TITLE_MIN && metaTitle.length <= SEO_TITLE_MAX) {
+    return metaTitle;
+  }
+  return pickSeoTitle([
+    metaTitle,
+    `${productName} | Buy from Skyfalke Shop`,
+    `${productName} — Skyfalke Shop`,
+    `${productName} | ${BRAND}`,
+  ]);
+}
+
+/** Remove embedded or trailing Skyfalke branding (layout template adds brand). */
+export function stripTitleBrandSuffix(title) {
+  if (!title || typeof title !== 'string') return title;
+  return title
+    .replace(/^Skyfalke\s*[\|–-]\s*/i, '')
+    .replace(/\s*\|\s*Skyfalke\s*-\s*/gi, ' | ')
+    .replace(/\s*\|\s*Skyfalke(?:\s+[\w\s&]+)?\s*$/i, '')
+    .replace(/\s*-\s*Skyfalke\s*$/i, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+\|\s*$/g, '')
+    .trim();
+}
+
+/** Trim titles used with the root `title.template` so final length stays ≤ 60. */
+export function fitTemplateTitle(title) {
+  const base = stripTitleBrandSuffix(title);
+  if (!base) return title;
+  if (base.length <= TEMPLATE_TITLE_MAX) return base;
+  const trimmed = base.slice(0, TEMPLATE_TITLE_MAX);
+  return trimmed.replace(/\s+\S*$/, '').replace(/\s*[|,&]\s*$/, '').trim() || trimmed;
+}
+
+/** Clamp absolute document titles to the recommended 30–60 character range. */
+export function clampSeoTitle(title) {
+  const base = stripTitleBrandSuffix(title);
+  if (!base) return BRAND;
+  if (base.length >= SEO_TITLE_MIN && base.length <= SEO_TITLE_MAX) return base;
+  if (base.length > SEO_TITLE_MAX) {
+    const trimmed = base.slice(0, SEO_TITLE_MAX).replace(/\s+\S*$/, '').trim();
+    return trimmed.length >= SEO_TITLE_MIN ? trimmed : base.slice(0, SEO_TITLE_MAX);
+  }
+  return pickSeoTitle([base, `${base} | ${BRAND}`]);
+}
+
+/** Clamp absolute titles without stripping brand (value is shown as-is in `<title>`). */
+export function clampAbsoluteSeoTitle(title) {
+  if (!title || typeof title !== 'string') return BRAND;
+  if (title.length <= SEO_TITLE_MAX) return title;
+  const trimmed = title.slice(0, SEO_TITLE_MAX).replace(/\s+\S*$/, '').trim();
+  return trimmed.length >= SEO_TITLE_MIN ? trimmed : title.slice(0, SEO_TITLE_MAX);
+}
+
+/**
+ * Absolute document title for case study detail pages.
+ */
+export function buildCaseStudySeoTitle(caseStudyTitle, metaTitle) {
+  const cleanedMeta = metaTitle ? stripTitleBrandSuffix(metaTitle) : null;
+  if (
+    cleanedMeta &&
+    cleanedMeta.length >= SEO_TITLE_MIN &&
+    cleanedMeta.length <= SEO_TITLE_MAX
+  ) {
+    return cleanedMeta;
+  }
+  const truncated =
+    caseStudyTitle.length > 28
+      ? `${caseStudyTitle.slice(0, 28).replace(/\s+\S*$/, '')}…`
+      : caseStudyTitle;
+  return pickSeoTitle([
+    cleanedMeta,
+    `${truncated} | Case Study | ${BRAND}`,
+    `Case Study | ${truncated} | ${BRAND}`,
+    `${caseStudyTitle} | ${BRAND}`,
+  ]);
+}
+
+/**
+ * Generate metadata object for Next.js pages
+ */
+export function generateMetadata({
+  title,
+  description,
+  keywords,
+  image = DEFAULT_IMAGE,
+  url,
+  type = 'website',
+  author = 'Skyfalke',
+  publishedTime,
+  modifiedTime,
+  category,
+  tags = [],
+  noIndex = false,
+  canonical,
+  ogTitle,
+  ogDescription,
+  twitterTitle,
+  twitterDescription,
+  twitterImage,
+  articleAuthor,
+  articleSection,
+  articleTags = [],
+  /** When true, skips root layout `title.template` (use for dynamic / CMS pages). */
+  titleAbsolute = false,
+}) {
+  const fullUrl = canonical || url || BASE_URL;
+
+  // Ensure we never use blocked images as the primary OG/Twitter image
+  let safeImage = image || DEFAULT_IMAGE;
+  if (isBlockedImage(safeImage)) {
+    safeImage = DEFAULT_IMAGE;
+  }
+
+  const fullImageUrl =
+    safeImage && safeImage.startsWith('http')
+      ? safeImage
+      : `${BASE_URL}${safeImage}`;
+  const defaultSegmentTitle = 'Digital Growth Partner in Africa';
+  const defaultAbsoluteTitle = 'Digital Growth Partner in Africa | Skyfalke';
+  const finalTitle = titleAbsolute
+    ? clampAbsoluteSeoTitle(title || defaultAbsoluteTitle)
+    : fitTemplateTitle(title) ||
+      stripTitleBrandSuffix(title) ||
+      title ||
+      defaultSegmentTitle;
+  const finalDescription = description || SITE_META_DESCRIPTION;
+  const finalKeywords =
+    keywords ||
+    'digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke';
+
+  const metadata = {
+    title: titleAbsolute ? { absolute: finalTitle } : finalTitle,
+    description: finalDescription,
+    keywords: finalKeywords,
+    authors: [{ name: author }],
+    creator: author,
+    publisher: 'Skyfalke',
+    robots: noIndex ? {
+      index: false,
+      follow: false,
+    } : {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      title: ogTitle || finalTitle,
+      description: ogDescription || finalDescription,
+      url: fullUrl,
+      siteName: 'Skyfalke',
+      images: [
+        {
+          url: fullImageUrl,
+          width: 1200,
+          height: 630,
+          alt: ogDescription || finalDescription,
+        },
+      ],
+      locale: 'en_US',
+      type: type,
+      ...(type === 'article' && {
+        publishedTime: publishedTime,
+        modifiedTime: modifiedTime,
+        authors: [articleAuthor || author],
+        section: articleSection || category,
+        tags: articleTags.length > 0 ? articleTags : tags,
+      }),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: twitterTitle || ogTitle || finalTitle,
+      description: twitterDescription || ogDescription || finalDescription,
+      images: [twitterImage || fullImageUrl],
+      site: '@skyfalke',
+      creator: '@skyfalke',
+    },
+    alternates: {
+      canonical: canonical || fullUrl,
+    },
+    ...(category && { category }),
+  };
+
+  return metadata;
+}
+
+/**
+ * Generate metadata for blog posts
+ */
+export function generateBlogMetadata(blog) {
+  if (!blog) {
+    return generateMetadata({
+      title: 'Blog Post - Skyfalke',
+      description: 'Read our latest blog post',
+    });
+  }
+
+  const blogUrl = `${BASE_URL}/blog/${blog.slug}`;
+  const blogImage = blog.featuredImage?.url 
+    ? (blog.featuredImage.url.startsWith('http') ? blog.featuredImage.url : `${BASE_URL}${blog.featuredImage.url}`)
+    : DEFAULT_IMAGE;
+
+  const seoKeywordsRaw = blog.seo?.keywords;
+  const seoKeywords = Array.isArray(seoKeywordsRaw)
+    ? seoKeywordsRaw
+    : typeof seoKeywordsRaw === 'string'
+      ? seoKeywordsRaw.split(',').map((k) => k.trim()).filter(Boolean)
+      : [];
+  const focusKeyword = blog.seo?.focusKeyword ? [String(blog.seo.focusKeyword).trim()] : [];
+  const keywordSet = [...new Set([...seoKeywords, ...focusKeyword].filter(Boolean))];
+
+  return generateMetadata({
+    title: blog.title,
+    titleAbsolute: true,
+    description: blog.excerpt || blog.description || `Read ${blog.title} on Skyfalke blog`,
+    keywords: keywordSet.join(', '),
+    image: blogImage,
+    url: blogUrl,
+    type: 'article',
+    author: blog.author?.name || 'Skyfalke Team',
+    publishedTime: blog.publishedAt ? new Date(blog.publishedAt).toISOString() : undefined,
+    modifiedTime: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
+    category: blog.category,
+    tags: keywordSet,
+    canonical: blogUrl,
+    articleAuthor: blog.author?.name || 'Skyfalke Team',
+    articleSection: blog.category,
+    articleTags: keywordSet,
+  });
+}
+
+/**
+ * Generate metadata for product pages
+ */
+export function generateProductMetadata(product) {
+  if (!product) {
+    return generateMetadata({
+      title: 'Product - Skyfalke',
+      description: 'View our product',
+    });
+  }
+
+  const productUrl = `${BASE_URL}/shop/product/${product.slug}`;
+  const productImage = product.images?.[0]?.url 
+    ? (product.images[0].url.startsWith('http') ? product.images[0].url : `${BASE_URL}${product.images[0].url}`)
+    : DEFAULT_IMAGE;
+
+  return generateMetadata({
+    title: buildProductSeoTitle(product.name, product.seo?.metaTitle),
+    titleAbsolute: true,
+    description: product.description || product.shortDescription || `Buy ${product.name} from Skyfalke`,
+    keywords: product.tags?.join(', ') || product.category || '',
+    image: productImage,
+    url: productUrl,
+    // Use a valid Open Graph type supported by Next.js metadata
+    // 'website' is appropriate for product detail pages in this setup
+    type: 'website',
+    canonical: productUrl,
+  });
+}
+
+/**
+ * Generate metadata for case study pages
+ */
+export function generateCaseStudyMetadata(caseStudy) {
+  if (!caseStudy) {
+    return generateMetadata({
+      title: 'Case Study - Skyfalke',
+      description: 'View our case study',
+    });
+  }
+
+  const caseStudyUrl = getCaseStudyPublicUrl(caseStudy.slug);
+  const caseStudyImage = caseStudy.featuredImage?.url 
+    ? (caseStudy.featuredImage.url.startsWith('http') ? caseStudy.featuredImage.url : `${BASE_URL}${caseStudy.featuredImage.url}`)
+    : DEFAULT_IMAGE;
+
+  return generateMetadata({
+    title: buildCaseStudySeoTitle(caseStudy.title, caseStudy.seo?.metaTitle),
+    titleAbsolute: true,
+    description: caseStudy.excerpt || caseStudy.description || `View ${caseStudy.title} case study`,
+    keywords: caseStudy.tags?.join(', ') || caseStudy.category || '',
+    image: caseStudyImage,
+    url: caseStudyUrl,
+    type: 'article',
+    canonical: caseStudyUrl,
+  });
+}
+
+/**
+ * Generate metadata for job pages
+ */
+export function generateJobMetadata(job) {
+  if (!job) {
+    return generateMetadata({
+      title: 'Job Opportunity - Skyfalke',
+      description: 'View job opportunities at Skyfalke',
+    });
+  }
+
+  const jobUrl = `${BASE_URL}/careers/${job._id}`;
+
+  return generateMetadata({
+    title: job.title,
+    titleAbsolute: true,
+    description: job.description || `Apply for ${job.title} position at Skyfalke`,
+    keywords: job.tags?.join(', ') || job.category || '',
+    url: jobUrl,
+    type: 'article',
+    canonical: jobUrl,
+  });
+}
+
+/**
+ * Page-specific metadata presets
+ */
+export const pageMetadata = {
+  home: generateMetadata({
+    title: 'Digital Growth Partner in Africa | Skyfalke',
+    titleAbsolute: true,
+    description: SITE_META_DESCRIPTION,
+    keywords:
+      'digital growth partner, business automation Kenya, SEO and digital ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke',
+    url: `${BASE_URL}/`,
+    canonical: `${BASE_URL}/`,
+    image:
+      'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
+    ogTitle: 'Digital Growth Partner in Africa | Skyfalke',
+    ogDescription: SITE_META_DESCRIPTION,
+    twitterTitle: 'Digital Growth Partner in Africa | Skyfalke',
+    twitterDescription: SITE_META_DESCRIPTION,
+  }),
+
+  about: generateMetadata({
+    title: 'About Us | Mission, Values & Responsibility',
+    description: 'Learn about Skyfalke, a leading digital marketing and technology solutions partner in Africa. We provide sustainable cloud hosting, AI-powered business tools, and innovative digital solutions.',
+    url: `${BASE_URL}/about-us`,
+  }),
+
+  services: generateMetadata({
+    title: 'Digital Marketing & Technology Solutions',
+    description: 'Explore Skyfalke\'s comprehensive range of digital marketing services, sustainable cloud hosting solutions, AI-powered business tools, and technology consulting services.',
+    url: `${BASE_URL}/services`,
+  }),
+
+  contact: generateMetadata({
+    title: 'Contact Us | Skyfalke',
+    description: 'Contact Skyfalke for digital marketing services, cloud hosting solutions, and technology consulting. We\'re here to help transform your business.',
+    url: `${BASE_URL}/contact`,
+  }),
+
+  blog: generateMetadata({
+    title: 'Digital Marketing & Technology Insight',
+    description: 'Read the latest insights, tips, and updates on digital marketing, cloud hosting, AI business tools, and technology trends from Skyfalke.',
+    url: `${BASE_URL}/blog`,
+  }),
+
+  shop: generateMetadata({
+    title: 'Digital Products & Services',
+    description: 'Browse Skyfalke\'s digital products and services. Find the perfect solution for your business needs.',
+    url: `${BASE_URL}/shop`,
+  }),
+
+  careers: generateMetadata({
+    title: 'Careers | Join Our Digital Transformation Team',
+    description: 'Join Skyfalke and be part of a team that\'s transforming businesses across Africa with innovative digital solutions.',
+    url: `${BASE_URL}/careers`,
+  }),
+};
+

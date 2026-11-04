@@ -1,0 +1,221 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { apiGet, apiPost } from '../../../utils/api';
+
+/**
+ * Custom hook for public blog functionality
+ * Handles blog fetching, comments, and related posts
+ */
+export const usePublicBlog = () => {
+  const [currentBlog, setCurrentBlog] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsError, setCommentsError] = useState(null);
+  const [submitCommentLoading, setSubmitCommentLoading] = useState(false);
+  const [submitCommentError, setSubmitCommentError] = useState(null);
+  const [relatedPosts, setRelatedPosts] = useState([]);
+  const [relatedPostsLoading, setRelatedPostsLoading] = useState(false);
+  const hasFetchedRef = useRef(false);
+
+  const getBlogFetchErrorMessage = (err) => {
+    const status = err?.response?.status;
+    if (status === 404) return 'Blog not found';
+
+    const isNetworkFailure =
+      err?.code === 'ERR_NETWORK' ||
+      err?.message?.includes('Network Error') ||
+      !err?.response;
+
+    if (isNetworkFailure) {
+      return 'Network error. Please check your connection and try again.';
+    }
+
+    return 'Failed to load blog post';
+  };
+
+  /**
+   * Fetch blog by slug
+   */
+  const fetchBlogBySlug = useCallback(async (slug) => {
+    if (!slug || slug === 'index') return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Check for SSR-injected initial data first
+      const initialData = window.__INITIAL_DATA__;
+      if (initialData?.post && initialData.post.slug === slug) {
+        console.log('[usePublicBlog] Using SSR-injected data');
+        setCurrentBlog(initialData.post);
+        setLoading(false);
+        
+        // Clear initial data to prevent reuse
+        window.__INITIAL_DATA__ = null;
+        
+        // Fetch related posts and comments in background
+        if (initialData.post._id) {
+          fetchRelatedPosts(initialData.post._id, initialData.post.category, initialData.post.tags || []).catch(console.error);
+          fetchComments(initialData.post._id).catch(console.error);
+        }
+        
+        // Track view
+        trackView(initialData.post._id).catch(console.error);
+        return;
+      }
+
+      // Fetch from API
+      const response = await apiGet(`/api/blogs/slug/${slug}`);
+      const blogData = response.data;
+      
+      setCurrentBlog(blogData);
+      
+      // Fetch related posts and comments in background
+      if (blogData._id) {
+        fetchRelatedPosts(blogData._id, blogData.category, blogData.tags || []).catch(console.error);
+        fetchComments(blogData._id).catch(console.error);
+      }
+      
+      // Track view
+      if (blogData._id) {
+        trackView(blogData._id).catch(console.error);
+      }
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        const status = err?.response?.status;
+        const errorLabel = status ? `HTTP ${status}` : (err?.code || 'NETWORK');
+        console.warn(`[usePublicBlog] Error fetching blog (${errorLabel})`);
+      }
+      setError(getBlogFetchErrorMessage(err));
+      setCurrentBlog(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * Fetch comments for a blog post
+   */
+  const fetchComments = useCallback(async (blogId) => {
+    if (!blogId) return;
+    
+    try {
+      setCommentsLoading(true);
+      setCommentsError(null);
+      const response = await apiGet(`/api/blogs/${blogId}/comments`);
+      setComments(response.data?.comments ?? []);
+    } catch (err) {
+      console.error('[usePublicBlog] Error fetching comments:', err);
+      setCommentsError('Failed to load comments');
+      setComments([]);
+    } finally {
+      setCommentsLoading(false);
+    }
+  }, []);
+
+  /**
+   * Submit a new comment for a blog post
+   */
+  const submitComment = useCallback(async (blogId, { name, email, comment }) => {
+    if (!blogId || !name?.trim() || !email?.trim() || !comment?.trim()) {
+      return { success: false, error: 'Name, email, and comment are required' };
+    }
+    try {
+      setSubmitCommentLoading(true);
+      setSubmitCommentError(null);
+      const response = await apiPost(`/api/blogs/${blogId}/comments`, {
+        name: name.trim(),
+        email: email.trim(),
+        comment: comment.trim()
+      });
+      const newComment = response.data?.comment;
+      if (newComment) {
+        setComments(prev => [newComment, ...prev]);
+      }
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to post comment';
+      setSubmitCommentError(message);
+      return { success: false, error: message };
+    } finally {
+      setSubmitCommentLoading(false);
+    }
+  }, []);
+
+  /**
+   * Fetch related posts
+   */
+  const fetchRelatedPosts = useCallback(async (blogId, category, tags = []) => {
+    if (!blogId) return;
+    
+    try {
+      setRelatedPostsLoading(true);
+      
+      // Check for SSR-injected related posts
+      const initialData = window.__INITIAL_DATA__;
+      if (initialData?.relatedPosts) {
+        setRelatedPosts(initialData.relatedPosts);
+        setRelatedPostsLoading(false);
+        return;
+      }
+      
+      // Fetch from API
+      const response = await apiGet(`/api/blogs/${blogId}/related`);
+      setRelatedPosts(response.data || []);
+    } catch (err) {
+      console.error('[usePublicBlog] Error fetching related posts:', err);
+      setRelatedPosts([]);
+    } finally {
+      setRelatedPostsLoading(false);
+    }
+  }, []);
+
+  /**
+   * Track blog view with session storage
+   */
+  const trackView = async (blogId) => {
+    try {
+      const viewedBlogs = JSON.parse(sessionStorage.getItem('viewedBlogs') || '[]');
+      
+      if (viewedBlogs.includes(blogId)) {
+        return; // Already viewed in this session
+      }
+
+      let sessionId = sessionStorage.getItem('sessionId');
+      if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        sessionStorage.setItem('sessionId', sessionId);
+      }
+
+      const response = await apiPost(`/api/blogs/${blogId}/view`, {}, {
+        headers: { 'X-Session-ID': sessionId }
+      });
+
+      if (response.data?.viewCounted) {
+        viewedBlogs.push(blogId);
+        sessionStorage.setItem('viewedBlogs', JSON.stringify(viewedBlogs));
+      }
+    } catch (error) {
+      console.error('[usePublicBlog] Error tracking view:', error);
+      // Don't fail the page load if view tracking fails
+    }
+  };
+
+  return {
+    currentBlog,
+    loading,
+    error,
+    fetchBlogBySlug,
+    comments,
+    fetchComments,
+    commentsLoading,
+    commentsError,
+    submitComment,
+    submitCommentLoading,
+    submitCommentError,
+    relatedPosts,
+    relatedPostsLoading
+  };
+};
+

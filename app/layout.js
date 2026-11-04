@@ -1,0 +1,126 @@
+import './globals.css';
+import localFont from 'next/font/local';
+import Script from 'next/script';
+import Providers from './providers';
+import { getGlobalSchemaJsonLd } from '@/utils/schemaMarkup';
+import { SITE_META_DESCRIPTION } from '@/utils/metadata';
+
+const nexaLight = localFont({
+  src: '../public/font/Nexa-ExtraLight.ttf',
+  weight: '200',
+  style: 'normal',
+  display: 'swap',
+  variable: '--font-nexa-light',
+  preload: true,
+});
+
+const nexaHeavy = localFont({
+  src: '../public/font/Nexa-Heavy.ttf',
+  weight: '800',
+  style: 'normal',
+  display: 'swap',
+  variable: '--font-nexa-heavy',
+  preload: true,
+});
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com';
+const globalJsonLd = getGlobalSchemaJsonLd(siteUrl);
+
+export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'),
+  title: {
+    default: 'Digital Growth Partner in Africa | Skyfalke',
+    template: '%s | Skyfalke',
+  },
+  description: SITE_META_DESCRIPTION,
+  keywords: [
+    'digital growth partner',
+    'business automation Kenya',
+    'SEO and digital ads',
+    'CRM workflows',
+    'AI roadmap',
+    'digital transformation Africa',
+    'Skyfalke',
+  ],
+  authors: [{ name: 'Skyfalke' }],
+  creator: 'Skyfalke',
+  publisher: 'Skyfalke',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
+    siteName: 'Skyfalke',
+    title: 'Digital Growth Partner in Africa | Skyfalke',
+    description: SITE_META_DESCRIPTION,
+    images: [
+      {
+        url: 'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
+        width: 1200,
+        height: 630,
+        alt: 'Skyfalke - digital growth partner for websites, marketing, automation, and AI strategy',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Digital Growth Partner in Africa | Skyfalke',
+    description: SITE_META_DESCRIPTION,
+    images: [
+      'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
+    ],
+    site: '@skyfalke',
+    creator: '@skyfalke',
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
+  },
+  manifest: '/manifest.json',
+  // Favicon / app icons for all pages
+  icons: {
+    icon: [
+      { url: '/favicon.ico', type: 'image/x-icon', rel: 'icon' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/favicon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+  },
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en" suppressHydrationWarning className={`${nexaLight.variable} ${nexaHeavy.variable}`}>
+      <body className="font-sans">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(globalJsonLd),
+          }}
+        />
+        <Providers>
+          {children}
+        </Providers>
+        <Script
+          src="https://skyfalke-2.skyfalkeconnect.io/widget.js"
+          data-tenant="cmt76gwh6000014ogefouznu0"
+          strategy="afterInteractive"
+        />
+      </body>
+    </html>
+  );
+}
+

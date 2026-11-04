@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin-panel/
+Disallow: /administrator/
+Disallow: /api/
+Disallow: /system/
+Disallow: /login/
+Disallow: /portal/
+Disallow: /checkout/
+Disallow: /dashboard/
+
+Sitemap: https://skyfalke.com/sitemap.xml

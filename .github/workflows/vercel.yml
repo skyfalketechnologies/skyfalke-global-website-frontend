@@ -1,0 +1,85 @@
+name: Deploy Client to Vercel
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify working directory
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Checking directory structure:"
+          ls -la | head -10
+          if [ ! -f "package.json" ] || [ ! -f "next.config.js" ]; then
+            echo "ERROR: package.json or next.config.js not found in root"
+            echo "Root contents:"
+            ls -la
+            exit 1
+          fi
+          echo "✓ Verified: package.json and next.config.js found"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          pwd
+          echo "Current directory contents:"
+          ls -la | head -20
+          echo "Checking package.json:"
+          test -f package.json && echo "✓ package.json found ($(wc -c < package.json) bytes)" || echo "✗ package.json NOT found"
+          echo "Checking for scripts in package.json:"
+          grep -q '"build"' package.json && echo "✓ Build script found" || echo "✗ Build script NOT found"
+          echo "Node version:"
+          node --version
+          echo "Installing dependencies:"
+          echo "Attempting npm ci..."
+          if npm ci; then
+            echo "✓ npm ci succeeded"
+          else
+            echo "npm ci failed, trying npm install..."
+            npm install
+          fi
+
+      - name: Build project
+        run: |
+          pwd
+          echo "Verifying we're in the right directory:"
+          ls -la | grep -E "(package.json|next.config)"
+          echo "Checking package.json has build script:"
+          grep '"build"' package.json || echo "ERROR: No build script found!"
+          echo "Running build command:"
+          npm run build
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL || 'https://apis.mwangikinyanjuiadvocates.com' }}
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v42
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          vercel-version: '50'
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+

@@ -1,0 +1,300 @@
+// API Configuration and Utilities
+import axios from 'axios';
+import logger from './logger';
+
+// Request throttling to prevent rate limiting
+const requestQueue = new Map();
+const REQUEST_DELAY = 100; // 100ms delay between requests
+
+// Get API base URL from environment variable
+const getApiBaseUrl = () => {
+  // In Next.js, use NEXT_PUBLIC_ prefix for client-side env vars
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.REACT_APP_API_BASE_URL;
+  
+  // If environment variable is set, use it
+  if (apiBaseUrl) {
+    if (process.env.NODE_ENV !== 'production') {
+      logger.log('Using API Base URL:', apiBaseUrl);
+    }
+    return apiBaseUrl;
+  }
+  
+  // Fallback URLs based on environment
+  // In production build or Vercel production, always use production URL
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+    const productionUrl = 'https://apis.mwangikinyanjuiadvocates.com';
+    if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+      // Only log in browser console if needed for debugging
+      console.warn('Using production API URL fallback:', productionUrl);
+    }
+    return productionUrl;
+  }
+  
+  // Development fallback
+  return 'http://localhost:5000';
+};
+
+// Create axios instance with default configuration
+const api = axios.create({
+  baseURL: getApiBaseUrl(),
+  // Increase default timeout to better handle slower API endpoints like
+  // case studies aggregation, while still failing eventually instead of
+  // hanging indefinitely.
+  timeout: 60000, // 60 seconds
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  // Disable axios internal logging
+  validateStatus: function (status) {
+    return status >= 200 && status < 300;
+  },
+});
+
+const isNetworkError = (error) => {
+  return (
+    error?.code === 'ERR_NETWORK' ||
+    error?.message?.includes('Network Error') ||
+    !error?.response
+  );
+};
+
+const canRetryOnSameOrigin = (url, config = {}) => {
+  if (typeof window === 'undefined') return false;
+  if (!url?.startsWith('/api/')) return false;
+  if (config.__skipSameOriginRetry) return false;
+
+  // In local development when the API base URL points to localhost,
+  // retrying through same-origin usually hits the same dead backend via proxy
+  // and turns a network error into a noisy 500.
+  const baseUrl = api.defaults.baseURL || '';
+  const isLocalApiBase =
+    baseUrl.includes('localhost:5000') ||
+    baseUrl.includes('127.0.0.1:5000');
+
+  if (process.env.NODE_ENV === 'development' && isLocalApiBase) {
+    return false;
+  }
+
+  return true;
+};
+
+const requestSameOrigin = async (url, method = 'get', data = null, config = {}) => {
+  const retryConfig = {
+    ...config,
+    __skipSameOriginRetry: true,
+  };
+
+  switch (method.toLowerCase()) {
+    case 'get':
+      return axios.get(url, retryConfig);
+    case 'post':
+      return axios.post(url, data, retryConfig);
+    case 'put':
+      return axios.put(url, data, retryConfig);
+    case 'patch':
+      return axios.patch(url, data, retryConfig);
+    case 'delete':
+      return axios.delete(url, retryConfig);
+    default:
+      throw new Error(`Unsupported HTTP method: ${method}`);
+  }
+};
+
+// Note: Axios adapter override removed - console logging is already suppressed in index.js
+
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    // Only access localStorage on client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    // Handle SSL Certificate Errors
+    if (error.code === 'ERR_CERT_DATE_INVALID' || error.code === 'ERR_CERT_AUTHORITY_INVALID' || error.code === 'ERR_CERT_INVALID') {
+      logger.error('SSL Certificate Error:', {
+        code: error.code,
+        message: error.message,
+        apiUrl: error.config?.baseURL || getApiBaseUrl()
+      });
+      // Don't redirect on SSL errors, let the calling component handle it
+    }
+    
+    // Network / no response: expected when API is offline locally — keep logs minimal (debug only)
+    if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || !error.response) {
+      const endpoint = error.config?.url || 'Unknown';
+      const method = error.config?.method?.toUpperCase() || 'GET';
+      if (process.env.NODE_ENV === 'development' && typeof console !== 'undefined' && console.debug) {
+        console.debug('[API] Unreachable:', method, endpoint);
+      }
+    }
+    
+    // Handle 401 Unauthorized
+    if (error.response?.status === 401) {
+      // Only access localStorage and window on client side
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        // Check if we're in an admin context, otherwise redirect to portal access
+        const currentPath = window.location.pathname;
+        if (currentPath.startsWith('/system') || currentPath.startsWith('/admin')) {
+          window.location.href = '/system/portal/access';
+        } else {
+          // For non-admin routes, redirect to home or appropriate login
+          window.location.href = '/';
+        }
+      }
+    }
+    
+    // Handle 403 Forbidden
+    if (error.response?.status === 403) {
+      // Access forbidden
+    }
+    
+    // Handle 429 Too Many Requests
+    if (error.response?.status === 429) {
+      logger.warn('Rate limit exceeded. Please wait before making more requests.');
+      // You could implement retry logic here with exponential backoff
+    }
+    
+    // Handle 500 Internal Server Error
+    if (error.response?.status >= 500 && error.response?.status < 600) {
+      // Server errors are handled gracefully by components
+      // Log as warning in development, but don't spam console
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Server error (${error.response.status}) on ${error.config?.method?.toUpperCase()} ${error.config?.url}:`, 
+          error.response?.data?.message || 'Internal server error');
+      }
+      // Don't throw - let the calling code handle it gracefully
+    }
+    
+    // Handle 404 Not Found
+    if (error.response?.status === 404) {
+      logger.warn('API endpoint not found:', error.config?.url);
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+// Throttled request function
+const throttledRequest = async (url, method = 'get', data = null, config = {}) => {
+  // Ensure we're not trying to make API calls during SSR
+  if (typeof window === 'undefined') {
+    throw new Error('API calls cannot be made during server-side rendering');
+  }
+  
+  const requestKey = `${method}:${url}`;
+  const now = Date.now();
+  
+  // Check if we need to throttle this request
+  if (requestQueue.has(requestKey)) {
+    const lastRequest = requestQueue.get(requestKey);
+    const timeSinceLastRequest = now - lastRequest;
+    
+    if (timeSinceLastRequest < REQUEST_DELAY) {
+      await new Promise(resolve => setTimeout(resolve, REQUEST_DELAY - timeSinceLastRequest));
+    }
+  }
+  
+  // Update the last request time
+  requestQueue.set(requestKey, now);
+  
+  // Make the actual request
+  try {
+    let response;
+    switch (method.toLowerCase()) {
+      case 'get':
+        response = await api.get(url, config);
+        break;
+      case 'post':
+        response = await api.post(url, data, config);
+        break;
+      case 'put':
+        response = await api.put(url, data, config);
+        break;
+      case 'patch':
+        response = await api.patch(url, data, config);
+        break;
+      case 'delete':
+        response = await api.delete(url, config);
+        break;
+      default:
+        throw new Error(`Unsupported HTTP method: ${method}`);
+    }
+    return response;
+  } catch (error) {
+    // Remove from queue on error to allow retry
+    requestQueue.delete(requestKey);
+
+    // If direct API host fails, retry once on same-origin /api endpoint.
+    // This allows Next.js rewrites to proxy requests and avoids CORS/cert issues.
+    if (isNetworkError(error) && canRetryOnSameOrigin(url, config)) {
+      try {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[API] Network error on base URL, retrying via same-origin:', url);
+        }
+        return await requestSameOrigin(url, method, data, config);
+      } catch (retryError) {
+        throw retryError;
+      }
+    }
+    
+    // For network errors, the interceptor has already logged them appropriately
+    // Just re-throw to let components handle gracefully
+    throw error;
+  }
+};
+
+// API helper functions
+export const apiGet = (url, config = {}) => {
+  return throttledRequest(url, 'get', null, config);
+};
+
+export const apiPost = (url, data = {}, config = {}) => {
+  return throttledRequest(url, 'post', data, config);
+};
+
+export const apiPut = (url, data = {}, config = {}) => {
+  return throttledRequest(url, 'put', data, config);
+};
+
+export const apiPatch = (url, data = {}, config = {}) => {
+  return throttledRequest(url, 'patch', data, config);
+};
+
+export const apiDelete = (url, config = {}) => {
+  return throttledRequest(url, 'delete', null, config);
+};
+
+// Health check function
+export const checkApiHealth = async () => {
+  try {
+    const response = await apiGet('/api/health');
+    return response.data;
+  } catch (error) {
+    // API health check failed
+    throw error;
+  }
+};
+
+// Export the API base URL for use in other parts of the application
+export const API_BASE_URL = getApiBaseUrl();
+
+// Export the configured axios instance
+export default api;
