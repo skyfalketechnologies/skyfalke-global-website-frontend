@@ -124,8 +124,6 @@ function generateMetaTags(blogData, type = 'blog') {
     }
   }
   
-  const rawImage = post.seo?.ogImage?.url || post.featuredImage?.url || 'https://skyfalke.com/images/logos/logo.svg';
-  const image = normalizeImageUrl(rawImage);
   const url = `https://skyfalke.com/blog/${post.slug}`;
   
   // Get keywords
