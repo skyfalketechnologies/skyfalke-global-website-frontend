@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { apiGet, apiDelete } from '../../utils/api';
+import { apiGet, apiPost, apiDelete } from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   FaPlus,
@@ -24,7 +24,9 @@ import {
   FaClock,
   FaExclamationTriangle,
   FaTimesCircle,
-  FaSpinner
+  FaSpinner,
+  FaWhatsapp,
+  FaTimes
 } from 'react-icons/fa';
 
 const InvoiceList = () => {
@@ -33,6 +35,10 @@ const InvoiceList = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingEmails, setSendingEmails] = useState(new Set());
+  const [sendingWhatsApp, setSendingWhatsApp] = useState(new Set());
+  const [whatsAppModal, setWhatsAppModal] = useState(null); // { invoice }
+  const [whatsAppPhone, setWhatsAppPhone] = useState('');
+  const [whatsAppTemplate, setWhatsAppTemplate] = useState('invoice_ready');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -159,7 +165,7 @@ const InvoiceList = () => {
   const sendEmail = async (id) => {
     try {
       setSendingEmails(prev => new Set(prev).add(id));
-      const response = await apiGet(`/api/invoices/${id}/send`);
+      const response = await apiPost(`/api/invoices/${id}/send`);
       if (response.data.success) {
         setSuccess('Invoice sent successfully');
         fetchInvoices();
@@ -172,6 +178,41 @@ const InvoiceList = () => {
         const newSet = new Set(prev);
         newSet.delete(id);
         return newSet;
+      });
+    }
+  };
+
+  const openWhatsAppModal = (invoice) => {
+    setWhatsAppPhone(invoice.client?.phone || '');
+    setWhatsAppTemplate(invoice.invoiceType === 'google-cloud' ? 'google_workspace_payment_reminder' : 'invoice_ready');
+    setWhatsAppModal(invoice);
+    setError('');
+  };
+
+  const sendWhatsApp = async (e) => {
+    e.preventDefault();
+    const invoice = whatsAppModal;
+    if (!invoice) return;
+    try {
+      setSendingWhatsApp(prev => new Set(prev).add(invoice._id));
+      setError('');
+      const response = await apiPost(`/api/invoices/${invoice._id}/send-whatsapp`, {
+        phone: whatsAppPhone.trim(),
+        template: whatsAppTemplate
+      });
+      if (response.data.success) {
+        setSuccess('Invoice sent via WhatsApp successfully');
+        setWhatsAppModal(null);
+        fetchInvoices();
+      }
+    } catch (error) {
+      console.error('Error sending invoice via WhatsApp:', error);
+      setError(error.response?.data?.message || 'Failed to send invoice via WhatsApp');
+    } finally {
+      setSendingWhatsApp(prev => {
+        const next = new Set(prev);
+        next.delete(invoice._id);
+        return next;
       });
     }
   };
@@ -215,6 +256,7 @@ const InvoiceList = () => {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Helmet>
         <title>Invoices - Skyfalke Admin</title>
@@ -491,6 +533,19 @@ const InvoiceList = () => {
                               )}
                             </button>
                           )}
+
+                          <button
+                            onClick={() => openWhatsAppModal(invoice)}
+                            disabled={sendingWhatsApp.has(invoice._id)}
+                            className="text-[#25D366] hover:text-[#1fb355] dark:text-[#25D366] dark:hover:text-[#1fb355] disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Send via WhatsApp"
+                          >
+                            {sendingWhatsApp.has(invoice._id) ? (
+                              <FaSpinner className="animate-spin h-4 w-4" />
+                            ) : (
+                              <FaWhatsapp />
+                            )}
+                          </button>
                           
                           <Link href={`/system/dashboard/invoices/${invoice._id}/edit`}
                             className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
@@ -544,6 +599,79 @@ const InvoiceList = () => {
         )}
       </div>
     </div>
+
+    {/* WhatsApp send modal */}
+    {whatsAppModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setWhatsAppModal(null)}>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+          <div className="px-5 py-4 bg-[#25D366] text-white flex items-center justify-between rounded-t-xl">
+            <h3 className="font-semibold flex items-center gap-2">
+              <FaWhatsapp /> Send Invoice via WhatsApp
+            </h3>
+            <button onClick={() => setWhatsAppModal(null)} className="p-1 hover:bg-white/20 rounded">
+              <FaTimes />
+            </button>
+          </div>
+          <form onSubmit={sendWhatsApp} className="p-5 space-y-4">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg px-4 py-3 text-sm space-y-1">
+              <p className="font-medium text-gray-800 dark:text-gray-200">INV-{whatsAppModal.invoiceNumber}</p>
+              <p className="text-gray-500 dark:text-gray-400">{whatsAppModal.client?.name}</p>
+              <p className="text-gray-700 dark:text-gray-300 font-semibold">
+                {whatsAppModal.currency === 'KES' ? 'KSh' : '$'} {whatsAppModal.total?.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                WhatsApp phone number
+              </label>
+              <input
+                type="text"
+                value={whatsAppPhone}
+                onChange={e => setWhatsAppPhone(e.target.value)}
+                placeholder="0712 345 678 or +254712345678"
+                className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
+                required
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {whatsAppModal?.client?.phone && whatsAppPhone === whatsAppModal.client.phone
+                  ? 'Auto-filled from invoice — edit if needed.'
+                  : 'Enter the client\'s WhatsApp number.'}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Message template
+              </label>
+              <select
+                value={whatsAppTemplate}
+                onChange={e => setWhatsAppTemplate(e.target.value)}
+                className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] focus:outline-none dark:bg-gray-700 dark:text-white"
+              >
+                <option value="invoice_ready">Invoice Ready</option>
+                <option value="google_workspace_payment_reminder">Google Workspace Payment Reminder</option>
+              </select>
+            </div>
+            {error && (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <FaExclamationTriangle /> {error}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={sendingWhatsApp.has(whatsAppModal._id) || !whatsAppPhone.trim()}
+              className="w-full py-2.5 rounded-lg bg-[#25D366] text-white text-sm font-medium hover:bg-[#1fb355] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            >
+              {sendingWhatsApp.has(whatsAppModal._id) ? (
+                <><FaSpinner className="animate-spin" /> Sending...</>
+              ) : (
+                <><FaWhatsapp /> Send Invoice</>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 

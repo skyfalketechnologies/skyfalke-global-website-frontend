@@ -224,6 +224,7 @@ app.use('/api/case-studies', require('./routes/caseStudies'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/invoices', require('./routes/invoices'));
+app.use('/api/customers', require('./routes/customers'));
 app.use('/api/quotations', require('./routes/quotations'));
 app.use('/api/academy', require('./routes/academy'));
 app.use('/api/payments', require('./routes/payments'));

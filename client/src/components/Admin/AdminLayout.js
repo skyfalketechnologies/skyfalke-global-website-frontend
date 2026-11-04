@@ -56,6 +56,7 @@ import {
 } from 'react-icons/fa';
 import NotificationDropdown from './NotificationDropdown';
 import ServerStatusIndicator from './ServerStatusIndicator';
+import WhatsAppToast from './WhatsAppToast';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -460,6 +461,7 @@ const AdminLayout = ({ children }) => {
           </div>
         </main>
       </div>
+      <WhatsAppToast />
     </div>
     </>
   );

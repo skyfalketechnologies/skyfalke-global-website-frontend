@@ -1,5 +1,6 @@
 import './globals.css';
 import localFont from 'next/font/local';
+import Script from 'next/script';
 import Providers from './providers';
 import { getGlobalSchemaJsonLd } from '@/utils/schemaMarkup';
 import { SITE_META_DESCRIPTION } from '@/utils/metadata';
@@ -113,6 +114,11 @@ export default function RootLayout({ children }) {
         <Providers>
           {children}
         </Providers>
+        <Script
+          src="https://skyfalke-2.skyfalkeconnect.io/widget.js"
+          data-tenant="cmt76gwh6000014ogefouznu0"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

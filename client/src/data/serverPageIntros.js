@@ -31,13 +31,11 @@ export const COURSES_PAGE_INTRO = {
 };
 
 export const RESOURCES_PAGE_INTRO = {
-  eyebrow: 'Resource library',
-  title: 'Free Resources & Tools',
+  eyebrow: 'Insights & resources',
+  title: 'Research that moves decisions forward',
   paragraphs: [
-    'Download expert-created resources to accelerate marketing, operations, and technology initiatives. Materials include campaign briefs, analytics starters, SEO checklists, web and content strategy templates, and workshop agendas used on Skyfalke client engagements.',
-    'Resources are free for personal and internal business use unless otherwise noted. We update the library as we publish new frameworks on the blog and complete relevant projects — check back regularly or follow our newsletter for announcements.',
-    'Filter by category or type to find guides, templates, tools, and video walkthroughs. Popular topics include digital marketing, cloud computing, business strategy, e-commerce, and data analytics for growth teams.',
-    'Need help applying a template to your context? Schedule a consultation and we can walk through fit, customization, and implementation sequencing with your team.',
+    'We publish original research and partner reports on the questions our clients face — where AI creates measurable value, how digital channels are shifting, and what technology adoption looks like across the markets we serve.',
+    'Every report is grounded in data and written for decision-makers. Download what is relevant to your agenda, or talk to us about what the findings mean for your organization.',
   ],
 };
 

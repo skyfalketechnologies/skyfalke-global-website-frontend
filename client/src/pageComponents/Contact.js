@@ -6,6 +6,7 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import {
   FaEnvelope,
   FaPhone,
+  FaWhatsapp,
   FaMapMarkerAlt,
   FaClock,
   FaBuilding,
@@ -109,6 +110,14 @@ const Contact = () => {
       details: '+254 (0) 717 797 238',
       href: 'tel:+254717797238',
       description: 'Mon–Fri, 8:00 AM – 6:00 PM EAT'
+    },
+    {
+      icon: FaWhatsapp,
+      title: 'WhatsApp',
+      details: '+254 (0) 717 797 238',
+      href: 'https://wa.me/254717797238',
+      external: true,
+      description: 'Chat with us directly'
     },
     {
       icon: FaMapMarkerAlt,

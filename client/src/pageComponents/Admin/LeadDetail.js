@@ -36,6 +36,7 @@ import {
   FaFlag
 } from 'react-icons/fa';
 import { apiGet, apiPost, apiPatch, apiDelete } from '../../utils/api';
+import LeadWhatsAppChat from '../../components/Admin/LeadWhatsAppChat';
 
 const LeadDetail = () => {
   const params = useParams();
@@ -428,6 +429,15 @@ const LeadDetail = () => {
               )}
             </div>
           </div>
+
+          {/* WhatsApp Conversation */}
+          {lead.phone && (
+            <LeadWhatsAppChat
+              leadId={id}
+              phone={lead.phone}
+              onMessageSent={fetchLead}
+            />
+          )}
 
           {/* Activities Timeline */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">

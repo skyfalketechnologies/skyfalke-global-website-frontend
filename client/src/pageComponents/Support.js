@@ -3,17 +3,18 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { 
-  FaQuestionCircle, 
-  FaEnvelope, 
-  FaPhone, 
+import {
+  FaQuestionCircle,
+  FaEnvelope,
+  FaPhone,
   FaComments,
   FaSearch,
   FaChevronDown,
   FaChevronUp,
   FaClock,
   FaHeadset,
-  FaVideo
+  FaVideo,
+  FaWhatsapp
 } from 'react-icons/fa';
 
 const Support = () => {
@@ -53,6 +54,15 @@ const Support = () => {
       action: 'Schedule Call',
       available: 'By appointment',
       color: 'bg-orange-500'
+    },
+    {
+      title: 'WhatsApp',
+      description: 'Message us on WhatsApp',
+      icon: FaWhatsapp,
+      action: 'Chat on WhatsApp',
+      available: 'Mon-Fri 9AM-6PM EAT',
+      color: 'bg-green-600',
+      href: 'https://wa.me/254717797238?text=Hi%20Skyfalke%2C%20I%20need%20support%20with...'
     }
   ];
 
@@ -199,9 +209,20 @@ const Support = () => {
                     <FaClock />
                     <span>{option.available}</span>
                   </div>
-                  <button className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors duration-300">
-                    {option.action}
-                  </button>
+                  {option.href ? (
+                    <a
+                      href={option.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors duration-300 text-center"
+                    >
+                      {option.action}
+                    </a>
+                  ) : (
+                    <button className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors duration-300">
+                      {option.action}
+                    </button>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -297,6 +318,15 @@ const Support = () => {
               >
                 <FaPhone className="mr-2" />
                 Call Now
+              </a>
+              <a
+                href="https://wa.me/254717797238?text=Hi%20Skyfalke%2C%20I%20need%20support%20with..."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center px-8 py-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-400 transition-all duration-300"
+              >
+                <FaWhatsapp className="mr-2" />
+                WhatsApp Us
               </a>
             </div>
           </div>

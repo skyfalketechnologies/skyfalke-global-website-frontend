@@ -34,6 +34,8 @@ const InvoiceMaker = () => {
   const [invoiceId, setInvoiceId] = useState(id || null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [customers, setCustomers] = useState([]);
+  const [services, setServices] = useState([]);
 
   const {
     register,
@@ -58,6 +60,7 @@ const InvoiceMaker = () => {
         company: '',
         taxId: ''
       },
+      invoiceType: 'standard',
       issueDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       currency: 'USD',
@@ -89,6 +92,64 @@ const InvoiceMaker = () => {
     }
   }, [id, isEditing]);
 
+  // Load saved customers and services for quick selection
+  useEffect(() => {
+    const fetchSaved = async () => {
+      try {
+        const [customersRes, servicesRes] = await Promise.all([
+          apiGet('/api/customers'),
+          apiGet('/api/customers/services')
+        ]);
+        setCustomers(customersRes.data.data || []);
+        setServices(servicesRes.data.data || []);
+      } catch (err) {
+        console.error('Error fetching saved customers/services:', err);
+      }
+    };
+    fetchSaved();
+  }, []);
+
+  const selectCustomer = (customerId) => {
+    const customer = customers.find(c => c._id === customerId);
+    if (!customer) return;
+    setValue('client', {
+      name: customer.name || '',
+      email: customer.email || '',
+      phone: customer.phone || '',
+      company: customer.company || '',
+      taxId: customer.taxId || '',
+      address: {
+        street: customer.address?.street || '',
+        city: customer.address?.city || '',
+        state: customer.address?.state || '',
+        zipCode: customer.address?.zipCode || '',
+        country: customer.address?.country || 'Kenya'
+      }
+    });
+  };
+
+  const addServiceItem = (serviceId) => {
+    const service = services.find(s => s._id === serviceId);
+    if (!service) return;
+    const item = {
+      description: service.description,
+      quantity: 1,
+      unitPrice: service.unitPrice,
+      total: service.unitPrice
+    };
+    // Fill the first empty row instead of appending a new one
+    const items = watch('items');
+    const emptyIndex = items.findIndex(i => !i.description && !i.unitPrice);
+    if (emptyIndex >= 0) {
+      setValue(`items.${emptyIndex}.description`, item.description);
+      setValue(`items.${emptyIndex}.quantity`, 1);
+      setValue(`items.${emptyIndex}.unitPrice`, item.unitPrice);
+      setValue(`items.${emptyIndex}.total`, item.total);
+    } else {
+      append(item);
+    }
+  };
+
   const fetchInvoice = async () => {
     try {
       setLoading(true);
@@ -97,6 +158,7 @@ const InvoiceMaker = () => {
       
       // Populate form with existing invoice data
       setValue('client', invoice.client);
+      setValue('invoiceType', invoice.invoiceType || 'standard');
       setValue('issueDate', new Date(invoice.issueDate).toISOString().split('T')[0]);
       setValue('dueDate', new Date(invoice.dueDate).toISOString().split('T')[0]);
       setValue('currency', invoice.currency);
@@ -368,7 +430,33 @@ const InvoiceMaker = () => {
                 <FaUser className="text-primary-500" />
                 Client Information
               </h2>
-              
+
+              {customers.length > 0 && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Select Saved Customer
+                  </label>
+                  <select
+                    defaultValue=""
+                    onChange={(e) => {
+                      selectCustomer(e.target.value);
+                      e.target.value = '';
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="">— Choose a saved customer to autofill —</option>
+                    {customers.map((customer) => (
+                      <option key={customer._id} value={customer._id}>
+                        {customer.name}{customer.company ? ` (${customer.company})` : ''} — {customer.email}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Customers are saved automatically each time an invoice is created.
+                  </p>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -520,6 +608,23 @@ const InvoiceMaker = () => {
                 </div>
               </div>
 
+              {/* Invoice Type / Branding */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Invoice Type / Branding *
+                </label>
+                <select
+                  {...register('invoiceType', { required: 'Invoice type is required' })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="standard">Standard (Skyfalke branding)</option>
+                  <option value="google-cloud">Google Cloud (Google branding)</option>
+                </select>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Controls the logo and colors used on the PDF, preview and email.
+                </p>
+              </div>
+
               {/* Currency */}
               <div className="mt-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -550,14 +655,33 @@ const InvoiceMaker = () => {
                   <FaDollarSign className="text-primary-500" />
                   Invoice Items
                 </h2>
-                <button
-                  type="button"
-                  onClick={addItem}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-                >
-                  <FaPlus />
-                  Add Item
-                </button>
+                <div className="flex items-center gap-3">
+                  {services.length > 0 && (
+                    <select
+                      defaultValue=""
+                      onChange={(e) => {
+                        addServiceItem(e.target.value);
+                        e.target.value = '';
+                      }}
+                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="">+ Add saved service…</option>
+                      {services.map((service) => (
+                        <option key={service._id} value={service._id}>
+                          {service.description} ({service.currency === 'KES' ? 'KSh ' : '$'}{service.unitPrice})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <button
+                    type="button"
+                    onClick={addItem}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                  >
+                    <FaPlus />
+                    Add Item
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-4">

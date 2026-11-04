@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const { adminAuth } = require('../middleware/auth');
 const WhatsAppMessage = require('../models/WhatsAppMessage');
 const Contact = require('../models/Contact');
+const Lead = require('../models/Lead');
+const ImageKitService = require('../services/imageKitService');
 const {
   verifyWebhookToken,
   verifyWebhookSignature,
@@ -15,6 +18,18 @@ const {
   formatPhoneNumber
 } = require('../services/whatsappService');
 const { sendNotificationToAllAdmins } = require('../socket');
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 16 * 1024 * 1024 } // WhatsApp's own media cap
+});
+
+const mediaTypeFromMime = (mimetype = '') => {
+  if (mimetype.startsWith('image/')) return 'image';
+  if (mimetype.startsWith('video/')) return 'video';
+  if (mimetype.startsWith('audio/')) return 'audio';
+  return 'document';
+};
 
 // Webhook verification (GET) - Required by WhatsApp
 router.get('/webhook', (req, res) => {
@@ -32,19 +47,21 @@ router.get('/webhook', (req, res) => {
 });
 
 // Webhook endpoint (POST) - Receives messages and status updates
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+router.post('/webhook', async (req, res) => {
   try {
     // Verify signature if webhook secret is configured
+    // req.body may be a raw Buffer (if express.raw ran) or a parsed object (if express.json ran first)
     const signature = req.headers['x-hub-signature-256'];
     if (signature && process.env.WHATSAPP_WEBHOOK_SECRET) {
-      const isValid = verifyWebhookSignature(req.body, signature.replace('sha256=', ''));
+      const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body));
+      const isValid = verifyWebhookSignature(rawBody, signature.replace('sha256=', ''));
       if (!isValid) {
         console.error('Invalid webhook signature');
         return res.status(403).send('Invalid signature');
       }
     }
 
-    const webhookData = JSON.parse(req.body.toString());
+    const webhookData = Buffer.isBuffer(req.body) ? JSON.parse(req.body.toString()) : req.body;
 
     // Handle different webhook types
     const entry = webhookData.entry?.[0];
@@ -69,7 +86,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
               from: result.message.from,
               contactId: result.contact?._id
             },
-            actionUrl: `/system/dashboard/whatsapp/messages/${result.message._id}`
+            actionUrl: `/system/dashboard/whatsapp?phone=${encodeURIComponent(result.message.from)}`
           });
         } catch (notificationError) {
           console.error('Error sending notification:', notificationError);
@@ -296,6 +313,31 @@ router.post('/admin/send/template', adminAuth, async (req, res) => {
   }
 });
 
+// Upload a file to send as WhatsApp media (returns a public URL)
+router.post('/admin/upload-media', adminAuth, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file provided' });
+    }
+
+    const uploadResult = await ImageKitService.uploadImage(req.file, 'whatsapp-media');
+
+    res.json({
+      success: true,
+      url: uploadResult.url,
+      mediaType: mediaTypeFromMime(req.file.mimetype),
+      name: uploadResult.name,
+      size: uploadResult.size
+    });
+  } catch (error) {
+    console.error('WhatsApp media upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to upload media'
+    });
+  }
+});
+
 // Send media message
 router.post('/admin/send/media', adminAuth, async (req, res) => {
   try {
@@ -365,6 +407,30 @@ router.patch('/admin/messages/:id/read', adminAuth, async (req, res) => {
   }
 });
 
+// Fetch approved templates from Meta API
+router.get('/admin/templates', adminAuth, async (req, res) => {
+  try {
+    const wabaId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
+    const token = process.env.WHATSAPP_ACCESS_TOKEN;
+    if (!wabaId || !token) {
+      return res.status(500).json({ success: false, message: 'WhatsApp credentials not configured' });
+    }
+    const url = `https://graph.facebook.com/v18.0/${wabaId}/message_templates?fields=name,language,status,components&limit=100`;
+    const response = await require('axios').get(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const raw = response.data.data || [];
+    console.log('Meta templates raw:', JSON.stringify(raw.map(t => ({ name: t.name, status: t.status, language: t.language }))));
+    const templates = raw
+      .filter(t => !['REJECTED', 'DELETED', 'PAUSED', 'DISABLED'].includes(t.status))
+      .map(t => ({ name: t.name, language: t.language, components: t.components }));
+    res.json({ success: true, templates });
+  } catch (error) {
+    console.error('Fetch templates error:', error.response?.data || error.message);
+    res.status(500).json({ success: false, message: 'Failed to fetch templates from Meta' });
+  }
+});
+
 // Get message statistics
 router.get('/admin/stats', adminAuth, async (req, res) => {
   try {
@@ -431,6 +497,101 @@ router.post('/admin/messages/:id/notes', adminAuth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to add note'
+    });
+  }
+});
+
+// Mark all inbound messages in a conversation as read
+router.patch('/admin/conversation/:phone/read', adminAuth, async (req, res) => {
+  try {
+    const result = await WhatsAppMessage.markConversationRead(req.params.phone);
+    res.json({
+      success: true,
+      updated: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Mark conversation read error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to mark conversation as read'
+    });
+  }
+});
+
+// Get WhatsApp conversation for a lead
+router.get('/admin/leads/:leadId/conversation', adminAuth, async (req, res) => {
+  try {
+    const lead = await Lead.findById(req.params.leadId).select('firstName lastName phone');
+    if (!lead) {
+      return res.status(404).json({ success: false, message: 'Lead not found' });
+    }
+    if (!lead.phone) {
+      return res.json({ success: true, messages: [], phone: null });
+    }
+
+    const formattedPhone = formatPhoneNumber(lead.phone);
+    const messages = await WhatsAppMessage.getConversation(formattedPhone, parseInt(req.query.limit) || 100);
+    messages.reverse();
+
+    res.json({
+      success: true,
+      messages,
+      phone: formattedPhone
+    });
+  } catch (error) {
+    console.error('Get lead conversation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch lead conversation'
+    });
+  }
+});
+
+// Send WhatsApp message to a lead (and log it as a lead activity)
+router.post('/admin/leads/:leadId/send', adminAuth, async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message || !message.trim()) {
+      return res.status(400).json({ success: false, message: 'Message is required' });
+    }
+
+    const lead = await Lead.findById(req.params.leadId);
+    if (!lead) {
+      return res.status(404).json({ success: false, message: 'Lead not found' });
+    }
+    if (!lead.phone) {
+      return res.status(400).json({ success: false, message: 'Lead does not have a phone number' });
+    }
+
+    const result = await sendTextMessage(lead.phone, message.trim(), {
+      leadId: lead._id,
+      sentBy: req.user._id
+    });
+
+    // Log activity and bump lead to contacted if still new
+    try {
+      if (lead.status === 'new') lead.status = 'contacted';
+      await lead.addActivity({
+        type: 'whatsapp',
+        title: 'WhatsApp message sent',
+        description: message.trim().substring(0, 500),
+        createdBy: req.user._id,
+        metadata: { messageId: result.whatsAppMessage?._id, direction: 'outbound' }
+      });
+    } catch (activityError) {
+      console.error('Error logging WhatsApp activity on lead:', activityError);
+    }
+
+    res.json({
+      success: true,
+      message: 'Message sent successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Send to lead error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.response?.data?.error?.message || error.message || 'Failed to send message'
     });
   }
 });

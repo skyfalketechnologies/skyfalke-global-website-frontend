@@ -102,6 +102,13 @@ const whatsAppMessageSchema = new mongoose.Schema({
     ref: 'Contact',
     index: true
   },
+
+  // Association with Lead model (CRM)
+  leadId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Lead',
+    index: true
+  },
   
   // Association with User (for outbound messages sent by admin)
   sentBy: {
@@ -179,13 +186,29 @@ whatsAppMessageSchema.methods.updateStatus = function(status, errorCode = null, 
   return this.save();
 };
 
-// Static method to get conversation with a contact
+// Static method to get conversation with a contact.
+// Inbound messages store the counterpart in `from` (digits only, e.g. 254712345678)
+// while outbound store it in `to` (E.164, e.g. +254712345678), so match both fields
+// and both formats.
 whatsAppMessageSchema.statics.getConversation = async function(phoneNumber, limit = 50) {
-  return this.find({ from: phoneNumber })
+  const digits = String(phoneNumber).replace(/\D/g, '');
+  const variants = [digits, `+${digits}`];
+  return this.find({ $or: [{ from: { $in: variants } }, { to: { $in: variants } }] })
     .sort({ timestamp: -1 })
     .limit(limit)
     .populate('contactId', 'name email company')
+    .populate('leadId', 'firstName lastName email company status')
     .populate('sentBy', 'name email');
+};
+
+// Static method to mark all inbound messages in a conversation as read
+whatsAppMessageSchema.statics.markConversationRead = async function(phoneNumber) {
+  const digits = String(phoneNumber).replace(/\D/g, '');
+  const variants = [digits, `+${digits}`];
+  return this.updateMany(
+    { direction: 'inbound', from: { $in: variants }, isRead: false },
+    { $set: { isRead: true, readAt: new Date() } }
+  );
 };
 
 // Static method to get unread messages count
@@ -196,12 +219,23 @@ whatsAppMessageSchema.statics.getUnreadCount = async function() {
   });
 };
 
-// Static method to get recent conversations
+// Static method to get recent conversations, grouped by the customer's phone
+// number regardless of message direction. The counterpart is `from` for inbound
+// messages and `to` for outbound; formats are normalized to digits only.
 whatsAppMessageSchema.statics.getRecentConversations = async function(limit = 20) {
   return this.aggregate([
     {
-      $match: {
-        direction: 'inbound'
+      $addFields: {
+        counterpart: {
+          $cond: [{ $eq: ['$direction', 'inbound'] }, '$from', '$to']
+        }
+      }
+    },
+    {
+      $addFields: {
+        counterpartKey: {
+          $replaceAll: { input: '$counterpart', find: '+', replacement: '' }
+        }
       }
     },
     {
@@ -209,12 +243,19 @@ whatsAppMessageSchema.statics.getRecentConversations = async function(limit = 20
     },
     {
       $group: {
-        _id: '$from',
+        _id: '$counterpartKey',
         lastMessage: { $first: '$$ROOT' },
         messageCount: { $sum: 1 },
+        contactName: { $max: '$contactName' },
+        contactId: { $max: '$contactId' },
+        leadId: { $max: '$leadId' },
         unreadCount: {
           $sum: {
-            $cond: [{ $eq: ['$isRead', false] }, 1, 0]
+            $cond: [
+              { $and: [{ $eq: ['$direction', 'inbound'] }, { $eq: ['$isRead', false] }] },
+              1,
+              0
+            ]
           }
         }
       }
@@ -228,7 +269,7 @@ whatsAppMessageSchema.statics.getRecentConversations = async function(limit = 20
     {
       $lookup: {
         from: 'contacts',
-        localField: 'lastMessage.contactId',
+        localField: 'contactId',
         foreignField: '_id',
         as: 'contact'
       }
@@ -236,6 +277,23 @@ whatsAppMessageSchema.statics.getRecentConversations = async function(limit = 20
     {
       $unwind: {
         path: '$contact',
+        preserveNullAndEmptyArrays: true
+      }
+    },
+    {
+      $lookup: {
+        from: 'leads',
+        localField: 'leadId',
+        foreignField: '_id',
+        as: 'lead',
+        pipeline: [
+          { $project: { firstName: 1, lastName: 1, company: 1, status: 1, leadRating: 1 } }
+        ]
+      }
+    },
+    {
+      $unwind: {
+        path: '$lead',
         preserveNullAndEmptyArrays: true
       }
     }

@@ -92,7 +92,7 @@ const contactSchema = new mongoose.Schema({
   }],
   source: {
     type: String,
-    enum: ['website', 'admin', 'api', 'email'],
+    enum: ['website', 'admin', 'api', 'email', 'whatsapp'],
     default: 'website'
   },
   ipAddress: {

@@ -502,11 +502,14 @@ router.post('/:id/send', adminAuth, dbCheck, async (req, res) => {
     const quotation = await Quotation.findById(req.params.id).populate('createdBy', 'name email');
     if (!quotation) return res.status(404).json({ message: 'Quotation not found' });
 
+    // Finance emails are sent from the billing account (falls back to the main account)
+    const billingUser = process.env.BILLING_EMAIL_USER || process.env.EMAIL_USER;
+    const billingPass = process.env.BILLING_EMAIL_PASS || process.env.EMAIL_PASS;
     const transporter = nodemailer.createTransport({
       host:   process.env.EMAIL_HOST,
       port:   process.env.EMAIL_PORT,
       secure: process.env.EMAIL_PORT == 465,
-      auth:   { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+      auth:   { user: billingUser, pass: billingPass }
     });
 
     const pdfDoc = new PDFDocument({ size: 'A4', margin: 48 });
@@ -520,7 +523,7 @@ router.post('/:id/send', adminAuth, dbCheck, async (req, res) => {
         : v.toFixed(2);
 
       const mailOptions = {
-        from:    `"Skyfalke Limited" <${process.env.EMAIL_USER}>`,
+        from:    `"Skyfalke Limited" <${billingUser}>`,
         to:      quotation.client.email,
         subject: `Quotation QT-${quotation.quotationNumber} from Skyfalke Limited`,
         html: `

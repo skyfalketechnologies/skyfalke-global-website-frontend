@@ -2,6 +2,7 @@ const axios = require('axios');
 const crypto = require('crypto');
 const WhatsAppMessage = require('../models/WhatsAppMessage');
 const Contact = require('../models/Contact');
+const Lead = require('../models/Lead');
 
 // WhatsApp Business API configuration
 const WHATSAPP_API_URL = process.env.WHATSAPP_API_URL || 'https://graph.facebook.com/v18.0';
@@ -59,6 +60,18 @@ const formatPhoneNumber = (phone) => {
 };
 
 /**
+ * Find a Lead by phone number, tolerant of formatting differences
+ * (leads may store 0712..., +254712..., or 254712...)
+ */
+const findLeadByPhone = async (phone) => {
+  const digits = String(phone).replace(/\D/g, '');
+  if (digits.length < 9) return null;
+  // Match on the last 9 digits (the subscriber number, ignoring country code / leading 0)
+  const suffix = digits.slice(-9);
+  return Lead.findOne({ phone: { $regex: `${suffix}\\D*$` } });
+};
+
+/**
  * Send text message via WhatsApp
  */
 const sendTextMessage = async (to, message, options = {}) => {
@@ -99,6 +112,7 @@ const sendTextMessage = async (to, message, options = {}) => {
       status: 'sent',
       timestamp: new Date(),
       contactId: options.contactId,
+      leadId: options.leadId,
       sentBy: options.sentBy,
       metadata: {
         wabaId: WHATSAPP_BUSINESS_ACCOUNT_ID,
@@ -116,7 +130,7 @@ const sendTextMessage = async (to, message, options = {}) => {
 
   } catch (error) {
     console.error('Error sending WhatsApp message:', error.response?.data || error.message);
-    
+
     // Save failed message to database
     try {
       const whatsAppMessage = new WhatsAppMessage({
@@ -131,6 +145,7 @@ const sendTextMessage = async (to, message, options = {}) => {
         errorMessage: error.response?.data?.error?.message || error.message,
         timestamp: new Date(),
         contactId: options.contactId,
+        leadId: options.leadId,
         sentBy: options.sentBy
       });
       await whatsAppMessage.save();
@@ -155,13 +170,21 @@ const sendTemplateMessage = async (to, templateName, templateParams = [], option
     const url = `${WHATSAPP_API_URL}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
 
     const components = [];
+    if (options.headerComponent) {
+      components.push(options.headerComponent);
+    }
+    // templateParams may be plain strings or {name, value} objects (for named-variable templates)
     if (templateParams.length > 0) {
       components.push({
         type: 'body',
-        parameters: templateParams.map(param => ({
-          type: 'text',
-          text: param
-        }))
+        parameters: templateParams.map(param => {
+          if (param && typeof param === 'object' && param.value !== undefined) {
+            const p = { type: 'text', text: param.value };
+            if (param.name && isNaN(param.name)) p.parameter_name = param.name;
+            return p;
+          }
+          return { type: 'text', text: param };
+        })
       });
     }
 
@@ -173,7 +196,7 @@ const sendTemplateMessage = async (to, templateName, templateParams = [], option
       template: {
         name: templateName,
         language: {
-          code: options.language || 'en'
+          code: options.language || 'en_US'
         },
         components: components.length > 0 ? components : undefined
       }
@@ -193,11 +216,12 @@ const sendTemplateMessage = async (to, templateName, templateParams = [], option
       to: phoneNumber,
       type: 'template',
       templateName: templateName,
-      templateParams: templateParams,
+      templateParams: templateParams.map(p => (p && typeof p === 'object' ? p.value : p)),
       direction: 'outbound',
       status: 'sent',
       timestamp: new Date(),
       contactId: options.contactId,
+      leadId: options.leadId,
       sentBy: options.sentBy,
       metadata: {
         wabaId: WHATSAPP_BUSINESS_ACCOUNT_ID,
@@ -266,6 +290,7 @@ const sendMediaMessage = async (to, mediaType, mediaUrl, caption = '', options =
       status: 'sent',
       timestamp: new Date(),
       contactId: options.contactId,
+      leadId: options.leadId,
       sentBy: options.sentBy,
       metadata: {
         wabaId: WHATSAPP_BUSINESS_ACCOUNT_ID,
@@ -317,13 +342,21 @@ const processIncomingMessage = async (webhookData) => {
       contactRecord = new Contact({
         name: contact.profile?.name || 'WhatsApp User',
         phone: phoneNumber,
-        email: `${phoneNumber.replace(/\D/g, '')}@whatsapp.local`,
+        email: `${phoneNumber.replace(/\D/g, '')}@whatsapp.com`,
         subject: 'WhatsApp Contact',
         message: 'Contact via WhatsApp',
         source: 'whatsapp',
         status: 'new'
       });
       await contactRecord.save();
+    }
+
+    // Try to match the sender to a CRM Lead so the conversation shows up on the lead
+    let leadRecord = null;
+    try {
+      leadRecord = await findLeadByPhone(phoneNumber);
+    } catch (leadError) {
+      console.error('Error matching WhatsApp message to lead:', leadError);
     }
 
     // Extract message content based on type
@@ -369,6 +402,7 @@ const processIncomingMessage = async (webhookData) => {
       status: 'delivered',
       timestamp: new Date(parseInt(message.timestamp) * 1000),
       contactId: contactRecord?._id,
+      leadId: leadRecord?._id,
       metadata: {
         wabaId: WHATSAPP_BUSINESS_ACCOUNT_ID,
         rawMessage: message
@@ -377,10 +411,25 @@ const processIncomingMessage = async (webhookData) => {
 
     await whatsAppMessage.save();
 
+    // Log the inbound message as an activity on the matched lead
+    if (leadRecord) {
+      try {
+        await leadRecord.addActivity({
+          type: 'whatsapp',
+          title: 'WhatsApp message received',
+          description: body ? body.substring(0, 500) : `Received ${message.type} message`,
+          metadata: { messageId: whatsAppMessage._id, direction: 'inbound' }
+        });
+      } catch (activityError) {
+        console.error('Error logging WhatsApp activity on lead:', activityError);
+      }
+    }
+
     return {
       processed: true,
       message: whatsAppMessage,
-      contact: contactRecord
+      contact: contactRecord,
+      lead: leadRecord
     };
 
   } catch (error) {
@@ -477,6 +526,7 @@ module.exports = {
   processIncomingMessage,
   processStatusUpdate,
   markMessageAsRead,
-  formatPhoneNumber
+  formatPhoneNumber,
+  findLeadByPhone
 };
 

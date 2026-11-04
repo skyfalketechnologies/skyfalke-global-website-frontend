@@ -265,7 +265,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
                 </time>
               )}
               {blog?.readingTime && (
-                <span className="text-sm text-white/50">· {blog.readingTime}</span>
+                <span className="hidden text-sm text-white/50 sm:inline">· {blog.readingTime}</span>
               )}
             </div>
             <h1 className="text-3xl font-nexa-heavy leading-[1.14] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.3rem]">
@@ -286,7 +286,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
             {hasContent && <TableOfContents content={contentWithIds} />}
 
             {/* Main Content */}
-            <div className="flex-1 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+            <div className="flex-1 overflow-hidden rounded-2xl border border-slate-200/80 bg-white">
               {/* Breadcrumbs */}
               <div className="border-b border-slate-100 px-6 py-6 sm:px-8 lg:px-10">
                 <Breadcrumbs items={[{ name: blog?.title || 'Blog Post', href: `/blog/${blog?.slug || ''}` }]} />
@@ -402,7 +402,7 @@ const BlogPost = ({ slug: propSlug, initialServerData }) => {
           </div>
 
           {/* Newsletter Section */}
-          <div className="mt-12 mb-8 rounded-2xl border border-slate-200/80 bg-white p-8 text-center shadow-sm md:p-12">
+          <div className="mt-12 mb-8 rounded-2xl border border-slate-200/80 bg-white p-8 text-center md:p-12">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary-600">Newsletter</p>
             <h3 className="mt-3 text-3xl font-nexa-heavy tracking-tight text-[#0B1220]">Stay Updated</h3>
             <p className="mx-auto mt-4 mb-8 max-w-2xl text-lg text-slate-600">

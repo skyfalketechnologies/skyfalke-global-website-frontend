@@ -29,6 +29,11 @@ const invoiceSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  invoiceType: {
+    type: String,
+    enum: ['standard', 'google-cloud'],
+    default: 'standard'
+  },
   status: {
     type: String,
     enum: ['draft', 'sent', 'paid', 'overdue', 'cancelled'],
