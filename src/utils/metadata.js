@@ -21,7 +21,7 @@ const SEO_TITLE_MAX = 60;
 const BRAND = 'Skyfalke';
 
 export const SITE_META_DESCRIPTION =
-  'Skyfalke partners with businesses across Africa to drive digital growth through technology, cloud solutions, branding, automation, and sustainable innovation.';
+  'Skyfalke helps businesses, NGOs and enterprises across Africa grow through digital marketing, cloud solutions, AI, data analytics and business automation.';
 
 /** Public URL path for a case study detail page. */
 export function getCaseStudyPublicPath(slug) {
@@ -191,8 +191,8 @@ export function generateMetadata({
     safeImage && safeImage.startsWith('http')
       ? safeImage
       : `${BASE_URL}${safeImage}`;
-  const defaultSegmentTitle = 'Digital Growth Partner in Africa';
-  const defaultAbsoluteTitle = 'Digital Growth Partner in Africa | Skyfalke';
+  const defaultSegmentTitle = 'Digital Transformation & Marketing in Africa';
+  const defaultAbsoluteTitle = 'Digital Transformation & Marketing in Africa | Skyfalke';
   const finalTitle = titleAbsolute
     ? clampAbsoluteSeoTitle(title || defaultAbsoluteTitle)
     : fitTemplateTitle(title) ||
@@ -397,7 +397,7 @@ export function generateJobMetadata(job) {
  */
 export const pageMetadata = {
   home: generateMetadata({
-    title: 'Digital Growth Partner in Africa | Skyfalke',
+    title: 'Digital Transformation & Marketing in Africa | Skyfalke',
     titleAbsolute: true,
     description: SITE_META_DESCRIPTION,
     keywords:
@@ -406,9 +406,9 @@ export const pageMetadata = {
     canonical: `${BASE_URL}/`,
     image:
       'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
-    ogTitle: 'Digital Growth Partner in Africa | Skyfalke',
+    ogTitle: 'Digital Transformation & Marketing in Africa | Skyfalke',
     ogDescription: SITE_META_DESCRIPTION,
-    twitterTitle: 'Digital Growth Partner in Africa | Skyfalke',
+    twitterTitle: 'Digital Transformation & Marketing in Africa | Skyfalke',
     twitterDescription: SITE_META_DESCRIPTION,
   }),
 

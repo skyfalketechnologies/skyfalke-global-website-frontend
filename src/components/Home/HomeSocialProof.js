@@ -68,6 +68,12 @@ const customers = [
     logo: 'https://ik.imagekit.io/g3nahgeeu/icons/shell-seeklogo.png',
     alt: 'Shell company logo',
   },
+  {
+    id: 8,
+    name: 'Nyali Golf & Country Club',
+    logo: '/images/customers/nyali-golf.png',
+    alt: 'Nyali Golf & Country Club logo',
+  },
 ];
 
 export default function HomeSocialProof() {

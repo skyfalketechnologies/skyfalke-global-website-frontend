@@ -150,6 +150,12 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSection, setMobileSection] = useState(null);
 
+  // The homepage hero photo runs behind the header, so the bar uses light text there
+  // and stays see-through until the user scrolls or opens a menu.
+  const isHome = pathname === '/';
+  const onDark = isScrolled || isHome;
+  const isTransparent = isHome && !isScrolled && !activeDesktop && !mobileOpen;
+
   const clearLeaveTimer = useCallback(() => {
     if (leaveTimerRef.current) {
       clearTimeout(leaveTimerRef.current);
@@ -315,9 +321,9 @@ const Header = () => {
 
   const dropdownTriggerClass = (key) =>
     `group inline-flex items-center gap-1 rounded-md px-2.5 py-2 text-[13px] font-medium tracking-tight ${TRANSITION} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-      isScrolled ? 'focus-visible:outline-white' : 'focus-visible:outline-primary-600'
+      onDark ? 'focus-visible:outline-white' : 'focus-visible:outline-primary-600'
     } ${
-      isScrolled
+      onDark
         ? activeDesktop === key
           ? 'text-white'
           : 'text-white hover:text-white'
@@ -327,7 +333,7 @@ const Header = () => {
     }`;
 
   const chevronNavClass = (open) =>
-    `h-4 w-4 shrink-0 ${TRANSITION} ${isScrolled ? 'text-white' : 'text-slate-500'} ${open ? 'rotate-180' : ''}`;
+    `h-4 w-4 shrink-0 ${TRANSITION} ${onDark ? 'text-white' : 'text-slate-500'} ${open ? 'rotate-180' : ''}`;
 
   const toggleMobileSection = (id) => {
     setMobileSection((prev) => (prev === id ? null : id));
@@ -338,9 +344,11 @@ const Header = () => {
       <header
         ref={headerRef}
         className={`fixed left-0 right-0 top-0 z-50 border-b ${TRANSITION} ${
-          isScrolled
-            ? 'border-white/10 bg-[#303661] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25)] backdrop-blur-md'
-            : 'border-transparent bg-[#F8FAFC] shadow-none'
+          isTransparent
+            ? 'border-white/15 bg-transparent shadow-none'
+            : onDark
+              ? 'border-white/10 bg-[#303661] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25)] backdrop-blur-md'
+              : 'border-transparent bg-[#F8FAFC] shadow-none'
         }`}
       >
         <nav
@@ -356,7 +364,7 @@ const Header = () => {
               <img
                 src="/images/logos/logo.svg"
                 alt="Skyfalke"
-                className={`h-8 w-auto md:h-9 ${isScrolled ? 'brightness-0 invert' : ''} ${TRANSITION}`}
+                className={`h-8 w-auto md:h-9 ${onDark ? 'brightness-0 invert' : ''} ${TRANSITION}`}
                 width={140}
                 height={36}
                 loading="eager"
@@ -364,7 +372,7 @@ const Header = () => {
             </Link>
 
             <span
-              className={`hidden h-7 w-px shrink-0 lg:block ${isScrolled ? 'bg-white/15' : 'bg-slate-200/90'}`}
+              className={`hidden h-7 w-px shrink-0 lg:block ${onDark ? 'bg-white/15' : 'bg-slate-200/90'}`}
               aria-hidden
             />
           </div>
@@ -498,14 +506,14 @@ const Header = () => {
                 </div>
 
                 <span
-                  className={`mx-1 hidden h-5 w-px shrink-0 self-center lg:block ${isScrolled ? 'bg-white/15' : 'bg-slate-200/90'}`}
+                  className={`mx-1 hidden h-5 w-px shrink-0 self-center lg:block ${onDark ? 'bg-white/15' : 'bg-slate-200/90'}`}
                   aria-hidden
                 />
 
                 <Link
                   href="/tech-ai"
                   className={`hidden lg:inline-flex items-center rounded-md px-2.5 py-2 text-[13px] font-medium tracking-tight underline-offset-[10px] ${TRANSITION} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                    isScrolled
+                    onDark
                       ? 'text-white decoration-white/40 hover:underline hover:decoration-white focus-visible:outline-white'
                       : 'text-slate-700 decoration-slate-300/80 hover:text-primary-700 hover:underline hover:decoration-primary-400/60 focus-visible:outline-primary-600'
                   }`}
@@ -516,7 +524,7 @@ const Header = () => {
                 <Link
                   href="/sustainability"
                   className={`hidden lg:inline-flex rounded-md px-2.5 py-2 text-[13px] font-medium tracking-tight underline-offset-[10px] ${TRANSITION} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                    isScrolled
+                    onDark
                       ? 'text-white decoration-white/40 hover:underline hover:decoration-white focus-visible:outline-white'
                       : 'text-slate-700 decoration-slate-300/80 hover:text-primary-700 hover:underline hover:decoration-primary-400/60 focus-visible:outline-primary-600'
                   }`}
@@ -533,10 +541,10 @@ const Header = () => {
                 openModal({ intent: 'strategy' });
                 setMobileOpen(false);
               }}
-              className={`hidden lg:inline-flex items-center justify-center gap-2 rounded-none px-4 py-2.5 text-sm font-medium shadow-sm ${TRANSITION} hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:translate-y-[0.5px] ${
-                isScrolled
-                  ? 'bg-secondary-500 text-primary-900 hover:bg-secondary-400 focus-visible:outline-white'
-                  : 'bg-[#0B1220] text-white hover:bg-primary-800 focus-visible:outline-primary-600'
+              className={`hidden lg:inline-flex items-center justify-center gap-2 rounded-none px-4 py-2.5 text-sm shadow-sm ${TRANSITION} hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:translate-y-[0.5px] ${
+                onDark
+                  ? 'bg-secondary-500 font-semibold text-primary-900 hover:bg-secondary-400 focus-visible:outline-white'
+                  : 'bg-[#0B1220] font-medium text-white hover:bg-primary-800 focus-visible:outline-primary-600'
               }`}
             >
               <HiOutlinePhone className="h-4 w-4 shrink-0" aria-hidden />
@@ -547,7 +555,7 @@ const Header = () => {
               ref={menuButtonRef}
               type="button"
               className={`inline-flex items-center justify-center rounded-lg p-2.5 lg:hidden ${TRANSITION} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                isScrolled
+                onDark
                   ? 'text-white hover:bg-white/10 focus-visible:outline-white'
                   : 'text-slate-800 hover:bg-slate-200/60 focus-visible:outline-primary-600'
               }`}

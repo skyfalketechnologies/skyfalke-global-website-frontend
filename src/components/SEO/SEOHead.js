@@ -10,7 +10,7 @@ const HOME_OG_DESCRIPTION = SITE_META_DESCRIPTION;
 const HOME_TWITTER_DESCRIPTION = SITE_META_DESCRIPTION;
 
 const SEOHead = ({
-  title = "Digital Growth Partner in Africa | Skyfalke",
+  title = "Digital Transformation & Marketing in Africa | Skyfalke",
   description = SITE_META_DESCRIPTION,
   keywords = "digital growth partner, business automation, SEO and ads, CRM workflows, AI roadmap, digital transformation Africa, Skyfalke",
   image = "https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good",
@@ -24,7 +24,7 @@ const SEOHead = ({
   noIndex = false,
   skipBaseMeta = false,
   canonical = null,
-  ogTitle = "Digital Growth Partner in Africa | Skyfalke",
+  ogTitle = "Digital Transformation & Marketing in Africa | Skyfalke",
   ogDescription,
   twitterDescription,
   twitterTitle = null

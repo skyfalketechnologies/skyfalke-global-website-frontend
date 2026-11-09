@@ -149,7 +149,6 @@ const Footer = () => {
 
   return (
     <footer className="relative border-t border-white/10 bg-[#0c0f14] text-white">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e0ae00]/80 to-transparent" aria-hidden />
 
       <div className="relative z-10">
         {/* CTA strip */}
@@ -199,7 +198,7 @@ const Footer = () => {
 
             {/* Newsletter */}
             <div className="lg:col-span-4">
-              <div className="border border-[#e0ae00]/30 bg-[#e0ae00]/[0.06] p-7">
+              <div className="border border-white/10 bg-[#12161d] p-7">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#e0ae00]/80">
                   Newsletter
                 </p>
@@ -288,22 +287,12 @@ const Footer = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-white/10 bg-black/20">
+        <div className="border-t border-white/10 bg-[#090b0f]">
           <div className="container-custom flex flex-col gap-6 py-6 md:flex-row md:items-center md:justify-between md:gap-8">
             <div className="flex flex-col items-center gap-4 md:flex-row md:items-center md:gap-6">
               <p className="text-center text-xs text-zinc-500 md:text-left">
                 © {currentYear} Skyfalke Limited. All rights reserved.
               </p>
-              <img
-                src="https://ik.imagekit.io/g3nahgeeu/meta-tech-provider-small.png"
-                alt="Meta Tech Provider"
-                className="h-9 w-auto opacity-90"
-              />
-              <img
-                src="/images/logos/google-cloud-partner.svg"
-                alt="Google Cloud Partner"
-                className="h-9 w-auto opacity-90"
-              />
             </div>
 
             <nav
@@ -336,7 +325,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.name}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:border-white/20 hover:text-white"
+                  className="flex h-9 w-9 items-center justify-center border border-white/10 text-zinc-400 transition-colors hover:border-white/20 hover:text-white"
                 >
                   <social.icon size={16} />
                 </a>
