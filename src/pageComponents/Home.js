@@ -12,15 +12,13 @@ import HomeServicesGrid from '../components/Home/HomeServicesGrid';
 import HomeDifferentiation from '../components/Home/HomeDifferentiation';
 import HomeSocialProof from '../components/Home/HomeSocialProof';
 import HomeReportHighlight from '../components/Home/HomeReportHighlight';
-import HomeFeaturedArticles from '../components/Home/HomeFeaturedArticles';
-import HomeLeadMagnet from '../components/Home/HomeLeadMagnet';
 import CreativeVideoSection from '@/components/Home/CreativeVideoSection';
 import CTASection from '../components/Home/CTASection';
 
-const HOME_TITLE = 'Digital Growth Partner in Africa | Skyfalke';
+const HOME_TITLE = 'Digital Transformation & Marketing in Africa | Skyfalke';
 const HOME_DESCRIPTION = SITE_META_DESCRIPTION;
 const HOME_KEYWORDS =  'digital growth partner, business automation, SEO and ads, CRM workflows, AI roadmap, digital transformation Kenya, Skyfalke';
-const HOME_OG_TITLE = 'Digital Growth Partner in Africa | Skyfalke';
+const HOME_OG_TITLE = 'Digital Transformation & Marketing in Africa | Skyfalke';
 const HOME_OG_DESC = SITE_META_DESCRIPTION;
 const HOME_TWITTER_DESC = SITE_META_DESCRIPTION;
 
@@ -49,9 +47,7 @@ const Home = () => {
       <HomeDifferentiation />
       <HomeSocialProof />
       <HomeReportHighlight />
-      <HomeFeaturedArticles />
       <CreativeVideoSection />
-      <HomeLeadMagnet />
       <CTASection />
     </>
   );

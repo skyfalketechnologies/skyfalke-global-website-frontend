@@ -1,6 +1,5 @@
 import './globals.css';
 import localFont from 'next/font/local';
-import Script from 'next/script';
 import Providers from './providers';
 import { getGlobalSchemaJsonLd } from '@/utils/schemaMarkup';
 import { SITE_META_DESCRIPTION } from '@/utils/metadata';
@@ -29,7 +28,7 @@ const globalJsonLd = getGlobalSchemaJsonLd(siteUrl);
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'),
   title: {
-    default: 'Digital Growth Partner in Africa | Skyfalke',
+    default: 'Digital Transformation & Marketing in Africa | Skyfalke',
     template: '%s | Skyfalke',
   },
   description: SITE_META_DESCRIPTION,
@@ -61,7 +60,7 @@ export const metadata = {
     locale: 'en_US',
     url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://skyfalke.com'}/`,
     siteName: 'Skyfalke',
-    title: 'Digital Growth Partner in Africa | Skyfalke',
+    title: 'Digital Transformation & Marketing in Africa | Skyfalke',
     description: SITE_META_DESCRIPTION,
     images: [
       {
@@ -74,7 +73,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Digital Growth Partner in Africa | Skyfalke',
+    title: 'Digital Transformation & Marketing in Africa | Skyfalke',
     description: SITE_META_DESCRIPTION,
     images: [
       'https://ik.imagekit.io/g3nahgeeu/hero/skyfalke-digital-tech-firm.webp?tr=w-1200,h-630,f-auto,q-auto:good',
@@ -114,11 +113,6 @@ export default function RootLayout({ children }) {
         <Providers>
           {children}
         </Providers>
-        <Script
-          src="https://skyfalke-2.skyfalkeconnect.io/widget.js"
-          data-tenant="cmt76gwh6000014ogefouznu0"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );
