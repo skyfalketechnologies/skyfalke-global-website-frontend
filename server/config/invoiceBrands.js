@@ -10,13 +10,23 @@ const paymentOptions = {
     paybill: '4567109',
     accountNote: 'Use the invoice number as the account number'
   },
-  bank: {
-    accountNumber: '00310686551250',
-    accountName: 'SKYFALKE LIMITED',
-    name: 'I&M Bank',
-    branch: 'Sarit Center',
-    currency: 'USD'
-  }
+  banks: [
+    {
+      accountNumber: '00310686551250',
+      accountName: 'SKYFALKE LIMITED',
+      name: 'I&M Bank',
+      branch: 'Sarit Center',
+      currency: 'USD'
+    },
+    {
+      accountNumber: '1350719986',
+      accountName: 'SKYFALKE LIMITED',
+      name: 'KCB Bank Limited',
+      branch: 'Kakamega',
+      currency: 'KES',
+      swiftCode: 'KCBLKENX'
+    }
+  ]
 };
 
 const brands = {

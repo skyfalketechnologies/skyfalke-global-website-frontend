@@ -393,7 +393,7 @@ router.post('/:id/send', accountingAuth, async (req, res) => {
               <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid ${brand.primaryColor}; margin: 20px 0;">
                 <h3 style="margin: 0 0 10px 0; color: ${brand.primaryColor};">Payment Options</h3>
                 <p style="margin: 0 0 5px 0;"><strong>M-Pesa:</strong> Paybill ${paymentOptions.mpesa.paybill}, Account No. INV-${invoice.invoiceNumber}</p>
-                <p style="margin: 0 0 5px 0;"><strong>Bank:</strong> ${paymentOptions.bank.name}, ${paymentOptions.bank.branch} — Account Name: ${paymentOptions.bank.accountName}, Account No. ${paymentOptions.bank.accountNumber}, Currency: ${paymentOptions.bank.currency}</p>
+                ${paymentOptions.banks.map((bank) => `<p style="margin: 0 0 5px 0;"><strong>Bank (${bank.currency}):</strong> ${bank.name}, ${bank.branch} — Account Name: ${bank.accountName}, Account No. ${bank.accountNumber}${bank.swiftCode ? `, SWIFT: ${bank.swiftCode}` : ''}</p>`).join('')}
               </div>
 
               ${invoice.paymentInstructions ? `
@@ -740,7 +740,8 @@ async function generateInvoicePDF(doc, invoice) {
   y += 45;
 
   // ── Payment options panel (M-Pesa + Bank) ──
-  const panelHeight = 108;
+  const bankBlockHeight = 62;
+  const panelHeight = Math.max(108, 32 + 14 + paymentOptions.banks.length * bankBlockHeight + 6);
   if (y + panelHeight > doc.page.height - 130) {
     doc.addPage();
     y = margin;
@@ -762,11 +763,14 @@ async function generateInvoicePDF(doc, invoice) {
 
   doc.font('Helvetica-Bold').fontSize(9).fillColor('#333333')
      .text('Bank Transfer', colRightX, payY);
-  doc.font('Helvetica').fontSize(9).fillColor('#444444')
-     .text(`Bank: ${paymentOptions.bank.name}, ${paymentOptions.bank.branch}`, colRightX, payY + 14)
-     .text(`Account Name: ${paymentOptions.bank.accountName}`, colRightX, payY + 28)
-     .text(`Account No.: ${paymentOptions.bank.accountNumber}`, colRightX, payY + 42)
-     .text(`Currency: ${paymentOptions.bank.currency}`, colRightX, payY + 56);
+  paymentOptions.banks.forEach((bank, i) => {
+    const bankY = payY + 14 + i * bankBlockHeight;
+    doc.font('Helvetica').fontSize(9).fillColor('#444444')
+       .text(`Bank: ${bank.name}, ${bank.branch}`, colRightX, bankY)
+       .text(`Account Name: ${bank.accountName}`, colRightX, bankY + 14)
+       .text(`Account No.: ${bank.accountNumber}`, colRightX, bankY + 28)
+       .text(`Currency: ${bank.currency}${bank.swiftCode ? ` | SWIFT: ${bank.swiftCode}` : ''}`, colRightX, bankY + 42);
+  });
 
   y += panelHeight + 18;
 
