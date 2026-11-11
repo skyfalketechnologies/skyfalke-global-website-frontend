@@ -21,13 +21,23 @@ const BRANDS = {
 
 const PAYMENT_OPTIONS = {
   mpesa: { paybill: '4567109' },
-  bank: {
-    accountNumber: '1350719986',
-    name: 'KCB Bank Limited',
-    branch: 'Westlands, Nairobi',
-    currency: 'KES',
-    swiftCode: 'KCBLKENX'
-  },
+  banks: [
+    {
+      accountNumber: '00310686551250',
+      accountName: 'SKYFALKE LIMITED',
+      name: 'I&M Bank',
+      branch: 'Sarit Center',
+      currency: 'USD'
+    },
+    {
+      accountNumber: '1350719986',
+      accountName: 'SKYFALKE LIMITED',
+      name: 'KCB Bank Limited',
+      branch: 'Kakamega',
+      currency: 'KES',
+      swiftCode: 'KCBLKENX'
+    }
+  ],
   financeEmail: 'billing@skyfalke.com'
 };
 
@@ -264,15 +274,23 @@ const InvoicePreview = ({ formData, subtotal, taxAmount, total, onClose, onDownl
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white mb-1">Bank Transfer</p>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {PAYMENT_OPTIONS.bank.name}, {PAYMENT_OPTIONS.bank.branch}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Account No.: {PAYMENT_OPTIONS.bank.accountNumber}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Currency: {PAYMENT_OPTIONS.bank.currency} | Swift Code: {PAYMENT_OPTIONS.bank.swiftCode}
-                  </p>                </div>
+                  {PAYMENT_OPTIONS.banks.map((bank) => (
+                    <div key={bank.accountNumber} className="mb-2 last:mb-0">
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {bank.name}, {bank.branch}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Account Name: {bank.accountName}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Account No.: {bank.accountNumber}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Currency: {bank.currency}
+                        {bank.swiftCode ? ` | SWIFT: ${bank.swiftCode}` : ''}
+                      </p>
+                    </div>
+                  ))}                </div>
               </div>
             </div>
 
