@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { 
   FaEdit, 
   FaFilePdf, 
@@ -12,8 +11,7 @@ import {
   FaTimes,
   FaClock,
   FaExclamationTriangle,
-  FaFileInvoice,
-  FaTrash
+  FaFileInvoice
 } from 'react-icons/fa';
 // import { useNotifications } from '../../contexts/NotificationContext';
 
@@ -32,11 +30,11 @@ const QuotationView = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   const statusColors = {
-    draft: 'bg-gray-100 text-gray-800',
-    sent: 'bg-blue-100 text-blue-800',
-    accepted: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
-    expired: 'bg-orange-100 text-orange-800'
+    draft: 'border-gray-200 bg-gray-50 text-gray-700',
+    sent: 'border-blue-200 bg-blue-50 text-blue-700',
+    accepted: 'border-green-200 bg-green-50 text-green-700',
+    rejected: 'border-red-200 bg-red-50 text-red-700',
+    expired: 'border-amber-200 bg-amber-50 text-amber-700'
   };
 
   const statusIcons = {
@@ -163,7 +161,7 @@ const QuotationView = () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `quotation-${quotationId}.pdf`;
+        a.download = `quotation-${quotation?.quotationNumber || quotationId}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -179,19 +177,21 @@ const QuotationView = () => {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
+    if (!date) return '—';
+    return new Date(date).toLocaleDateString('en-GB', {
+      day: 'numeric',
       month: 'long',
-      day: 'numeric'
+      year: 'numeric'
     });
   };
 
   const formatCurrency = (amount) => {
     const currency = quotation?.currency || 'USD';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency
-    }).format(amount);
+    const value = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(Number(amount) || 0);
+    return `${currency} ${value}`;
   };
 
   if (loading) {
@@ -212,7 +212,7 @@ const QuotationView = () => {
         <div className="mt-6">
           <button
             onClick={() => router.push('/system/dashboard/quotations')}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
           >
             Back to Quotations
           </button>
@@ -221,364 +221,231 @@ const QuotationView = () => {
     );
   }
 
-  const StatusIcon = statusIcons[quotation.status];
+  const StatusIcon = statusIcons[quotation.status] || FaClock;
+  const statusLabel = quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1);
+  const client = quotation.client || {};
+  const address = client.address || {};
+  const addressLines = [
+    address.street,
+    [address.city, address.state, address.zipCode].filter(Boolean).join(', '),
+    address.country
+  ].filter(Boolean);
+  const preparer = quotation.createdBy && typeof quotation.createdBy === 'object' ? quotation.createdBy : null;
+
+  const secondaryBtn =
+    'inline-flex items-center px-3.5 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50';
+  const primaryBtn =
+    'inline-flex items-center px-3.5 py-2 rounded-md text-sm font-medium text-white bg-[#303661] hover:bg-[#262b4f] focus:outline-none focus:ring-2 focus:ring-[#303661] focus:ring-offset-2 disabled:opacity-50';
+  const sectionLabel = 'text-[11px] font-semibold uppercase tracking-wider text-gray-500';
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      {/* Toolbar */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => router.push('/system/dashboard/quotations')}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+            className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+            aria-label="Back to quotations"
           >
-            <FaArrowLeft className="h-5 w-5" />
+            <FaArrowLeft className="h-4 w-4" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Quotation QT-{quotation.quotationNumber}
-            </h1>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Created on {formatDate(quotation.issueDate)}
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+                QT-{quotation.quotationNumber}
+              </h1>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${statusColors[quotation.status] || statusColors.draft}`}>
+                <StatusIcon className="mr-1 h-3 w-3" />
+                {statusLabel}
+              </span>
+            </div>
+            <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+              {client.company || client.name} · Issued {formatDate(quotation.issueDate)}
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColors[quotation.status]}`}>
-            <StatusIcon className="mr-1 h-4 w-4" />
-            {quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
-          </span>
-        </div>
-      </div>
 
-      {/* Actions */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="flex flex-wrap items-center justify-between">
-          <div className="flex flex-wrap items-center space-x-3">
-            <button
-              onClick={() => router.push(`/system/dashboard/quotations/${id}/edit`)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              <FaEdit className="mr-2 h-4 w-4" />
-              Edit
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={() => router.push(`/system/dashboard/quotations/${id}/edit`)} className={secondaryBtn}>
+            <FaEdit className="mr-2 h-3.5 w-3.5" />
+            Edit
+          </button>
+          <button onClick={() => downloadPDF(id)} className={secondaryBtn}>
+            <FaFilePdf className="mr-2 h-3.5 w-3.5" />
+            Download PDF
+          </button>
+          {quotation.status === 'draft' && (
+            <button onClick={() => handleStatusChange('sent')} disabled={actionLoading} className={secondaryBtn}>
+              Mark as Sent
             </button>
-            <button
-              onClick={() => downloadPDF(id)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              <FaFilePdf className="mr-2 h-4 w-4" />
-              Download PDF
+          )}
+          {quotation.status === 'sent' && (
+            <>
+              <button onClick={() => handleStatusChange('accepted')} disabled={actionLoading} className={secondaryBtn}>
+                <FaCheck className="mr-2 h-3.5 w-3.5 text-green-600" />
+                Accepted
+              </button>
+              <button onClick={() => handleStatusChange('rejected')} disabled={actionLoading} className={secondaryBtn}>
+                <FaTimes className="mr-2 h-3.5 w-3.5 text-red-600" />
+                Rejected
+              </button>
+            </>
+          )}
+          {quotation.status === 'accepted' && !quotation.convertedToInvoice && (
+            <button onClick={handleConvertToInvoice} disabled={actionLoading} className={primaryBtn}>
+              <FaFileInvoice className="mr-2 h-3.5 w-3.5" />
+              {actionLoading ? 'Converting…' : 'Convert to Invoice'}
             </button>
-            {quotation.status !== 'sent' && (
-              <button
-                onClick={handleSendEmail}
-                disabled={actionLoading}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-              >
-                <FaEnvelope className="mr-2 h-4 w-4" />
-                {actionLoading ? 'Sending...' : 'Send Email'}
-              </button>
-            )}
-          </div>
-          <div className="flex items-center space-x-3">
-            {quotation.status === 'accepted' && !quotation.convertedToInvoice && (
-              <button
-                onClick={handleConvertToInvoice}
-                disabled={actionLoading}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
-              >
-                <FaFileInvoice className="mr-2 h-4 w-4" />
-                {actionLoading ? 'Converting...' : 'Convert to Invoice'}
-              </button>
-            )}
-            {quotation.convertedToInvoice && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                <FaCheck className="mr-1 h-4 w-4" />
-                Converted to Invoice
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Client Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-gray-800 shadow rounded-lg p-6"
-          >
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Client Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  Name
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white">{quotation.client.name}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  Email
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white">{quotation.client.email}</p>
-              </div>
-              {quotation.client.phone && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Phone
-                  </label>
-                  <p className="text-sm text-gray-900 dark:text-white">{quotation.client.phone}</p>
-                </div>
-              )}
-              {quotation.client.company && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Company
-                  </label>
-                  <p className="text-sm text-gray-900 dark:text-white">{quotation.client.company}</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Items */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-gray-800 shadow rounded-lg p-6"
-          >
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Items
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      Quantity
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      Unit Price
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {quotation.items.map((item, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                        {item.description}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                        {item.quantity}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                        {formatCurrency(item.unitPrice)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                        {formatCurrency(item.total)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-
-          {/* Notes and Terms */}
-          {(quotation.notes || quotation.terms) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-gray-800 shadow rounded-lg p-6"
-            >
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Additional Information
-              </h3>
-              <div className="space-y-4">
-                {quotation.notes && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                      Notes
-                    </label>
-                    <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
-                      {quotation.notes}
-                    </p>
-                  </div>
-                )}
-                {quotation.terms && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                      Terms & Conditions
-                    </label>
-                    <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
-                      {quotation.terms}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+          )}
+          {quotation.status !== 'sent' && !quotation.convertedToInvoice && (
+            <button onClick={handleSendEmail} disabled={actionLoading} className={primaryBtn}>
+              <FaEnvelope className="mr-2 h-3.5 w-3.5" />
+              {actionLoading ? 'Sending…' : 'Send to Client'}
+            </button>
+          )}
+          {quotation.convertedToInvoice && (
+            <span className="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium border border-green-200 bg-green-50 text-green-700">
+              <FaCheck className="mr-1 h-3 w-3" />
+              Converted to Invoice
+            </span>
           )}
         </div>
+      </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Quotation Details */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white dark:bg-gray-800 shadow rounded-lg p-6"
-          >
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Quotation Details
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  Quotation Number
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white">QT-{quotation.quotationNumber}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  Issue Date
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white">{formatDate(quotation.issueDate)}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  Expiry Date
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white">{formatDate(quotation.expiryDate)}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  Status
-                </label>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[quotation.status]}`}>
-                  <StatusIcon className="mr-1 h-3 w-3" />
-                  {quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
-                </span>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  Currency
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white">
-                  {quotation.currency || 'USD'}
-                </p>
+      {/* Document preview — mirrors the generated PDF */}
+      <div className="mx-auto max-w-4xl bg-white text-gray-800 border border-gray-200 rounded-sm">
+        <div className="h-1 bg-[#303661]" />
+        <div className="px-6 py-8 sm:px-12 sm:py-10">
+          {/* Header */}
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <img src="/images/logos/logo.png" alt="Skyfalke" className="h-9 w-auto" />
+              <div className="mt-4 text-xs leading-5 text-gray-500">
+                <p className="text-sm font-semibold text-gray-900">Skyfalke Limited</p>
+                <p>Nairobi, Kenya</p>
+                <p>info@skyfalke.com | +254 (071) 797-238</p>
+                <p>KRA PIN: P052474944J</p>
               </div>
             </div>
-          </motion.div>
+            <div className="sm:text-right">
+              <h2 className="text-2xl font-bold tracking-wide text-[#303661]">QUOTATION</h2>
+              <dl className="mt-3 grid grid-cols-[auto_auto] gap-x-8 gap-y-1 text-xs sm:justify-end">
+                <dt className="text-gray-500 sm:text-left">Quotation No.</dt>
+                <dd className="font-semibold text-gray-900 text-right">QT-{quotation.quotationNumber}</dd>
+                <dt className="text-gray-500 sm:text-left">Date</dt>
+                <dd className="font-semibold text-gray-900 text-right">{formatDate(quotation.issueDate)}</dd>
+                <dt className="text-gray-500 sm:text-left">Valid Until</dt>
+                <dd className="font-semibold text-gray-900 text-right">{formatDate(quotation.expiryDate)}</dd>
+                <dt className="text-gray-500 sm:text-left">Currency</dt>
+                <dd className="font-semibold text-gray-900 text-right">{quotation.currency || 'USD'}</dd>
+              </dl>
+            </div>
+          </div>
 
-          {/* Pricing Summary */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6"
-          >
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Pricing Summary
-            </h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Subtotal:</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(quotation.subtotal)}
-                </span>
+          <div className="mt-8 border-t border-[#303661]" />
+
+          {/* Parties */}
+          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <p className={sectionLabel}>Prepared For</p>
+              <p className="mt-2 text-base font-semibold text-gray-900">{client.name}</p>
+              <div className="mt-1 text-sm leading-6 text-gray-600">
+                {client.company && <p>{client.company}</p>}
+                {addressLines.map((line) => <p key={line}>{line}</p>)}
+                {client.email && <p>{client.email}</p>}
+                {client.phone && <p>{client.phone}</p>}
+              </div>
+            </div>
+            <div>
+              <p className={sectionLabel}>Prepared By</p>
+              <p className="mt-2 text-base font-semibold text-gray-900">Skyfalke Limited</p>
+              <div className="mt-1 text-sm leading-6 text-gray-600">
+                {preparer?.name && <p>Contact: {preparer.name}</p>}
+                <p>{preparer?.email || 'info@skyfalke.com'}</p>
+                <p>+254 (071) 797-238</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Items */}
+          <div className="mt-8 overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#303661]">
+                  <th className={`${sectionLabel} py-2 pr-3 text-left w-8`}>#</th>
+                  <th className={`${sectionLabel} py-2 pr-3 text-left`}>Description</th>
+                  <th className={`${sectionLabel} py-2 px-3 text-right`}>Qty</th>
+                  <th className={`${sectionLabel} py-2 px-3 text-right`}>Unit Price</th>
+                  <th className={`${sectionLabel} py-2 pl-3 text-right`}>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quotation.items.map((item, index) => (
+                  <tr key={index} className="border-b border-gray-200 align-top">
+                    <td className="py-3 pr-3 text-gray-400">{index + 1}</td>
+                    <td className="py-3 pr-3 text-gray-900 whitespace-pre-wrap">{item.description}</td>
+                    <td className="py-3 px-3 text-right text-gray-700">{item.quantity}</td>
+                    <td className="py-3 px-3 text-right text-gray-700 whitespace-nowrap">{formatCurrency(item.unitPrice)}</td>
+                    <td className="py-3 pl-3 text-right font-semibold text-gray-900 whitespace-nowrap">{formatCurrency(item.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Totals */}
+          <div className="mt-6 flex flex-col-reverse gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <p className="max-w-xs text-xs leading-5 text-gray-500">
+              This quotation is valid until {formatDate(quotation.expiryDate)}. All amounts are in {quotation.currency || 'USD'}.
+            </p>
+            <div className="w-full sm:w-72 text-sm">
+              <div className="flex justify-between border-b border-gray-200 px-2 py-2">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="text-gray-900">{formatCurrency(quotation.subtotal)}</span>
               </div>
               {quotation.discount > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Discount:</span>
-                  <span className="text-sm font-medium text-red-600 dark:text-red-400">
-                    -{formatCurrency(quotation.discount)}
-                  </span>
+                <div className="flex justify-between border-b border-gray-200 px-2 py-2">
+                  <span className="text-gray-600">Discount</span>
+                  <span className="text-gray-900">- {formatCurrency(quotation.discount)}</span>
                 </div>
               )}
               {quotation.taxRate > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Tax ({quotation.taxRate}%):
-                  </span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {formatCurrency(quotation.taxAmount)}
-                  </span>
+                <div className="flex justify-between border-b border-gray-200 px-2 py-2">
+                  <span className="text-gray-600">VAT ({quotation.taxRate}%)</span>
+                  <span className="text-gray-900">{formatCurrency(quotation.taxAmount)}</span>
                 </div>
               )}
-              <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
-                <div className="flex justify-between">
-                  <span className="text-base font-medium text-gray-900 dark:text-white">Total:</span>
-                  <span className="text-base font-bold text-primary-600 dark:text-primary-400">
-                    {formatCurrency(quotation.total)}
-                  </span>
-                </div>
+              <div className="flex justify-between border-t border-[#303661] bg-[#f4f5f9] px-2 py-3 font-semibold text-[#303661]">
+                <span>Total</span>
+                <span className="text-base">{formatCurrency(quotation.total)}</span>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Status Actions */}
-          {quotation.status === 'draft' && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-gray-800 shadow rounded-lg p-6"
-            >
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Status Actions
-              </h3>
-              <div className="space-y-3">
-                <button
-                  onClick={() => handleStatusChange('sent')}
-                  disabled={actionLoading}
-                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-                >
-                  Mark as Sent
-                </button>
+          {/* Notes & terms */}
+          {quotation.notes && (
+            <div className="mt-10">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#303661]">Notes</p>
+              <div className="mt-2 border-t border-gray-200 pt-2 text-sm leading-6 text-gray-700 whitespace-pre-wrap">
+                {quotation.notes}
               </div>
-            </motion.div>
+            </div>
+          )}
+          {quotation.terms && (
+            <div className="mt-8">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#303661]">Terms &amp; Conditions</p>
+              <div className="mt-2 border-t border-gray-200 pt-2 text-sm leading-6 text-gray-700 whitespace-pre-wrap">
+                {quotation.terms}
+              </div>
+            </div>
           )}
 
-          {quotation.status === 'sent' && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-gray-800 shadow rounded-lg p-6"
-            >
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Status Actions
-              </h3>
-              <div className="space-y-3">
-                <button
-                  onClick={() => handleStatusChange('accepted')}
-                  disabled={actionLoading}
-                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                >
-                  Mark as Accepted
-                </button>
-                <button
-                  onClick={() => handleStatusChange('rejected')}
-                  disabled={actionLoading}
-                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-                >
-                  Mark as Rejected
-                </button>
-              </div>
-            </motion.div>
-          )}
+          {/* Footer */}
+          <div className="mt-12 border-t border-gray-200 pt-4 text-[11px] leading-5 text-gray-500">
+            <p>Skyfalke Limited · Nairobi, Kenya · KRA PIN P052474944J</p>
+            <p>info@skyfalke.com · +254 (071) 797-238 · www.skyfalke.com</p>
+          </div>
         </div>
       </div>
     </div>
